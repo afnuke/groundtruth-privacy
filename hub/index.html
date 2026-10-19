@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Afnuke — Ground Truths Apps</title>
+<style>
+  :root { --bg:#17181c; --card:#22242b; --amber:#f5b921; --text:#f2f0eb; --dim:#b9b6ad; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: Georgia, 'Times New Roman', serif; line-height: 1.55; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 40px 20px 60px; }
+  header { text-align: center; padding: 30px 0 10px; }
+  header .brand { font-size: 15px; letter-spacing: 6px; color: var(--amber); text-transform: uppercase; }
+  header h1 { font-size: 44px; margin: 8px 0 6px; }
+  header .tag { color: var(--dim); font-size: 18px; font-style: italic; }
+  .rule { border: none; border-top: 1px solid #3a3d46; margin: 28px 0; }
+  .card { background: var(--card); border: 1px solid #34363f; border-radius: 14px; padding: 26px 24px; margin-bottom: 22px; }
+  .card h2 { font-size: 28px; margin-bottom: 2px; }
+  .card .sub { color: var(--amber); font-size: 17px; font-style: italic; margin-bottom: 12px; }
+  .card p { color: var(--text); font-size: 16.5px; margin-bottom: 12px; }
+  .status { display: inline-block; font-family: Arial, sans-serif; font-size: 12.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--amber); border: 1px solid var(--amber); border-radius: 999px; padding: 4px 12px; margin-bottom: 14px; }
+  .btn { display: inline-block; font-family: Arial, sans-serif; font-weight: bold; font-size: 16px; background: var(--amber); color: #17181c; text-decoration: none; padding: 12px 22px; border-radius: 10px; margin-top: 4px; }
+  .btn.disabled { background: #3a3d46; color: var(--dim); pointer-events: none; }
+  .fine { color: var(--dim); font-size: 14px; margin-top: 10px; }
+  footer { text-align: center; color: var(--dim); font-size: 14.5px; padding-top: 8px; }
+  footer a { color: var(--amber); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">Afnuke</div>
+    <h1>Ground Truths</h1>
+    <p class="tag">Apps that show the real numbers behind everyday life — straight from public filings and public data. No spin.</p>
+  </header>
+
+  <hr class="rule">
+
+  <section class="card">
+    <span class="status">In closed testing · Google Play</span>
+    <h2>GroundTruth</h2>
+    <p class="sub">Profit per worker per year</p>
+    <p>GroundTruth runs quietly in the background. Walk near a store and it shows what that company really makes — its profit for the year divided by the people who work there — taken from real SEC filings. Walk in knowing.</p>
+    <a class="btn" href="https://play.google.com/apps/testing/com.afnuke.groundtruth">Become a tester</a>
+    <p class="fine">Want in? The link only works for accounts on the tester list. Send your Gmail address to <a href="mailto:afnuke@gmail.com" style="color:var(--amber)">afnuke@gmail.com</a> and you'll be added — then tap the button.</p>
+  </section>
+
+  <section class="card">
+    <span class="status">In development</span>
+    <h2>CEO Ratio</h2>
+    <p class="sub">Owner vs. employee pay</p>
+    <p>The second app in the Ground Truths series. One card, one honest comparison: what the CEO takes home against what one worker makes — the pay ratio companies must disclose in their own proxy filings. At Starbucks, that number is 6,666 to 1.</p>
+    <a class="btn disabled" href="#">Closed testing coming</a>
+  </section>
+
+  <section class="card">
+    <span class="status">In the works</span>
+    <h2>Real Feel</h2>
+    <p class="sub">The weather your body actually meets</p>
+    <p>A Greenville weather app that leads with the number that matters: how it actually feels outside — not the thermometer reading, not the afternoon high in a headline. The truth on the ground, for the people standing in it.</p>
+    <a class="btn disabled" href="#">Coming soon</a>
+  </section>
+
+  <hr class="rule">
+
+  <footer>
+    <p>Built by Bryan Lee (Afnuke), in AI collaboration.</p>
+    <p style="margin-top:6px"><a href="https://afnuke.github.io/groundtruth-privacy/">Privacy Policy</a> · Contact: <a href="mailto:afnuke@gmail.com">afnuke@gmail.com</a></p>
+    <p style="margin-top:10px">© 2026 Afnuke. All rights reserved.</p>
+  </footer>
+
+</div>
+</body>
+</html>
