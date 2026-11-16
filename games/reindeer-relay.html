@@ -1,0 +1,1337 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" href="data:," />
+    <title>Reindeer Relay — the draw-and-guess telephone party game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.25rem; }
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+      :root{
+        --red:#C1272D; --red-deep:#8E1B20; --red-dark:#6E1216;
+        --green:#1E7A46; --green-bright:#27A35C; --green-deep:#0C4A2A; --green-dark:#083A20;
+        --gold:#F5B301; --gold-soft:#FFD166; --gold-pale:#FFE9A8;
+        --cream:#FFF8EC; --paper:#FFFDF6; --ink:#3A2418; --ink-soft:#6B4A35;
+        --pink:#EF476F; --sky:#2A9D8F; --blue:#4361EE;
+        --card-shadow: 0 18px 40px rgba(60,10,10,.35), 0 4px 10px rgba(60,10,10,.25);
+      }
+      html{ scroll-behavior:smooth; background:#5E1420; }
+      body{
+        margin:0; font-family:"Nunito", system-ui, sans-serif; color:var(--ink);
+        background:
+          radial-gradient(1100px 500px at 85% -5%, rgba(245,179,1,.28), transparent 60%),
+          radial-gradient(900px 600px at -10% 30%, rgba(39,163,92,.35), transparent 55%),
+          linear-gradient(165deg, #A31621 0%, #C1272D 34%, #7E1B2E 62%, #0C4A2A 130%);
+        background-attachment: fixed;
+        min-height:100vh; overflow-x:hidden;
+      }
+      #snowCanvas, #confettiCanvas{ position:fixed; inset:0; width:100%; height:100%; pointer-events:none; }
+      #snowCanvas{ z-index:0; }
+      #confettiCanvas{ z-index:60; }
+      .wrap{ position:relative; z-index:1; max-width:600px; margin:0 auto; padding:0 14px 30px; }
+
+      /* ---------- twinkling light string ---------- */
+      .lights{ position:relative; height:58px; margin:0 -6px; }
+      .lights svg.wire{ position:absolute; top:0; left:0; width:100%; height:34px; }
+      .bulb{ position:absolute; width:15px; height:15px; border-radius:50% 50% 50% 50% / 60% 60% 40% 40%; transform:translateX(-50%); animation:twinkle 1.6s ease-in-out infinite; }
+      .bulb::before{ content:""; position:absolute; left:50%; top:-7px; width:2px; height:8px; background:rgba(0,0,0,.35); transform:translateX(-50%); }
+      .bulb::after{ content:""; position:absolute; inset:-9px; border-radius:50%; background:inherit; opacity:.35; filter:blur(7px); z-index:-1; }
+      @keyframes twinkle{ 0%,100%{ filter:brightness(1.25);} 50%{ filter:brightness(.55);} }
+
+      /* ---------- hero ---------- */
+      .hero{ text-align:center; padding:2px 6px 4px; }
+      .hero .stars{ display:flex; justify-content:center; gap:10px; margin-bottom:2px; }
+      .hero .stars svg{ width:22px; height:22px; filter:drop-shadow(0 2px 3px rgba(0,0,0,.35)); animation:spinStar 7s linear infinite; }
+      .hero .stars svg:nth-child(2){ animation-duration:10s; width:28px; height:28px; }
+      .hero .stars svg:nth-child(3){ animation-duration:8s; }
+      @keyframes spinStar{ from{ transform:rotate(0deg);} to{ transform:rotate(360deg);} }
+      h1.game-title{
+        font-family:"Mountains of Christmas", cursive; font-weight:700;
+        font-size:clamp(3rem, 13.5vw, 4.6rem); line-height:.95; margin:0; color:var(--cream);
+        text-shadow: 0 3px 0 var(--gold), 0 6px 0 rgba(0,0,0,.18), 0 12px 28px rgba(0,0,0,.45);
+        letter-spacing:.5px;
+      }
+      .tagline{ color:var(--gold-pale); font-weight:800; font-size:1.02rem; margin:10px auto 2px; max-width:44ch; text-shadow:0 2px 8px rgba(0,0,0,.4); }
+      .tagline b{ color:#fff; }
+
+      /* ---------- cards & screens ---------- */
+      .card{
+        background:var(--paper); border-radius:26px; padding:22px 20px 24px; margin-top:16px;
+        box-shadow:var(--card-shadow); border:3px solid var(--gold-soft);
+        position:relative;
+      }
+      .card::before{ content:""; position:absolute; inset:6px; border-radius:20px; border:2px dashed rgba(193,39,45,.18); pointer-events:none; }
+      .screen{ display:none; }
+      .screen.active{ display:block; animation:screenIn .45s cubic-bezier(.2,1.4,.4,1) both; }
+      @keyframes screenIn{ from{ opacity:0; transform:translateY(18px) scale(.985);} to{ opacity:1; transform:none;} }
+      h2.screen-title{ font-family:"Mountains of Christmas", cursive; font-size:2rem; margin:0 0 4px; color:var(--red); line-height:1.05; }
+      .sub{ color:var(--ink-soft); font-weight:700; margin:0 0 14px; font-size:.95rem; }
+      .label{ display:block; font-weight:900; font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; color:var(--green-deep); margin:18px 0 8px; }
+      .label:first-of-type{ margin-top:6px; }
+
+      /* ---------- controls ---------- */
+      .pill-row{ display:flex; flex-wrap:wrap; gap:8px; }
+      .pill{
+        border:3px solid #EAD9BE; background:#FFF6E3; color:var(--ink); font-family:inherit;
+        font-weight:900; font-size:1rem; padding:9px 16px; border-radius:999px; cursor:pointer;
+        box-shadow:0 3px 0 #E0C99F; transition:transform .08s, box-shadow .08s, background .15s;
+        min-width:48px;
+      }
+      .pill:active{ transform:translateY(2px); box-shadow:0 1px 0 #E0C99F; }
+      .pill.on{ background:var(--red); border-color:var(--red-deep); color:#fff; box-shadow:0 3px 0 var(--red-dark); }
+      .deck-grid{ display:grid; grid-template-columns:1fr; gap:10px; }
+      @media (min-width:480px){ .deck-grid{ grid-template-columns:repeat(3,1fr);} }
+      .deck-card{
+        border:3px solid #EAD9BE; background:#FFF6E3; border-radius:18px; padding:14px 12px 12px;
+        cursor:pointer; text-align:center; font-family:inherit; width:100%;
+        box-shadow:0 4px 0 #E0C99F; transition:transform .08s, box-shadow .08s;
+      }
+      .deck-card:active{ transform:translateY(3px); box-shadow:0 1px 0 #E0C99F; }
+      .deck-card.on{ border-color:var(--green); background:#EAF7EE; box-shadow:0 4px 0 var(--green-deep); }
+      .deck-card svg{ width:38px; height:38px; }
+      .deck-card .deck-name{ display:block; font-weight:900; font-size:1rem; margin-top:6px; color:var(--ink); }
+      .deck-card .deck-desc{ display:block; font-weight:700; font-size:.78rem; color:var(--ink-soft); margin-top:2px; line-height:1.35; }
+      .name-grid{ display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+      @media (max-width:380px){ .name-grid{ grid-template-columns:1fr; } }
+      .name-field{ display:flex; align-items:center; gap:8px; background:#FFF6E3; border:3px solid #EAD9BE; border-radius:14px; padding:4px 10px 4px 6px; }
+      .name-field .dot{ flex:0 0 auto; width:30px; height:30px; border-radius:50%; color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; font-size:.95rem; box-shadow:inset 0 -3px 0 rgba(0,0,0,.18); }
+      .name-field input{ border:0; background:transparent; font-family:inherit; font-weight:800; font-size:1rem; color:var(--ink); width:100%; min-width:0; padding:6px 0; }
+      .name-field input:focus{ outline:none; }
+      .name-field:focus-within{ border-color:var(--gold); background:#FFFBEF; }
+      .toggle-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; background:#FFF6E3; border:3px solid #EAD9BE; border-radius:16px; padding:10px 14px; }
+      .toggle-row .t-text{ font-weight:900; }
+      .toggle-row .t-sub{ display:block; font-weight:700; font-size:.8rem; color:var(--ink-soft); }
+      .switch{ position:relative; flex:0 0 auto; width:62px; height:36px; display:block; }
+      .switch input{
+        -webkit-appearance:none; appearance:none; position:absolute; inset:0; margin:0; cursor:pointer; z-index:2;
+        width:62px; height:36px; border-radius:999px; background:#D8C6A5; border:0;
+        box-shadow:inset 0 2px 5px rgba(0,0,0,.25); transition:background .2s;
+      }
+      .switch input::after{ content:""; position:absolute; top:3px; left:3px; width:30px; height:30px; border-radius:50%; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,.3); transition:left .2s cubic-bezier(.2,1.4,.4,1); }
+      .switch input:checked{ background:var(--green-bright); }
+      .switch input:checked::after{ left:29px; }
+      .switch input:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+      .timer-opts{ margin-top:10px; display:none; }
+      .timer-opts.show{ display:block; animation:screenIn .3s both; }
+
+      .btn{
+        display:inline-flex; align-items:center; justify-content:center; gap:9px;
+        font-family:inherit; font-weight:900; cursor:pointer; border-radius:999px;
+        padding:14px 26px; font-size:1.08rem; border:0; width:100%;
+        transition:transform .08s, box-shadow .08s, filter .15s; text-decoration:none;
+      }
+      .btn:active{ transform:translateY(4px); }
+      .btn-green{ background:linear-gradient(180deg, var(--green-bright), var(--green)); color:#fff; box-shadow:0 6px 0 var(--green-dark), 0 14px 24px rgba(8,58,32,.35); text-shadow:0 1px 2px rgba(0,0,0,.25); }
+      .btn-green:active{ box-shadow:0 2px 0 var(--green-dark); }
+      .btn-red{ background:linear-gradient(180deg, #E0484F, var(--red)); color:#fff; box-shadow:0 6px 0 var(--red-dark), 0 14px 24px rgba(110,18,22,.35); text-shadow:0 1px 2px rgba(0,0,0,.25); }
+      .btn-red:active{ box-shadow:0 2px 0 var(--red-dark); }
+      .btn-gold{ background:linear-gradient(180deg, var(--gold-soft), var(--gold)); color:#5C3A00; box-shadow:0 6px 0 #B97E00, 0 14px 24px rgba(185,126,0,.3); }
+      .btn-gold:active{ box-shadow:0 2px 0 #B97E00; }
+      .btn-ghost{ background:#fff; color:var(--red); box-shadow:0 5px 0 #E0C99F; border:3px solid #EAD9BE; }
+      .btn-ghost:active{ box-shadow:0 1px 0 #E0C99F; }
+      .btn[disabled]{ opacity:.45; filter:grayscale(.4); pointer-events:none; }
+      .btn-row{ display:grid; gap:10px; margin-top:16px; }
+      @media (min-width:480px){ .btn-row.two{ grid-template-columns:1fr 1fr; } }
+      .start-wrap{ margin-top:22px; }
+      .start-wrap .btn{ font-size:1.25rem; padding:17px 26px; }
+
+      details.howto{ margin-top:16px; background:#EAF7EE; border:3px solid #BFE6CC; border-radius:18px; padding:6px 16px 12px; }
+      details.howto summary{ font-weight:900; color:var(--green-deep); cursor:pointer; padding:10px 0 4px; font-size:1rem; list-style:none; display:flex; align-items:center; gap:8px; min-height:2.25rem; }
+      details.howto summary::-webkit-details-marker{ display:none; }
+      details.howto ol{ margin:6px 0 4px; padding-left:22px; font-weight:700; color:var(--ink-soft); line-height:1.55; font-size:.93rem; }
+      details.howto ol b{ color:var(--ink); }
+
+      /* ---------- in-game top bar ---------- */
+      .topbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px; }
+      .topbar .mini-title{ font-family:"Mountains of Christmas", cursive; font-size:1.35rem; color:var(--red); line-height:1; }
+      .step-pill{ background:var(--green-deep); color:#fff; font-weight:900; font-size:.8rem; padding:7px 13px; border-radius:999px; box-shadow:0 3px 0 var(--green-dark); white-space:nowrap; }
+      .progress-track{ height:12px; background:#F1E3C8; border-radius:999px; overflow:hidden; margin:10px 0 4px; box-shadow:inset 0 2px 4px rgba(0,0,0,.15); }
+      .progress-fill{ height:100%; width:0%; border-radius:999px; background:repeating-linear-gradient(45deg, var(--red) 0 14px, #fff 14px 28px); transition:width .5s cubic-bezier(.2,1,.3,1); box-shadow:inset 0 -3px 0 rgba(0,0,0,.15); }
+
+      /* ---------- pass screen ---------- */
+      .pass-inner{ text-align:center; padding:10px 4px 6px; }
+      .avatar-big{ width:104px; height:104px; margin:6px auto 12px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-family:"Mountains of Christmas", cursive; font-size:3.2rem; box-shadow:0 10px 24px rgba(0,0,0,.25), inset 0 -8px 0 rgba(0,0,0,.18); border:5px solid #fff; animation:bobble 2.2s ease-in-out infinite; }
+      @keyframes bobble{ 0%,100%{ transform:translateY(0) rotate(-2deg);} 50%{ transform:translateY(-7px) rotate(2deg);} }
+      .pass-to{ font-weight:800; color:var(--ink-soft); letter-spacing:.06em; text-transform:uppercase; font-size:.85rem; margin:0; }
+      .pass-name{ font-family:"Mountains of Christmas", cursive; font-size:3rem; color:var(--red); margin:2px 0 6px; line-height:1; }
+      .pass-funny{ font-weight:800; color:var(--ink-soft); font-size:1rem; margin:0 auto 8px; max-width:36ch; }
+      .pass-role{ display:inline-block; background:var(--gold-pale); border:2px dashed var(--gold); color:#7A5200; font-weight:900; padding:7px 15px; border-radius:999px; font-size:.88rem; margin-bottom:6px; }
+
+      /* ---------- prompt / text display ---------- */
+      .sentence-banner{
+        background:linear-gradient(180deg, #FFF3D6, #FFE9A8); border:3px solid var(--gold);
+        border-radius:18px; padding:16px 18px; text-align:center; margin:12px 0 4px;
+        box-shadow:0 6px 0 #E3B93E, 0 12px 20px rgba(185,126,0,.2);
+      }
+      .sentence-banner .sb-label{ font-size:.75rem; font-weight:900; letter-spacing:.1em; text-transform:uppercase; color:#8A6400; }
+      .sentence-banner .sb-text{ font-family:"Mountains of Christmas", cursive; font-size:1.75rem; line-height:1.15; color:var(--ink); margin-top:3px; }
+      textarea.big-input, input.big-input{
+        width:100%; font-family:inherit; font-weight:800; font-size:1.12rem; color:var(--ink);
+        background:#FFF6E3; border:3px solid #EAD9BE; border-radius:16px; padding:14px 16px; resize:vertical;
+      }
+      textarea.big-input:focus, input.big-input:focus{ outline:none; border-color:var(--gold); background:#FFFBEF; box-shadow:0 0 0 4px rgba(245,179,1,.25); }
+      .char-hint{ font-size:.8rem; font-weight:700; color:var(--ink-soft); margin-top:6px; text-align:right; }
+      .dice-row{ display:flex; gap:10px; align-items:stretch; margin-top:10px; }
+      .dice-row .btn{ width:auto; flex:0 0 auto; padding:12px 18px; font-size:.95rem; }
+
+      /* ---------- timer ---------- */
+      .timer-bar-wrap{ display:none; margin:10px 0 2px; }
+      .timer-bar-wrap.show{ display:block; }
+      .timer-meta{ display:flex; justify-content:space-between; font-weight:900; font-size:.85rem; color:var(--ink-soft); }
+      .timer-meta .t-num{ color:var(--red); font-size:1rem; }
+      .timer-track{ height:14px; background:#F1E3C8; border-radius:999px; overflow:hidden; box-shadow:inset 0 2px 4px rgba(0,0,0,.18); margin-top:5px; }
+      .timer-fill{ height:100%; width:100%; background:linear-gradient(90deg, var(--green-bright), var(--gold)); border-radius:999px; }
+      .timer-fill.low{ background:linear-gradient(90deg, var(--red), var(--pink)); }
+      .times-up{ display:none; background:#FDE8EA; border:3px solid var(--pink); color:#8E1B3A; font-weight:900; border-radius:14px; padding:10px 14px; text-align:center; margin-top:12px; animation:shake .45s ease; }
+      .times-up.show{ display:block; }
+      @keyframes shake{ 0%,100%{transform:translateX(0);} 20%{transform:translateX(-6px);} 40%{transform:translateX(6px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(4px);} }
+
+      /* ---------- drawing pad ---------- */
+      .pad-frame{
+        margin-top:12px; padding:11px; border-radius:20px;
+        background:repeating-linear-gradient(45deg, var(--red) 0 18px, #fff 18px 36px);
+        box-shadow:0 12px 26px rgba(60,10,10,.3), inset 0 0 0 3px rgba(255,255,255,.5);
+      }
+      .pad-inner{ background:#fff; border-radius:12px; overflow:hidden; box-shadow:inset 0 0 0 2px rgba(0,0,0,.06); }
+      canvas#pad{ display:block; width:100%; height:auto; touch-action:none; cursor:crosshair; background:#FFFDF6; }
+      .draw-tools{ margin-top:14px; }
+      .swatches{ display:flex; flex-wrap:wrap; gap:8px; }
+      .swatch{ width:42px; height:42px; border-radius:50%; border:3px solid #fff; box-shadow:0 3px 7px rgba(0,0,0,.28), inset 0 -4px 0 rgba(0,0,0,.15); cursor:pointer; padding:0; transition:transform .1s; position:relative; }
+      .swatch:active{ transform:scale(.92); }
+      .swatch.on{ outline:3px solid var(--ink); outline-offset:2px; transform:scale(1.08); }
+      .swatch.eraser{ background:#fff !important; border-color:#EAD9BE; display:flex; align-items:center; justify-content:center; }
+      .swatch.eraser svg{ width:22px; height:22px; }
+      .tool-row{ display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; justify-content:space-between; margin-top:12px; }
+      .brush-row{ display:flex; gap:8px; align-items:flex-end; }
+      .brush-btn{ width:48px; height:44px; border-radius:13px; border:3px solid #EAD9BE; background:#FFF6E3; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 0 #E0C99F; padding:0; }
+      .brush-btn:active{ transform:translateY(2px); box-shadow:0 1px 0 #E0C99F; }
+      .brush-btn.on{ border-color:var(--red); background:#FDECEC; box-shadow:0 3px 0 var(--red-dark); }
+      .brush-btn .bdot{ background:var(--ink); border-radius:50%; display:block; }
+      .mini-btns{ display:flex; gap:8px; }
+      .mini-btn{ font-family:inherit; font-weight:900; font-size:.9rem; border-radius:13px; border:3px solid #EAD9BE; background:#fff; color:var(--ink); padding:9px 15px; cursor:pointer; box-shadow:0 3px 0 #E0C99F; min-height:44px; }
+      .mini-btn:active{ transform:translateY(2px); box-shadow:0 1px 0 #E0C99F; }
+      .mini-btn[disabled]{ opacity:.4; pointer-events:none; }
+      .drawing-view{ margin-top:12px; }
+      .drawing-view img{ display:block; width:100%; height:auto; border-radius:12px; background:#FFFDF6; }
+
+      /* ---------- reveal ---------- */
+      .reveal-head{ text-align:center; }
+      .reveal-head .big{ font-family:"Mountains of Christmas", cursive; font-size:2.4rem; color:var(--red); margin:0; line-height:1.05; }
+      .versus{ display:grid; gap:10px; margin-top:14px; }
+      @media (min-width:480px){ .versus{ grid-template-columns:1fr auto 1fr; align-items:stretch; } }
+      .versus .v-card{ border-radius:16px; padding:13px 15px; }
+      .versus .v-start{ background:#EAF7EE; border:3px solid #BFE6CC; }
+      .versus .v-end{ background:#FDECEC; border:3px solid #F6C6C8; }
+      .versus .v-label{ font-size:.72rem; font-weight:900; letter-spacing:.09em; text-transform:uppercase; }
+      .versus .v-start .v-label{ color:var(--green-deep); }
+      .versus .v-end .v-label{ color:var(--red); }
+      .versus .v-text{ font-family:"Mountains of Christmas", cursive; font-size:1.4rem; line-height:1.15; margin-top:3px; }
+      .versus .v-arrow{ display:flex; align-items:center; justify-content:center; font-size:1.6rem; color:var(--gold); font-weight:900; }
+      .chain{ position:relative; margin-top:20px; padding-left:30px; }
+      .chain::before{ content:""; position:absolute; left:12px; top:8px; bottom:8px; border-left:4px dashed var(--gold); }
+      .chain-step{ position:relative; margin-bottom:16px; opacity:0; transform:translateY(16px) rotate(0deg); }
+      .chain-step.shown{ opacity:1; transform:translateY(0) rotate(var(--tilt,0deg)); transition:opacity .45s ease, transform .5s cubic-bezier(.2,1.3,.4,1); }
+      .chain-step .node{ position:absolute; left:-30px; top:12px; width:28px; height:28px; border-radius:50%; color:#fff; font-weight:900; font-size:.85rem; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 7px rgba(0,0,0,.3); border:3px solid #fff; z-index:1; }
+      .step-card{ background:#fff; border:3px solid #F1E3C8; border-radius:18px; padding:13px 15px 15px; box-shadow:0 8px 18px rgba(60,10,10,.14); }
+      .step-card .who{ display:flex; align-items:center; gap:9px; margin-bottom:8px; }
+      .step-card .who .dot{ width:30px; height:30px; border-radius:50%; color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; font-size:.9rem; box-shadow:inset 0 -3px 0 rgba(0,0,0,.18); flex:0 0 auto; }
+      .step-card .who .wname{ font-weight:900; }
+      .step-card .who .wact{ font-weight:800; color:var(--ink-soft); font-size:.88rem; }
+      .step-card .who .tag{ margin-left:auto; font-size:.7rem; font-weight:900; letter-spacing:.07em; text-transform:uppercase; padding:5px 10px; border-radius:999px; white-space:nowrap; }
+      .tag-text{ background:#EAF7EE; color:var(--green-deep); }
+      .tag-draw{ background:#FFF3D6; color:#8A6400; }
+      .tag-guess{ background:#FDECEC; color:var(--red); }
+      .step-card .step-text{ font-family:"Mountains of Christmas", cursive; font-size:1.55rem; line-height:1.15; }
+      .step-card img{ width:100%; height:auto; display:block; border-radius:10px; background:#FFFDF6; }
+      .step-card .mini-frame{ padding:7px; border-radius:14px; background:repeating-linear-gradient(45deg, var(--red) 0 14px, #fff 14px 28px); }
+      .step-card .mini-frame .in{ background:#fff; border-radius:9px; overflow:hidden; }
+
+      .awards{ margin-top:8px; display:none; }
+      .awards.show{ display:block; animation:screenIn .5s both; }
+      .awards h3{ font-family:"Mountains of Christmas", cursive; font-size:1.9rem; color:var(--red); text-align:center; margin:10px 0 12px; }
+      .award{ display:flex; gap:13px; align-items:flex-start; background:linear-gradient(180deg,#FFF8E6,#FFEFC4); border:3px solid var(--gold); border-radius:18px; padding:14px 16px; margin-bottom:11px; box-shadow:0 6px 0 #E3B93E; }
+      .award .medal{ flex:0 0 auto; width:48px; height:48px; }
+      .award .a-title{ font-weight:900; font-size:1.05rem; color:#7A5200; }
+      .award .a-who{ font-weight:900; color:var(--ink); }
+      .award .a-desc{ font-weight:700; color:var(--ink-soft); font-size:.9rem; line-height:1.45; margin-top:2px; }
+      .final-actions{ display:none; margin-top:18px; }
+      .final-actions.show{ display:grid; animation:screenIn .5s both; }
+
+      footer.credit{ text-align:center; color:rgba(255,248,236,.92); font-weight:800; font-size:.85rem; padding:20px 10px 6px; text-shadow:0 1px 5px rgba(0,0,0,.45); line-height:1.6; }
+      footer.credit .snowline{ color:var(--gold-pale); letter-spacing:.35em; font-size:.7rem; }
+
+      /* ---------- background music control ---------- */
+      .music-dock{ position:fixed; right:14px; bottom:calc(14px + env(safe-area-inset-bottom)); z-index:80; display:flex; flex-direction:column; align-items:flex-end; gap:7px; }
+      .music-now{
+        background:rgba(58,20,10,.82); color:var(--gold-pale); font-weight:800; font-size:.78rem;
+        padding:6px 12px; border-radius:999px; border:2px solid rgba(255,209,102,.55);
+        box-shadow:0 6px 16px rgba(0,0,0,.3); max-width:78vw; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      }
+      .music-now:empty{ display:none; }
+      .music-btn{
+        display:inline-flex; align-items:center; gap:9px; font-family:inherit; cursor:pointer;
+        font-weight:900; font-size:.98rem; color:#5C3A00; padding:11px 18px; border-radius:999px;
+        background:linear-gradient(180deg, var(--gold-soft), var(--gold)); border:3px solid #fff;
+        box-shadow:0 6px 0 #B97E00, 0 14px 26px rgba(0,0,0,.35); transition:transform .08s, box-shadow .08s, filter .15s;
+      }
+      .music-btn:active{ transform:translateY(4px); box-shadow:0 2px 0 #B97E00, 0 8px 16px rgba(0,0,0,.3); }
+      .music-btn svg{ width:21px; height:21px; flex:0 0 auto; }
+      .music-btn .eq{ display:inline-flex; gap:2.5px; align-items:flex-end; height:14px; }
+      .music-btn .eq i{ display:block; width:3.5px; border-radius:2px; background:var(--red); height:6px; }
+      .music-btn.playing .eq i{ animation:eqBounce .7s ease-in-out infinite; }
+      .music-btn.playing .eq i:nth-child(2){ animation-delay:.18s; height:12px; }
+      .music-btn.playing .eq i:nth-child(3){ animation-delay:.36s; height:9px; }
+      @keyframes eqBounce{ 0%,100%{ transform:scaleY(.55);} 50%{ transform:scaleY(1.25);} }
+      .music-btn.off{ background:#FFF6E3; color:var(--ink-soft); box-shadow:0 6px 0 #C9B184, 0 14px 26px rgba(0,0,0,.28); filter:saturate(.6); }
+      .music-btn.off:active{ box-shadow:0 2px 0 #C9B184; }
+      .music-btn:focus-visible{ outline:3px solid #fff; outline-offset:3px; }
+
+      @media (prefers-reduced-motion: reduce){
+        *, *::before, *::after{ animation-duration:.001s !important; transition-duration:.001s !important; }
+        html{ scroll-behavior:auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="snowCanvas" aria-hidden="true"></canvas>
+    <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+    <div class="music-dock">
+      <span class="music-now" id="musicNow" aria-live="polite"></span>
+      <button type="button" class="music-btn" id="musicToggle" aria-pressed="true" aria-label="Turn background Christmas music on or off">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span id="musicToggleLabel">Music On</span>
+        <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+      </button>
+    </div>
+
+    <div class="wrap">
+      <div class="lights" id="lights" aria-hidden="true">
+        <svg class="wire" viewBox="0 0 600 34" preserveAspectRatio="none"><path d="M0,2 Q150,36 300,10 T600,2" fill="none" stroke="rgba(0,0,0,.4)" stroke-width="2.5"/></svg>
+      </div>
+
+      <header class="hero" id="hero">
+        <div class="stars" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="#FFD166"><path d="M12 1l2.6 7.2L22 9.3l-5.7 4.9L18 21.5 12 17.3 6 21.5l1.7-7.3L2 9.3l7.4-1.1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="#FFD166"><path d="M12 1l2.6 7.2L22 9.3l-5.7 4.9L18 21.5 12 17.3 6 21.5l1.7-7.3L2 9.3l7.4-1.1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="#FFD166"><path d="M12 1l2.6 7.2L22 9.3l-5.7 4.9L18 21.5 12 17.3 6 21.5l1.7-7.3L2 9.3l7.4-1.1z"/></svg>
+        </div>
+        <h1 class="game-title">Reindeer Relay</h1>
+        <p class="tagline">One phone. One sentence. A room full of artists who <b>cannot draw</b>. Pass it, draw it, guess it — and watch a perfectly good sentence turn into beautiful nonsense.</p>
+      </header>
+
+      <!-- ============ HOME / SETUP ============ -->
+      <section class="screen active" id="screen-home">
+        <div class="card">
+          <h2 class="screen-title">Round up your herd</h2>
+          <p class="sub">Gather 3–8 players in one room. The phone does the traveling — you just pass it like a hot potato with antlers.</p>
+
+          <span class="label" id="lbl-players">How many players?</span>
+          <div class="pill-row" id="playerCountRow" role="group" aria-labelledby="lbl-players"></div>
+
+          <span class="label">Player names (reindeer names work great)</span>
+          <div class="name-grid" id="nameGrid"></div>
+
+          <span class="label">Pick your prompt deck</span>
+          <div class="deck-grid" id="deckGrid">
+            <button type="button" class="deck-card on" data-deck="christmas">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 L36 17 H30 L40 29 H31 L41 41 H7 L17 29 H8 L18 17 H12 Z" fill="#1E7A46"/><rect x="21" y="41" width="6" height="5" rx="1" fill="#8A5A2B"/><circle cx="24" cy="12" r="3" fill="#F5B301"/><circle cx="18" cy="24" r="2.4" fill="#C1272D"/><circle cx="30" cy="31" r="2.4" fill="#4361EE"/><circle cx="24" cy="35" r="2.4" fill="#EF476F"/></svg>
+              <span class="deck-name">Christmas Capers</span>
+              <span class="deck-desc">Santa mishaps, runaway elves &amp; reindeer chaos</span>
+            </button>
+            <button type="button" class="deck-card" data-deck="everyday">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="19" fill="#FFD166"/><circle cx="17.5" cy="20" r="2.6" fill="#3A2418"/><circle cx="30.5" cy="20" r="2.6" fill="#3A2418"/><path d="M13 29 Q24 40 35 29" fill="none" stroke="#3A2418" stroke-width="3.4" stroke-linecap="round"/><circle cx="10" cy="26" r="3.4" fill="#EF476F" opacity=".65"/><circle cx="38" cy="26" r="3.4" fill="#EF476F" opacity=".65"/></svg>
+              <span class="deck-name">Everyday Silly</span>
+              <span class="deck-desc">Cats in sunglasses, juggling chefs &amp; brave bananas</span>
+            </button>
+            <button type="button" class="deck-card" data-deck="custom">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M33 6 L42 15 L18 39 L8 42 L11 32 Z" fill="#F5B301"/><path d="M33 6 L42 15 L37 20 L28 11 Z" fill="#C1272D"/><path d="M11 32 L8 42 L18 39 L15 35 Z" fill="#3A2418"/></svg>
+              <span class="deck-name">Write Our Own</span>
+              <span class="deck-desc">Player 1 invents the starting sentence. Danger!</span>
+            </button>
+          </div>
+
+          <span class="label">How long is the relay?</span>
+          <div class="pill-row" id="lapRow" role="group" aria-label="Relay length">
+            <button type="button" class="pill on" data-laps="1">One lap — quick &amp; silly</button>
+            <button type="button" class="pill" data-laps="2">Two laps — double chaos</button>
+          </div>
+
+          <span class="label">Turn timer</span>
+          <div class="toggle-row">
+            <span><span class="t-text">Race the clock</span><span class="t-sub">Off by default — panic is optional, but encouraged</span></span>
+            <label class="switch" aria-label="Toggle turn timer">
+              <input type="checkbox" id="timerToggle" />
+            </label>
+          </div>
+          <div class="timer-opts" id="timerOpts">
+            <div class="pill-row" id="timerRow" role="group" aria-label="Timer length">
+              <button type="button" class="pill" data-secs="30">30 sec</button>
+              <button type="button" class="pill on" data-secs="60">60 sec</button>
+              <button type="button" class="pill" data-secs="90">90 sec</button>
+            </div>
+          </div>
+
+          <div class="start-wrap">
+            <button type="button" class="btn btn-green" id="startBtn">Start the Relay!</button>
+          </div>
+
+          <details class="howto">
+            <summary>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0C4A2A" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M9.5 9.3a2.6 2.6 0 1 1 3.6 2.4c-.8.35-1.1.8-1.1 1.8"/><circle cx="12" cy="17.2" r=".4" fill="#0C4A2A"/></svg>
+              How to play (30 seconds)
+            </summary>
+            <ol>
+              <li><b>Player 1</b> gets a secret sentence. Read it, memorize it, guard it with your life.</li>
+              <li>Pass the phone. The next player sees <b>only the sentence</b> and has to <b>draw it</b>. No words in the drawing — that's cheating, Santa is watching.</li>
+              <li>Pass again. The next player sees <b>only the drawing</b> and writes what they <b>think</b> it is.</li>
+              <li>Draw, guess, draw, guess… all the way around the room.</li>
+              <li>At the end, the phone reveals the <b>whole chain</b> — and you watch "Santa stuck in a chimney" become "a sausage escaping a house fire." That's the game. That's the whole game. It's glorious.</li>
+            </ol>
+          </details>
+        </div>
+      </section>
+
+      <!-- ============ PASS SCREEN ============ -->
+      <section class="screen" id="screen-pass">
+        <div class="card">
+          <div class="topbar">
+            <span class="mini-title">Reindeer Relay</span>
+            <span class="step-pill" id="passStepPill">Step 1 of 4</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="passProgress"></div></div>
+          <div class="pass-inner">
+            <div class="avatar-big" id="passAvatar">D</div>
+            <p class="pass-to">Pass the phone to</p>
+            <p class="pass-name" id="passName">Dasher</p>
+            <span class="pass-role" id="passRole">You're starting us off!</span>
+            <p class="pass-funny" id="passFunny">Everyone else: eyes elsewhere. No peeking — the elves report everything.</p>
+            <div class="btn-row">
+              <button type="button" class="btn btn-red" id="passReadyBtn">I'm ready — show me!</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PROMPT SCREEN (turn 0) ============ -->
+      <section class="screen" id="screen-start">
+        <div class="card">
+          <div class="topbar">
+            <span class="mini-title">Reindeer Relay</span>
+            <span class="step-pill" id="startStepPill">Step 1 of 4</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="startProgress"></div></div>
+          <h2 class="screen-title" id="startTitle">Your secret sentence</h2>
+          <p class="sub" id="startSub">Read it. Burn it into your brain. Then pass the phone — the next player has to draw THIS.</p>
+
+          <div id="startDeckView">
+            <div class="sentence-banner">
+              <div class="sb-label">The sentence that starts it all</div>
+              <div class="sb-text" id="startSentenceEl">Santa got stuck in the chimney again</div>
+            </div>
+            <div class="dice-row">
+              <button type="button" class="btn btn-gold" id="shuffleBtn">Shuffle — gimme another</button>
+            </div>
+          </div>
+
+          <div id="startCustomView" style="display:none;">
+            <label class="label" for="customInput" style="margin-top:10px;">Invent something drawable… and devious</label>
+            <textarea class="big-input" id="customInput" rows="2" maxlength="90" placeholder="e.g. A penguin teaching penguins to tap-dance… wait"></textarea>
+            <p class="char-hint"><span id="customCount">0</span> / 90 — short &amp; silly wins</p>
+          </div>
+
+          <div class="btn-row">
+            <button type="button" class="btn btn-green" id="startDoneBtn">Got it — pass it on!</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ DRAW SCREEN ============ -->
+      <section class="screen" id="screen-draw">
+        <div class="card">
+          <div class="topbar">
+            <span class="mini-title">Reindeer Relay</span>
+            <span class="step-pill" id="drawStepPill">Step 2 of 4</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="drawProgress"></div></div>
+          <h2 class="screen-title">Draw this!</h2>
+          <div class="sentence-banner" style="margin-top:8px;">
+            <div class="sb-label">Your secret sentence — pictures only, no words!</div>
+            <div class="sb-text" id="drawSentence">Santa got stuck in the chimney again</div>
+          </div>
+
+          <div class="timer-bar-wrap" id="drawTimerWrap">
+            <div class="timer-meta"><span>Time left</span><span class="t-num" id="drawTimerNum">60</span></div>
+            <div class="timer-track"><div class="timer-fill" id="drawTimerFill"></div></div>
+          </div>
+          <div class="times-up" id="drawTimesUp">Time's up! Wrap it up, Picasso — pass it on.</div>
+
+          <div class="pad-frame">
+            <div class="pad-inner">
+              <canvas id="pad" width="900" height="660"></canvas>
+            </div>
+          </div>
+
+          <div class="draw-tools">
+            <span class="label" style="margin-top:2px;">Colors</span>
+            <div class="swatches" id="swatches"></div>
+            <div class="tool-row">
+              <div>
+                <span class="label" style="margin:0 0 6px;">Brush size</span>
+                <div class="brush-row" id="brushRow">
+                  <button type="button" class="brush-btn" data-size="5" aria-label="Small brush"><span class="bdot" style="width:8px;height:8px;"></span></button>
+                  <button type="button" class="brush-btn on" data-size="11" aria-label="Medium brush"><span class="bdot" style="width:15px;height:15px;"></span></button>
+                  <button type="button" class="brush-btn" data-size="20" aria-label="Large brush"><span class="bdot" style="width:24px;height:24px;"></span></button>
+                </div>
+              </div>
+              <div>
+                <span class="label" style="margin:0 0 6px;">Oops tools</span>
+                <div class="mini-btns">
+                  <button type="button" class="mini-btn" id="undoBtn">Undo</button>
+                  <button type="button" class="mini-btn" id="clearBtn">Clear</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button type="button" class="btn btn-green" id="drawDoneBtn" disabled>Done drawing — pass it on!</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ GUESS SCREEN ============ -->
+      <section class="screen" id="screen-guess">
+        <div class="card">
+          <div class="topbar">
+            <span class="mini-title">Reindeer Relay</span>
+            <span class="step-pill" id="guessStepPill">Step 3 of 4</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="guessProgress"></div></div>
+          <h2 class="screen-title">What IS this?!</h2>
+          <p class="sub">Somebody drew this. Seriously. Study the masterpiece, then write what you think it is.</p>
+
+          <div class="timer-bar-wrap" id="guessTimerWrap">
+            <div class="timer-meta"><span>Time left</span><span class="t-num" id="guessTimerNum">60</span></div>
+            <div class="timer-track"><div class="timer-fill" id="guessTimerFill"></div></div>
+          </div>
+          <div class="times-up" id="guessTimesUp">Time's up! Commit to a guess — confidence is everything.</div>
+
+          <div class="pad-frame drawing-view">
+            <div class="pad-inner"><img id="guessImg" alt="The drawing you need to guess" /></div>
+          </div>
+
+          <label class="label" for="guessInput">Your guess</label>
+          <input class="big-input" id="guessInput" type="text" maxlength="90" placeholder="It is CLEARLY a…" autocomplete="off" />
+          <p class="char-hint">Wrong answers are the whole point. Be bold.</p>
+
+          <div class="btn-row">
+            <button type="button" class="btn btn-green" id="guessDoneBtn" disabled>Lock in my guess!</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ REVEAL SCREEN ============ -->
+      <section class="screen" id="screen-reveal">
+        <div class="card">
+          <div class="reveal-head">
+            <h2 class="big" id="revealTitle">The Great Unveiling!</h2>
+            <p class="sub" style="margin-bottom:0;">Everybody gather round. This is where sentences go to become legends.</p>
+          </div>
+
+          <div class="versus" id="versus" style="display:none;">
+            <div class="v-card v-start"><div class="v-label">It started as</div><div class="v-text" id="versusStart"></div></div>
+            <div class="v-arrow" aria-hidden="true">➜</div>
+            <div class="v-card v-end"><div class="v-label">It ended as</div><div class="v-text" id="versusEnd"></div></div>
+          </div>
+
+          <div class="chain" id="chain"></div>
+
+          <div class="btn-row" id="revealNextWrap">
+            <button type="button" class="btn btn-red" id="revealNextBtn">Reveal the first step!</button>
+          </div>
+
+          <div class="awards" id="awards">
+            <h3>Mutation Awards</h3>
+            <div id="awardList"></div>
+          </div>
+
+          <div class="btn-row final-actions" id="finalActions">
+            <button type="button" class="btn btn-green" id="againBtn">Play again — new sentence!</button>
+            <button type="button" class="btn btn-ghost" id="setupBtn">Change players &amp; setup</button>
+          </div>
+        </div>
+      </section>
+
+      <footer class="credit">
+        <div class="snowline" aria-hidden="true">✦ ✦ ✦</div>
+        Built by Bryan Lee (Afnuke) · AI collaboration<br />
+        One phone, one room, zero drawing skills required.
+      </footer>
+    </div>
+
+    <script>
+      "use strict";
+      /* ================= DATA ================= */
+      var CHRISTMAS = [
+        "Santa got stuck in the chimney again",
+        "A reindeer learning to swim",
+        "Rudolph forgot where he parked the sleigh",
+        "An elf riding a runaway candy cane",
+        "Santa's beard got tangled in the Christmas lights",
+        "A snowman relaxing in a hot tub",
+        "A penguin delivering presents by bicycle",
+        "Mrs. Claus arm-wrestling a polar bear",
+        "A gingerbread man running from a hungry cat",
+        "Santa doing the limbo under a tinsel rope",
+        "An elf trapped inside a snow globe",
+        "A reindeer with a flashlight stuck on its nose",
+        "The Christmas tree fell over onto the cat",
+        "Two snowmen in a serious snowball fight",
+        "Santa's sleigh got a parking ticket",
+        "A turkey proudly wearing a Santa hat",
+        "An elf juggling ornaments on a wobbly ladder",
+        "Hot cocoa flooding the toy workshop",
+        "A reindeer completely tangled in wrapping paper",
+        "Santa texting while flying the sleigh",
+        "A mouse stealing Santa's cookies",
+        "A nutcracker dancing ballet with a broom",
+        "A Christmas stocking stuffed with spaghetti",
+        "A penguin building an igloo with a chimney",
+        "The reindeer formed a boy band",
+        "Santa's boots got filled with jelly"
+      ];
+      var EVERYDAY = [
+        "A cat in sunglasses driving a bus",
+        "A banana slipping on a banana peel",
+        "A dinosaur trying to tie its shoes",
+        "A fish riding a bicycle underwater",
+        "A robot learning to ballet dance",
+        "A cow jumping over the moon",
+        "A pirate finding a treasure chest full of socks",
+        "A frog holding an umbrella in the rain",
+        "An elephant terrified of a tiny mouse",
+        "A chef juggling flaming pancakes",
+        "A snail beating a cheetah in a race",
+        "A monkey brushing its teeth with a banana",
+        "A penguin sunbathing on a beach towel",
+        "A wizard whose wand only makes bubbles",
+        "A dog digging up a gigantic bone",
+        "A chicken crossing a very busy road",
+        "A bear riding a unicycle at the circus",
+        "A turtle carrying a house on its back",
+        "A superhero whose cape keeps getting stuck in doors",
+        "A giraffe trying to limbo under a bridge",
+        "A shark selling lemonade at the beach",
+        "A baby dragon sneezing tiny fireballs"
+      ];
+      var REINDEER = ["Dasher","Dancer","Prancer","Vixen","Comet","Cupid","Donner","Blitzen"];
+      var PLAYER_COLORS = ["#C1272D","#1E7A46","#4361EE","#EF476F","#B97E00","#2A9D8F","#7B2CBF","#E85D04"];
+      var PASS_FUNNY = [
+        "Everyone else: eyes elsewhere. No peeking — the elves report everything.",
+        "Hand it over nice and casual. Act like it's NOT a top-secret mission.",
+        "The fate of this sentence rests in your hands. No pressure.",
+        "Previous player: walk away. Far away. We can still see you peeking.",
+        "This phone has seen things. Now it's your turn to add to the chaos.",
+        "Deep breath. Whatever you're about to see, it made sense once. Probably."
+      ];
+      var ROLE_LINES = {
+        start: "You're starting us off!",
+        draw: "You're the artist. Good luck, everyone.",
+        guess: "You're the guesser. Trust your gut."
+      };
+
+      /* ================= STATE ================= */
+      var S = {
+        playerCount: 4, players: [], deck: "christmas", laps: 1,
+        timerOn: false, timerSecs: 60,
+        chain: [], turn: 0, totalSteps: 0,
+        startText: "", lastPickIdx: -1,
+        revealIdx: 0, timerId: null, timerLeft: 0
+      };
+
+      function $(id){ return document.getElementById(id); }
+      function shufflePick(arr){
+        if (arr.length < 2) return arr[0];
+        var i;
+        do { i = Math.floor(Math.random() * arr.length); } while (i === S.lastPickIdx);
+        S.lastPickIdx = i;
+        return arr[i];
+      }
+      function deckPool(){
+        if (S.deck === "christmas") return CHRISTMAS;
+        if (S.deck === "everyday") return EVERYDAY;
+        return CHRISTMAS.concat(EVERYDAY);
+      }
+
+      /* ================= SCREENS ================= */
+      var SCREENS = ["home","pass","start","draw","guess","reveal"];
+      function showScreen(name){
+        stopTimer();
+        $("hero").style.display = (name === "home") ? "" : "none";
+        SCREENS.forEach(function(s){ $("screen-" + s).classList.toggle("active", s === name); });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      function setProgress(prefix, turn, total){
+        $(prefix + "StepPill").textContent = "Step " + (turn + 1) + " of " + total;
+        $(prefix + "Progress").style.width = Math.round(((turn) / total) * 100) + "%";
+      }
+
+      /* ================= SETUP UI ================= */
+      var savedNames = {};
+      function buildCountRow(){
+        var row = $("playerCountRow"); row.innerHTML = "";
+        for (var n = 3; n <= 8; n++){
+          (function(n){
+            var b = document.createElement("button");
+            b.type = "button"; b.className = "pill" + (n === S.playerCount ? " on" : "");
+            b.textContent = String(n);
+            b.setAttribute("aria-label", n + " players");
+            b.addEventListener("click", function(){
+              S.playerCount = n;
+              row.querySelectorAll(".pill").forEach(function(p){ p.classList.remove("on"); });
+              b.classList.add("on");
+              buildNameGrid();
+            });
+            row.appendChild(b);
+          })(n);
+        }
+      }
+      function buildNameGrid(){
+        document.querySelectorAll("#nameGrid input").forEach(function(inp){
+          savedNames[inp.getAttribute("data-slot")] = inp.value;
+        });
+        var grid = $("nameGrid"); grid.innerHTML = "";
+        for (var i = 0; i < S.playerCount; i++){
+          (function(i){
+            var wrap = document.createElement("div"); wrap.className = "name-field";
+            var dot = document.createElement("span"); dot.className = "dot";
+            dot.style.background = PLAYER_COLORS[i % PLAYER_COLORS.length];
+            dot.textContent = REINDEER[i].charAt(0);
+            var inp = document.createElement("input");
+            inp.type = "text"; inp.maxLength = 16; inp.setAttribute("data-slot", i);
+            inp.placeholder = REINDEER[i];
+            inp.value = savedNames[i] || "";
+            inp.setAttribute("aria-label", "Player " + (i + 1) + " name");
+            inp.addEventListener("input", function(){ savedNames[i] = inp.value; });
+            wrap.appendChild(dot); wrap.appendChild(inp);
+            grid.appendChild(wrap);
+          })(i);
+        }
+      }
+      document.querySelectorAll("#deckGrid .deck-card").forEach(function(card){
+        card.addEventListener("click", function(){
+          document.querySelectorAll("#deckGrid .deck-card").forEach(function(c){ c.classList.remove("on"); });
+          card.classList.add("on");
+          S.deck = card.getAttribute("data-deck");
+        });
+      });
+      document.querySelectorAll("#lapRow .pill").forEach(function(p){
+        p.addEventListener("click", function(){
+          document.querySelectorAll("#lapRow .pill").forEach(function(x){ x.classList.remove("on"); });
+          p.classList.add("on");
+          S.laps = parseInt(p.getAttribute("data-laps"), 10);
+        });
+      });
+      document.querySelectorAll("#timerRow .pill").forEach(function(p){
+        p.addEventListener("click", function(){
+          document.querySelectorAll("#timerRow .pill").forEach(function(x){ x.classList.remove("on"); });
+          p.classList.add("on");
+          S.timerSecs = parseInt(p.getAttribute("data-secs"), 10);
+        });
+      });
+      $("timerToggle").addEventListener("change", function(){
+        S.timerOn = this.checked;
+        $("timerOpts").classList.toggle("show", S.timerOn);
+      });
+
+      /* ================= GAME FLOW ================= */
+      function collectPlayers(){
+        S.players = [];
+        document.querySelectorAll("#nameGrid input").forEach(function(inp, i){
+          var v = inp.value.trim();
+          S.players.push(v || REINDEER[i]);
+        });
+      }
+      function turnType(turn){
+        if (turn === 0) return "start";
+        return (turn % 2 === 1) ? "draw" : "guess";
+      }
+      function playerFor(turn){ return S.players[turn % S.players.length]; }
+      function colorFor(turn){ return PLAYER_COLORS[(turn % S.players.length) % PLAYER_COLORS.length]; }
+
+      function startGame(){
+        collectPlayers();
+        S.chain = [];
+        S.turn = 0;
+        S.totalSteps = S.players.length * S.laps;
+        S.lastPickIdx = -1;
+        S.startText = (S.deck === "custom") ? "" : shufflePick(deckPool());
+        goToPass();
+      }
+      function goToPass(){
+        var t = S.turn, type = turnType(t), name = playerFor(t);
+        setProgress("pass", t, S.totalSteps);
+        $("passAvatar").style.background = colorFor(t);
+        $("passAvatar").textContent = name.charAt(0).toUpperCase();
+        $("passName").textContent = name;
+        $("passRole").textContent = ROLE_LINES[type];
+        $("passFunny").textContent = PASS_FUNNY[Math.floor(Math.random() * PASS_FUNNY.length)];
+        $("passReadyBtn").textContent = "I'm " + name + " — show me!";
+        showScreen("pass");
+      }
+      $("passReadyBtn").addEventListener("click", function(){
+        var type = turnType(S.turn);
+        if (type === "start") openStartTurn();
+        else if (type === "draw") openDraw();
+        else openGuess();
+      });
+
+      /* ---- starting sentence (turn 0) ---- */
+      function openStartTurn(){
+        setProgress("start", 0, S.totalSteps);
+        var custom = (S.deck === "custom");
+        $("startDeckView").style.display = custom ? "none" : "block";
+        $("startCustomView").style.display = custom ? "block" : "none";
+        $("startTitle").textContent = custom ? "Invent the sentence!" : "Your secret sentence";
+        $("startSub").textContent = custom
+          ? "Make it drawable, make it silly. The next player has to draw whatever you write here. Choose wisely… or don't."
+          : "Read it. Burn it into your brain. Then pass the phone — the next player has to draw THIS.";
+        if (!custom) $("startSentenceEl").textContent = S.startText;
+        validateStartTurn();
+        showScreen("start");
+        if (custom) setTimeout(function(){ $("customInput").focus(); }, 350);
+      }
+      function validateStartTurn(){
+        if (S.deck === "custom"){
+          $("startDoneBtn").disabled = $("customInput").value.trim().length < 3;
+        } else {
+          $("startDoneBtn").disabled = false;
+        }
+      }
+      $("customInput").addEventListener("input", function(){
+        $("customCount").textContent = this.value.length;
+        validateStartTurn();
+      });
+      $("shuffleBtn").addEventListener("click", function(){
+        S.startText = shufflePick(deckPool());
+        $("startSentenceEl").textContent = S.startText;
+      });
+      $("startDoneBtn").addEventListener("click", function(){
+        var text = (S.deck === "custom") ? $("customInput").value.trim() : S.startText;
+        S.chain.push({ type: "text", player: playerFor(0), color: colorFor(0), text: text });
+        advance();
+      });
+
+      /* ---- draw ---- */
+      function openDraw(){
+        setProgress("draw", S.turn, S.totalSteps);
+        var prev = S.chain[S.chain.length - 1];
+        $("drawSentence").textContent = prev.text;
+        resetPad();
+        $("drawTimesUp").classList.remove("show");
+        showScreen("draw");
+        startTimer("draw");
+      }
+      $("drawDoneBtn").addEventListener("click", function(){
+        var img = pad.toDataURL("image/png");
+        S.chain.push({ type: "draw", player: playerFor(S.turn), color: colorFor(S.turn), img: img });
+        advance();
+      });
+
+      /* ---- guess ---- */
+      function openGuess(){
+        setProgress("guess", S.turn, S.totalSteps);
+        var prev = S.chain[S.chain.length - 1];
+        $("guessImg").src = prev.img;
+        $("guessInput").value = "";
+        $("guessDoneBtn").disabled = true;
+        $("guessTimesUp").classList.remove("show");
+        showScreen("guess");
+        startTimer("guess");
+      }
+      $("guessInput").addEventListener("input", function(){
+        $("guessDoneBtn").disabled = this.value.trim().length < 2;
+      });
+      $("guessDoneBtn").addEventListener("click", function(){
+        S.chain.push({ type: "guess", player: playerFor(S.turn), color: colorFor(S.turn), text: $("guessInput").value.trim() });
+        advance();
+      });
+
+      function advance(){
+        stopTimer();
+        S.turn++;
+        if (S.turn >= S.totalSteps) openReveal();
+        else goToPass();
+      }
+
+      /* ================= TIMER ================= */
+      function startTimer(kind){
+        if (!S.timerOn) { $(kind + "TimerWrap").classList.remove("show"); return; }
+        $(kind + "TimerWrap").classList.add("show");
+        S.timerLeft = S.timerSecs;
+        var num = $(kind + "TimerNum"), fill = $(kind + "TimerFill");
+        num.textContent = S.timerLeft;
+        fill.style.width = "100%"; fill.classList.remove("low");
+        fill.style.transition = "none";
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){
+          fill.style.transition = "width " + S.timerSecs + "s linear";
+          fill.style.width = "0%";
+        }); });
+        S.timerId = setInterval(function(){
+          S.timerLeft--;
+          num.textContent = Math.max(S.timerLeft, 0);
+          if (S.timerLeft <= 10) fill.classList.add("low");
+          if (S.timerLeft <= 0){
+            stopTimer();
+            $(kind + "TimesUp").classList.add("show");
+          }
+        }, 1000);
+      }
+      function stopTimer(){ if (S.timerId){ clearInterval(S.timerId); S.timerId = null; } }
+
+      /* ================= DRAWING PAD ================= */
+      var pad = $("pad"), pctx = pad.getContext("2d");
+      var strokes = [], currentStroke = null;
+      var brushColor = "#C1272D", brushSize = 11, isEraser = false;
+      var SWATCHES = ["#C1272D","#E85D04","#F5B301","#1E7A46","#2A9D8F","#4361EE","#7B2CBF","#EF476F","#8A5A2B","#26221F"];
+      function buildSwatches(){
+        var box = $("swatches");
+        SWATCHES.forEach(function(c, i){
+          var b = document.createElement("button");
+          b.type = "button"; b.className = "swatch" + (i === 0 ? " on" : "");
+          b.style.background = c; b.setAttribute("aria-label", "Color " + c);
+          b.addEventListener("click", function(){
+            brushColor = c; isEraser = false;
+            box.querySelectorAll(".swatch").forEach(function(s){ s.classList.remove("on"); });
+            b.classList.add("on");
+          });
+          box.appendChild(b);
+        });
+        var er = document.createElement("button");
+        er.type = "button"; er.className = "swatch eraser"; er.setAttribute("aria-label", "Eraser");
+        er.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#C1272D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H8L3.7 15.7a2 2 0 0 1 0-2.8L12 4.6a2 2 0 0 1 2.8 0l5.8 5.8a2 2 0 0 1 0 2.8L13 20" fill="#FDECEC"/><path d="M7.5 11.5l6 6"/></svg>';
+        er.addEventListener("click", function(){
+          isEraser = true;
+          box.querySelectorAll(".swatch").forEach(function(s){ s.classList.remove("on"); });
+          er.classList.add("on");
+        });
+        box.appendChild(er);
+      }
+      document.querySelectorAll("#brushRow .brush-btn").forEach(function(b){
+        b.addEventListener("click", function(){
+          document.querySelectorAll("#brushRow .brush-btn").forEach(function(x){ x.classList.remove("on"); });
+          b.classList.add("on");
+          brushSize = parseInt(b.getAttribute("data-size"), 10);
+        });
+      });
+      function redrawPad(){
+        pctx.fillStyle = "#FFFDF6";
+        pctx.fillRect(0, 0, pad.width, pad.height);
+        strokes.forEach(drawStroke);
+        if (currentStroke) drawStroke(currentStroke);
+        $("undoBtn").disabled = strokes.length === 0;
+        $("drawDoneBtn").disabled = strokes.length === 0 && !currentStroke;
+      }
+      function drawStroke(st){
+        if (st.points.length < 2){
+          pctx.fillStyle = st.color;
+          pctx.beginPath();
+          pctx.arc(st.points[0].x, st.points[0].y, st.size / 2, 0, Math.PI * 2);
+          pctx.fill();
+          return;
+        }
+        pctx.strokeStyle = st.color;
+        pctx.lineWidth = st.size;
+        pctx.lineCap = "round"; pctx.lineJoin = "round";
+        pctx.beginPath();
+        pctx.moveTo(st.points[0].x, st.points[0].y);
+        for (var i = 1; i < st.points.length; i++) pctx.lineTo(st.points[i].x, st.points[i].y);
+        pctx.stroke();
+      }
+      function padPos(e){
+        var r = pad.getBoundingClientRect();
+        return { x: (e.clientX - r.left) * (pad.width / r.width), y: (e.clientY - r.top) * (pad.height / r.height) };
+      }
+      pad.addEventListener("pointerdown", function(e){
+        e.preventDefault();
+        pad.setPointerCapture(e.pointerId);
+        currentStroke = { color: isEraser ? "#FFFDF6" : brushColor, size: isEraser ? brushSize * 2.2 : brushSize, points: [padPos(e)] };
+        redrawPad();
+      });
+      pad.addEventListener("pointermove", function(e){
+        if (!currentStroke) return;
+        e.preventDefault();
+        currentStroke.points.push(padPos(e));
+        redrawPad();
+      });
+      function endStroke(){
+        if (currentStroke){ strokes.push(currentStroke); currentStroke = null; redrawPad(); }
+      }
+      pad.addEventListener("pointerup", endStroke);
+      pad.addEventListener("pointercancel", endStroke);
+      $("undoBtn").addEventListener("click", function(){ strokes.pop(); redrawPad(); });
+      $("clearBtn").addEventListener("click", function(){ strokes = []; currentStroke = null; redrawPad(); });
+      function resetPad(){
+        strokes = []; currentStroke = null;
+        pctx.fillStyle = "#FFFDF6";
+        pctx.fillRect(0, 0, pad.width, pad.height);
+        $("undoBtn").disabled = true;
+        $("drawDoneBtn").disabled = true;
+      }
+
+      /* ================= REVEAL ================= */
+      function openReveal(){
+        S.revealIdx = 0;
+        $("chain").innerHTML = "";
+        $("versus").style.display = "none";
+        $("awards").classList.remove("show");
+        $("finalActions").classList.remove("show");
+        $("finalActions").style.display = "none";
+        $("revealNextWrap").style.display = "grid";
+        $("revealNextBtn").textContent = "Reveal the first step!";
+        $("revealTitle").textContent = "The Great Unveiling!";
+        showScreen("reveal");
+        burstConfetti(40);
+      }
+      $("revealNextBtn").addEventListener("click", function(){
+        if (S.revealIdx < S.chain.length){
+          addChainStep(S.revealIdx);
+          S.revealIdx++;
+          var left = S.chain.length - S.revealIdx;
+          if (left > 0) $("revealNextBtn").textContent = "Next step! (" + left + " to go)";
+          else finishReveal();
+          var el = $("chain").lastElementChild;
+          if (el) setTimeout(function(){ el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 60);
+        }
+      });
+      function addChainStep(i){
+        var step = S.chain[i];
+        var wrap = document.createElement("div");
+        wrap.className = "chain-step";
+        wrap.style.setProperty("--tilt", (i % 2 === 0 ? "-0.7deg" : "0.7deg"));
+        var nodeColor = step.color;
+        var tagClass = step.type === "text" ? "tag-text" : step.type === "draw" ? "tag-draw" : "tag-guess";
+        var tagText = step.type === "text" ? "The Sentence" : step.type === "draw" ? "The Drawing" : "The Guess";
+        var actText = step.type === "text" ? "started the relay" : step.type === "draw" ? "drew this" : "guessed this";
+        var inner = '<span class="node" style="background:' + nodeColor + '">' + (i + 1) + '</span>' +
+          '<div class="step-card"><div class="who">' +
+          '<span class="dot" style="background:' + step.color + '">' + step.player.charAt(0).toUpperCase() + '</span>' +
+          '<span><span class="wname">' + escapeHtml(step.player) + '</span> <span class="wact">' + actText + '</span></span>' +
+          '<span class="tag ' + tagClass + '">' + tagText + '</span></div>';
+        if (step.type === "draw"){
+          inner += '<div class="mini-frame"><div class="in"><img src="' + step.img + '" alt="Drawing by ' + escapeHtml(step.player) + '" /></div></div>';
+        } else {
+          inner += '<div class="step-text">“' + escapeHtml(step.text) + '”</div>';
+        }
+        inner += '</div>';
+        wrap.innerHTML = inner;
+        $("chain").appendChild(wrap);
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ wrap.classList.add("shown"); }); });
+      }
+      function escapeHtml(s){
+        return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      }
+      function finishReveal(){
+        $("revealNextWrap").style.display = "none";
+        var first = S.chain[0];
+        var lastText = null;
+        for (var i = S.chain.length - 1; i >= 0; i--){ if (S.chain[i].type !== "draw"){ lastText = S.chain[i]; break; } }
+        $("versusStart").textContent = "“" + first.text + "”";
+        $("versusEnd").textContent = lastText ? "“" + lastText.text + "”" : "A drawing?!";
+        $("versus").style.display = "grid";
+        buildAwards(first, lastText);
+        $("awards").classList.add("show");
+        var fa = $("finalActions");
+        fa.style.display = "grid"; fa.classList.add("show");
+        burstConfetti(130);
+      }
+
+      /* ---- awards ---- */
+      function wordSet(t){
+        var stop = { "a":1,"an":1,"the":1,"of":1,"in":1,"on":1,"at":1,"to":1,"with":1,"and":1,"is":1,"its":1,"it":1,"over":1,"under":1,"from":1,"by":1,"full":1,"very":1 };
+        var set = {};
+        String(t).toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).forEach(function(w){
+          if (w && !stop[w]) set[w] = 1;
+        });
+        return set;
+      }
+      function similarity(a, b){
+        var A = wordSet(a), B = wordSet(b);
+        var ka = Object.keys(A), kb = Object.keys(B);
+        if (!ka.length || !kb.length) return 0;
+        var inter = 0;
+        ka.forEach(function(w){ if (B[w]) inter++; });
+        return inter / (ka.length + kb.length - inter);
+      }
+      var MEDAL = '<svg class="medal" viewBox="0 0 48 48" aria-hidden="true"><path d="M17 3 L24 14 L31 3 L38 5 L29 20 L19 20 L10 5 Z" fill="#4361EE"/><path d="M19 20 L10 5 L15 4 L23 16 Z" fill="#C1272D" opacity=".85"/><circle cx="24" cy="29" r="14" fill="#F5B301" stroke="#B97E00" stroke-width="2.5"/><path d="M24 20l2.4 5.3 5.8.6-4.3 3.9 1.2 5.7L24 32.5l-5.1 3 1.2-5.7-4.3-3.9 5.8-.6z" fill="#FFF3D6"/></svg>';
+      function awardCard(title, who, desc){
+        return '<div class="award">' + MEDAL + '<div><div class="a-title">' + title + '</div>' +
+          '<div class="a-who">Goes to: ' + escapeHtml(who) + '</div>' +
+          '<div class="a-desc">' + desc + '</div></div></div>';
+      }
+      function buildAwards(first, lastText){
+        var list = [];
+        var guesses = [];
+        S.chain.forEach(function(step, i){
+          if (step.type === "guess"){
+            var source = S.chain[i - 2];
+            guesses.push({ step: step, drawStep: S.chain[i - 1], sourceText: source ? source.text : "", sim: source ? similarity(step.text, source.text) : 0 });
+          }
+        });
+        var endSim = lastText ? similarity(first.text, lastText.text) : 0;
+        if (guesses.length){
+          var best = guesses[0], worst = guesses[0];
+          guesses.forEach(function(g){ if (g.sim > best.sim) best = g; if (g.sim < worst.sim) worst = g; });
+          if (endSim >= 0.5){
+            list.push(awardCard("Christmas Miracle — It Survived!", best.step.player,
+              "The sentence made it through the whole relay almost untouched. Frame this moment. It will never happen again."));
+          } else {
+            list.push(awardCard("Closest Guess", best.step.player,
+              "“" + escapeHtml(best.step.text) + "” actually resembled “" + escapeHtml(best.sourceText) + "”. Sharp eyes — or a suspiciously drawable picture."));
+          }
+          list.push(awardCard("Biggest Twist", lastText ? lastText.player : worst.step.player,
+            "We started at “" + escapeHtml(first.text) + "” and somehow landed on “" + escapeHtml(lastText ? lastText.text : "") + "”. Nobody knows how. Nobody ever will."));
+          if (guesses.length > 1 || worst !== best){
+            list.push(awardCard("Most Confusing Drawing", worst.drawStep.player,
+              "This masterpiece turned “" + escapeHtml(worst.sourceText) + "” into “" + escapeHtml(worst.step.text) + "”. Modern art museums have been notified."));
+          }
+        }
+        $("awardList").innerHTML = list.join("");
+      }
+      $("againBtn").addEventListener("click", function(){ startGame(); });
+      $("setupBtn").addEventListener("click", function(){ showScreen("home"); });
+
+      $("startBtn").addEventListener("click", startGame);
+
+      /* ================= LIGHTS ================= */
+      (function buildLights(){
+        var box = $("lights");
+        var colors = ["#FF595E","#FFD166","#27A35C","#4361EE","#EF476F","#FF9F1C"];
+        var N = 14;
+        for (var i = 0; i < N; i++){
+          var b = document.createElement("span");
+          b.className = "bulb";
+          var x = (i + 0.5) / N * 100;
+          var dip = Math.sin((i + 0.5) / N * Math.PI) * 16 + 6;
+          b.style.left = x + "%";
+          b.style.top = dip + "px";
+          b.style.background = colors[i % colors.length];
+          b.style.animationDelay = (i * 0.23) + "s";
+          box.appendChild(b);
+        }
+      })();
+
+      /* ================= SNOW ================= */
+      var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      (function snow(){
+        if (reducedMotion) return;
+        var cv = $("snowCanvas"), cx = cv.getContext("2d");
+        var W, H, flakes = [];
+        function resize(){
+          W = cv.width = window.innerWidth; H = cv.height = window.innerHeight;
+        }
+        resize(); window.addEventListener("resize", resize);
+        for (var i = 0; i < 70; i++){
+          flakes.push({ x: Math.random(), y: Math.random(), r: 1 + Math.random() * 2.6, s: 0.25 + Math.random() * 0.7, drift: Math.random() * Math.PI * 2, o: 0.35 + Math.random() * 0.55 });
+        }
+        var t = 0;
+        (function loop(){
+          t += 0.008;
+          cx.clearRect(0, 0, W, H);
+          cx.fillStyle = "#fff";
+          flakes.forEach(function(f){
+            f.y += f.s / H * 1.4;
+            if (f.y > 1.02){ f.y = -0.02; f.x = Math.random(); }
+            var x = f.x * W + Math.sin(t * 2 + f.drift) * 14;
+            cx.globalAlpha = f.o;
+            cx.beginPath(); cx.arc(x, f.y * H, f.r, 0, Math.PI * 2); cx.fill();
+          });
+          cx.globalAlpha = 1;
+          requestAnimationFrame(loop);
+        })();
+      })();
+
+      /* ================= CONFETTI ================= */
+      function burstConfetti(count){
+        if (reducedMotion) return;
+        var cv = $("confettiCanvas"), cx = cv.getContext("2d");
+        cv.width = window.innerWidth; cv.height = window.innerHeight;
+        var colors = ["#C1272D","#1E7A46","#F5B301","#FFD166","#EF476F","#4361EE","#ffffff"];
+        var parts = [];
+        for (var i = 0; i < count; i++){
+          parts.push({
+            x: Math.random() * cv.width, y: -20 - Math.random() * cv.height * 0.35,
+            w: 6 + Math.random() * 7, h: 8 + Math.random() * 9,
+            vy: 2.2 + Math.random() * 3.4, vx: -1.4 + Math.random() * 2.8,
+            rot: Math.random() * Math.PI, vr: -0.12 + Math.random() * 0.24,
+            color: colors[Math.floor(Math.random() * colors.length)]
+          });
+        }
+        var frames = 0;
+        (function loop(){
+          frames++;
+          cx.clearRect(0, 0, cv.width, cv.height);
+          parts.forEach(function(p){
+            p.x += p.vx + Math.sin(frames / 9 + p.rot) * 0.8;
+            p.y += p.vy; p.rot += p.vr;
+            cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot);
+            cx.fillStyle = p.color; cx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            cx.restore();
+          });
+          parts = parts.filter(function(p){ return p.y < cv.height + 40; });
+          if (parts.length && frames < 320) requestAnimationFrame(loop);
+          else cx.clearRect(0, 0, cv.width, cv.height);
+        })();
+      }
+
+      /* ================= BACKGROUND CHRISTMAS MUSIC =================
+         Gentle music-box carols, synthesized live with WebAudio —
+         no audio files, no downloads. Public-domain tunes only:
+         Jingle Bells, Deck the Halls, We Wish You a Merry Christmas.
+         Notes are [MIDI note, beats]; 0 = a rest. */
+      var CAROLS = [
+        { title: "Jingle Bells", beat: 0.40, notes: [
+          [76,1],[76,1],[76,2],[76,1],[76,1],[76,2],[76,1],[79,1],[72,1.5],[74,0.5],[76,4],
+          [77,1],[77,1],[77,1.5],[77,0.5],[77,1],[76,1],[76,1],[76,0.5],[76,0.5],[76,1],[74,1],[74,1],[76,1],[74,2],[79,2],
+          [76,1],[76,1],[76,2],[76,1],[76,1],[76,2],[76,1],[79,1],[72,1.5],[74,0.5],[76,4],
+          [77,1],[77,1],[77,1.5],[77,0.5],[77,1],[76,1],[76,1],[76,0.5],[76,0.5],[79,1],[79,1],[77,1],[74,1],[72,4],
+          [0,2]
+        ]},
+        { title: "Deck the Halls", beat: 0.38, notes: [
+          [74,1],[72,0.5],[71,0.5],[69,1],[67,1],[69,1],[71,1],[67,2],
+          [69,1],[71,0.5],[72,0.5],[69,1],[71,1],[72,0.5],[74,0.5],[71,1],[69,2],
+          [74,1],[72,0.5],[71,0.5],[69,1],[67,1],[69,1],[71,1],[67,2],
+          [69,0.5],[71,0.5],[72,0.5],[74,0.5],[76,1],[74,0.5],[72,0.5],[71,0.5],[69,0.5],[67,3],
+          [0,2]
+        ]},
+        { title: "We Wish You a Merry Christmas", beat: 0.38, notes: [
+          [67,1],[72,1],[72,0.5],[74,0.5],[72,0.5],[71,0.5],[69,1],[69,1],
+          [74,1],[74,0.5],[76,0.5],[74,0.5],[72,0.5],[71,1],[67,1],[67,1],
+          [76,1],[76,0.5],[77,0.5],[76,0.5],[74,0.5],[72,1],[71,1],[67,0.5],[69,0.5],
+          [74,1],[72,0.5],[71,0.5],[69,0.5],[67,0.5],[67,3],
+          [0,2]
+        ]}
+      ];
+      var music = {
+        ctx: null, master: null, on: true, started: false, playing: false,
+        songIdx: 0, noteIdx: 0, timer: null, nextTime: 0
+      };
+      function midiFreq(m){ return 440 * Math.pow(2, (m - 69) / 12); }
+      function ensureAudio(){
+        if (music.ctx) return true;
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return false;
+        music.ctx = new AC();
+        music.master = music.ctx.createGain();
+        music.master.gain.value = 0.16; /* low, under the game */
+        music.master.connect(music.ctx.destination);
+        return true;
+      }
+      function playMusicBoxNote(midi, when, durBeats, beatLen){
+        var ctx = music.ctx;
+        var freq = midiFreq(midi);
+        var noteGain = ctx.createGain();
+        noteGain.connect(music.master);
+        var peak = 0.55;
+        noteGain.gain.setValueAtTime(0.0001, when);
+        noteGain.gain.exponentialRampToValueAtTime(peak, when + 0.008);
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, when + Math.max(1.1, durBeats * beatLen * 1.6));
+        /* music-box voice: bright fundamental + fast-fading glassy partials */
+        var partials = [ [1, 1.0], [3.98, 0.28], [8.9, 0.10], [2.0, 0.16] ];
+        partials.forEach(function(p){
+          var osc = ctx.createOscillator();
+          osc.type = "sine";
+          osc.frequency.value = freq * p[0];
+          var og = ctx.createGain();
+          og.gain.value = p[1];
+          osc.connect(og); og.connect(noteGain);
+          osc.start(when);
+          osc.stop(when + Math.max(1.2, durBeats * beatLen * 1.7));
+        });
+        /* a soft low companion note, an octave down, very quiet */
+        var sub = ctx.createOscillator();
+        sub.type = "triangle";
+        sub.frequency.value = freq / 2;
+        var sg = ctx.createGain();
+        sg.gain.setValueAtTime(0.05, when);
+        sg.gain.exponentialRampToValueAtTime(0.0001, when + 0.7);
+        sub.connect(sg); sg.connect(music.master);
+        sub.start(when); sub.stop(when + 0.75);
+      }
+      function scheduleMusic(){
+        if (!music.playing || !music.ctx) return;
+        var song = CAROLS[music.songIdx];
+        /* schedule a few seconds ahead, note by note */
+        while (music.nextTime < music.ctx.currentTime + 2.5){
+          if (music.noteIdx >= song.notes.length){
+            music.songIdx = (music.songIdx + 1) % CAROLS.length;
+            music.noteIdx = 0;
+            song = CAROLS[music.songIdx];
+            updateMusicLabel();
+          }
+          var step = song.notes[music.noteIdx];
+          var dur = step[1] * song.beat;
+          if (step[0] > 0) playMusicBoxNote(step[0], Math.max(music.nextTime, music.ctx.currentTime + 0.03), step[1], song.beat);
+          music.nextTime += dur;
+          music.noteIdx++;
+        }
+        music.timer = setTimeout(scheduleMusic, 700);
+      }
+      function updateMusicLabel(){
+        var btn = $("musicToggle");
+        btn.classList.toggle("off", !music.on);
+        btn.classList.toggle("playing", music.playing && music.on);
+        btn.setAttribute("aria-pressed", music.on ? "true" : "false");
+        $("musicToggleLabel").textContent = music.on ? "Music On" : "Music Off";
+        $("musicNow").textContent = (music.playing && music.on) ? "♪ Now playing: " + CAROLS[music.songIdx].title : "";
+      }
+      function startMusic(){
+        if (!music.on || music.playing) return;
+        if (!ensureAudio()) return;
+        if (music.ctx.state === "suspended") music.ctx.resume();
+        music.playing = true;
+        music.started = true;
+        music.nextTime = music.ctx.currentTime + 0.08;
+        scheduleMusic();
+        updateMusicLabel();
+      }
+      function stopMusic(){
+        music.playing = false;
+        if (music.timer){ clearTimeout(music.timer); music.timer = null; }
+        if (music.ctx) music.ctx.suspend();
+        updateMusicLabel();
+      }
+      /* Browsers require a user tap before audio can start: begin on the first tap anywhere. */
+      function firstTapMusic(){
+        if (!music.started && music.on) startMusic();
+        else if (music.ctx && music.ctx.state === "suspended" && music.on && music.playing) music.ctx.resume();
+      }
+      document.addEventListener("pointerdown", firstTapMusic);
+      document.addEventListener("keydown", firstTapMusic);
+      $("musicToggle").addEventListener("click", function(){
+        music.on = !music.on;
+        if (music.on) startMusic();
+        else stopMusic();
+        updateMusicLabel();
+      });
+      document.addEventListener("visibilitychange", function(){
+        if (!music.ctx) return;
+        if (document.hidden) { if (music.playing) music.ctx.suspend(); }
+        else if (music.playing && music.on) music.ctx.resume();
+      });
+      updateMusicLabel();
+
+      /* ================= INIT ================= */
+      buildCountRow();
+      buildNameGrid();
+      buildSwatches();
+      resetPad();
+    </script>
+  </body>
+</html>

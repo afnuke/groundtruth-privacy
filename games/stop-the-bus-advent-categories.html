@@ -1,0 +1,1743 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Stop the Bus: Advent Categories</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]), textarea { min-height: 2.25rem; }
+
+      :root {
+        --red: #e5342b;
+        --red-deep: #b91c0f;
+        --red-soft: #ffe3df;
+        --green: #1e9e50;
+        --green-deep: #0f7038;
+        --green-soft: #dcf5e3;
+        --gold: #f6b41e;
+        --gold-deep: #c07f04;
+        --gold-soft: #ffefc2;
+        --card: #ffffff;
+        --card-edge: #f0dcc0;
+        --ink: #2c2318;
+        --ink-soft: #6f6152;
+        --field: #fffaf0;
+        --shadow: 0 12px 30px rgba(146, 64, 10, .18);
+        --radius: 20px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --card: #173d27;
+          --card-edge: #2c5c3d;
+          --ink: #fdf6e3;
+          --ink-soft: #c4d6bd;
+          --field: #0f2f1d;
+          --red-soft: #4d1a12;
+          --green-soft: #14402a;
+          --gold-soft: #4a3608;
+          --shadow: 0 12px 30px rgba(0, 0, 0, .5);
+        }
+      }
+
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        font-family: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+        color: var(--ink);
+        min-height: 100vh;
+        background:
+          radial-gradient(700px 340px at 12% -60px, rgba(246, 180, 30, .35), transparent 70%),
+          radial-gradient(760px 380px at 88% -40px, rgba(229, 52, 43, .28), transparent 70%),
+          linear-gradient(180deg, #fff8ea 0%, #ffeeda 46%, #ffe3d9 100%);
+        background-attachment: fixed;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background:
+            radial-gradient(700px 340px at 12% -60px, rgba(246, 180, 30, .22), transparent 70%),
+            radial-gradient(760px 380px at 88% -40px, rgba(229, 52, 43, .30), transparent 70%),
+            linear-gradient(180deg, #0d3520 0%, #092416 55%, #2a0d08 130%);
+          background-attachment: fixed;
+        }
+      }
+      #snow { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+      #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 60; overflow: hidden; }
+      .confetto {
+        position: absolute; top: -16px; width: 10px; height: 15px; border-radius: 2px;
+        animation: confall linear forwards;
+      }
+      @keyframes confall {
+        to { transform: translateY(108vh) rotate(720deg); }
+      }
+
+      /* ---------- Twinkling light string ---------- */
+      #lights {
+        position: fixed; top: 0; left: 0; right: 0; height: 64px; z-index: 2;
+        pointer-events: none; overflow: visible;
+      }
+      #lights .wire {
+        position: absolute; top: 0; left: -2%; width: 104%; height: 30px;
+        border-bottom: 3px solid rgba(60, 40, 20, .35); border-radius: 0 0 50% 50%;
+      }
+      @media (prefers-color-scheme: dark) { #lights .wire { border-bottom-color: rgba(0,0,0,.6); } }
+      .bulb { position: absolute; top: 0; width: 14px; margin-left: -7px; text-align: center; }
+      .bulb .stem { width: 3px; margin: 0 auto; background: rgba(60,40,20,.45); }
+      .bulb .glow {
+        width: 14px; height: 18px; border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%;
+        margin-top: -1px; animation: twinkle 1.5s ease-in-out infinite alternate;
+      }
+      @keyframes twinkle {
+        from { filter: brightness(.72); box-shadow: 0 0 2px 1px currentColor; }
+        to   { filter: brightness(1.25); box-shadow: 0 0 14px 5px currentColor; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .bulb .glow { animation: none; }
+        .confetto { display: none; }
+      }
+
+      .wrap { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; padding: 74px 16px 108px; }
+
+      /* ---------- Background music toggle ---------- */
+      .music-toggle {
+        position: fixed; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 70;
+        display: inline-flex; align-items: center; gap: 9px; text-align: left;
+        background: var(--card); color: var(--ink);
+        border: 2px solid var(--gold); border-radius: 99px;
+        padding: 8px 17px 8px 13px; min-height: 52px; cursor: pointer;
+        box-shadow: 0 5px 0 var(--gold-deep), var(--shadow);
+        font-family: "Baloo 2", "Nunito", sans-serif;
+        transition: transform .07s ease, box-shadow .07s ease, opacity .15s ease;
+      }
+      .music-toggle:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--gold-deep), var(--shadow); }
+      .music-toggle .mt-icon { font-size: 21px; line-height: 1; }
+      .music-toggle .mt-state { display: block; font-weight: 800; font-size: 15.5px; line-height: 1.15; }
+      .music-toggle .mt-song { display: block; font-family: "Nunito", sans-serif; font-weight: 800; font-size: 11.5px; color: var(--ink-soft); line-height: 1.25; }
+      .music-toggle.off { opacity: .82; border-color: var(--card-edge); box-shadow: 0 5px 0 var(--card-edge), var(--shadow); }
+      .music-toggle.off:active { box-shadow: 0 2px 0 var(--card-edge), var(--shadow); }
+      .music-toggle .mt-icon.dancing { animation: bob 1.6s ease-in-out infinite; display: inline-block; }
+      @media (prefers-reduced-motion: reduce) { .music-toggle .mt-icon.dancing { animation: none; } }
+      .screen { display: none; }
+      .screen.active { display: block; animation: rise .32s cubic-bezier(.2,.9,.3,1.2) both; }
+      @keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.99); } to { opacity: 1; transform: none; } }
+      @media (prefers-reduced-motion: reduce) { .screen.active { animation: none; } }
+
+      /* ---------- Hero ---------- */
+      .hero { text-align: center; padding: 4px 6px 2px; }
+      .hero .bus {
+        display: inline-block; font-family: "Baloo 2", "Nunito", sans-serif; font-weight: 800;
+        font-size: 15px; letter-spacing: .24em; text-transform: uppercase; color: #fff;
+        background: linear-gradient(180deg, var(--red), var(--red-deep));
+        padding: 7px 16px 6px; border-radius: 99px; box-shadow: 0 4px 0 var(--red-deep), var(--shadow);
+      }
+      h1 {
+        font-family: "Baloo 2", "Nunito", sans-serif; font-weight: 800;
+        font-size: clamp(46px, 12vw, 72px); line-height: .98; margin: 14px 0 2px;
+        color: var(--green-deep);
+        text-shadow: 0 3px 0 rgba(246,180,30,.45);
+      }
+      @media (prefers-color-scheme: dark) { h1 { color: #8fe3ae; text-shadow: 0 3px 0 rgba(0,0,0,.35); } }
+      .hero .sub {
+        font-family: "Baloo 2", "Nunito", sans-serif; font-weight: 700;
+        font-size: clamp(20px, 5.6vw, 28px); color: var(--red); margin: 0 0 10px;
+      }
+      @media (prefers-color-scheme: dark) { .hero .sub { color: #ff9a8a; } }
+      .hero p.lede { color: var(--ink-soft); font-size: 16.5px; font-weight: 700; line-height: 1.55; margin: 0 auto; max-width: 48ch; }
+      .hero p.lede strong { color: var(--ink); }
+      .streak {
+        display: inline-flex; align-items: center; gap: 8px; margin-top: 14px;
+        background: var(--card); border: 2px solid var(--gold); color: var(--ink);
+        font-weight: 900; font-size: 14.5px; padding: 7px 15px; border-radius: 99px; box-shadow: var(--shadow);
+      }
+      .streak .flame { font-size: 18px; }
+      .streak[hidden] { display: none; }
+
+      .howto { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0 2px; }
+      .howto .step {
+        background: var(--card); border: 2px solid var(--card-edge); border-radius: var(--radius);
+        padding: 13px 13px 11px; box-shadow: var(--shadow);
+      }
+      .howto .n {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 28px; height: 28px; border-radius: 50%;
+        background: linear-gradient(180deg, var(--green), var(--green-deep)); color: #fff;
+        font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 15px; margin-bottom: 7px;
+        box-shadow: 0 3px 0 var(--green-deep);
+      }
+      .howto p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); font-weight: 700; }
+      .howto p strong { color: var(--ink); display: block; font-size: 14.5px; margin-bottom: 2px; }
+      @media (max-width: 540px) { .howto { grid-template-columns: 1fr; } .howto .step { display: flex; gap: 11px; } .howto .n { flex: none; margin: 0; } }
+
+      .card {
+        background: var(--card); border: 2px solid var(--card-edge); border-radius: var(--radius);
+        box-shadow: var(--shadow); padding: 20px; margin-top: 18px;
+      }
+      .card h2 {
+        font-family: "Baloo 2", "Nunito", sans-serif; font-weight: 800;
+        font-size: 26px; margin: 0 0 4px; color: var(--green-deep);
+      }
+      @media (prefers-color-scheme: dark) { .card h2 { color: #8fe3ae; } }
+      .card .hint { color: var(--ink-soft); font-size: 14.5px; font-weight: 700; margin: 0 0 14px; line-height: 1.55; }
+
+      /* ---------- Buttons ---------- */
+      .btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        font-family: "Baloo 2", "Nunito", sans-serif; font-weight: 800; font-size: 17px; cursor: pointer;
+        border-radius: 16px; border: none; padding: 13px 20px; min-height: 54px; text-decoration: none;
+        color: #fff; transition: transform .07s ease, box-shadow .07s ease, filter .15s ease;
+      }
+      .btn-primary { background: linear-gradient(180deg, #f04a3e, var(--red-deep)); box-shadow: 0 5px 0 #7e130a, var(--shadow); width: 100%; }
+      .btn-pine { background: linear-gradient(180deg, #2cbb63, var(--green-deep)); box-shadow: 0 5px 0 #084d24, var(--shadow); width: 100%; }
+      .btn-gold { background: linear-gradient(180deg, #ffc93c, var(--gold-deep)); box-shadow: 0 5px 0 #8a5a02, var(--shadow); color: #3a2703; width: 100%; }
+      .btn:active { transform: translateY(4px); }
+      .btn-primary:active { box-shadow: 0 1px 0 #7e130a; }
+      .btn-pine:active { box-shadow: 0 1px 0 #084d24; }
+      .btn-gold:active { box-shadow: 0 1px 0 #8a5a02; }
+      .btn-ghost {
+        background: var(--card); color: var(--ink); border: 2px solid var(--card-edge);
+        box-shadow: 0 4px 0 var(--card-edge);
+      }
+      .btn-ghost:active { box-shadow: 0 1px 0 var(--card-edge); }
+      .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+      .btn-row .btn { flex: 1 1 170px; }
+
+      /* ---------- Setup controls ---------- */
+      .seg { display: flex; gap: 8px; flex-wrap: wrap; }
+      .seg button {
+        flex: 1 1 auto; min-height: 48px; padding: 10px 13px;
+        border-radius: 13px; border: 2px solid var(--card-edge);
+        background: var(--field); color: var(--ink);
+        font-family: "Baloo 2", "Nunito", sans-serif; font-weight: 700; font-size: 15.5px; cursor: pointer;
+        transition: all .12s ease;
+      }
+      .seg button[aria-pressed="true"] {
+        background: linear-gradient(180deg, #2cbb63, var(--green-deep)); border-color: var(--green-deep);
+        color: #fff; box-shadow: 0 4px 0 #084d24;
+      }
+      .field { margin-top: 17px; }
+      .field > span.label {
+        display: block; font-size: 12.5px; font-weight: 900; letter-spacing: .09em;
+        text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px;
+      }
+      .names { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      @media (max-width: 480px) { .names { grid-template-columns: 1fr; } }
+      .names input, .answer-input, textarea.codebox {
+        width: 100%; font: inherit; font-size: 16px; font-weight: 700; color: var(--ink);
+        background: var(--field); border: 2px solid var(--card-edge); border-radius: 13px;
+        padding: 11px 13px; min-height: 48px;
+      }
+      textarea.codebox { font-size: 13.5px; font-weight: 600; word-break: break-all; resize: vertical; min-height: 74px; line-height: 1.45; }
+      .names input:focus, .answer-input:focus, textarea.codebox:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+
+      /* ---------- Featured ---------- */
+      .featured { border: 3px solid var(--gold); position: relative; }
+      .featured .ribbon {
+        position: absolute; top: -15px; right: 18px;
+        background: linear-gradient(180deg, #ffc93c, var(--gold-deep)); color: #3a2703;
+        font-family: "Baloo 2", sans-serif; font-size: 12.5px; font-weight: 800;
+        letter-spacing: .12em; text-transform: uppercase; padding: 6px 16px; border-radius: 99px;
+        box-shadow: 0 3px 0 #8a5a02, 0 6px 14px rgba(0,0,0,.22); white-space: nowrap;
+      }
+      .featured .dayline { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+      .bigletter {
+        font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 60px; line-height: 1;
+        color: #fff; background: linear-gradient(160deg, #f04a3e, var(--red-deep));
+        border-radius: 18px; width: 78px; height: 78px; flex: none;
+        display: inline-flex; align-items: center; justify-content: center;
+        box-shadow: 0 6px 0 #7e130a, var(--shadow); transform: rotate(-3deg);
+      }
+      .featured ul.cats { margin: 14px 0 16px; padding-left: 20px; color: var(--ink-soft); font-weight: 700; font-size: 14.5px; line-height: 1.65; columns: 2; column-gap: 26px; }
+      @media (max-width: 540px) { .featured ul.cats { columns: 1; } }
+
+      /* ---------- Calendar ---------- */
+      .cal { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; }
+      @media (max-width: 420px) { .cal { gap: 6px; } }
+      .cal button {
+        position: relative; border: 2px solid var(--card-edge); background: var(--field);
+        border-radius: 14px; padding: 10px 4px 8px; cursor: pointer; color: var(--ink);
+        font: inherit; min-height: 66px;
+        display: flex; flex-direction: column; align-items: center; gap: 1px;
+        transition: transform .1s ease, border-color .12s ease;
+      }
+      .cal button:hover { border-color: var(--gold); transform: translateY(-2px); }
+      .cal button:active { transform: scale(.96); }
+      .cal button .d { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 18px; line-height: 1; }
+      .cal button .l { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 15px; color: var(--red); }
+      @media (prefers-color-scheme: dark) { .cal button .l { color: #ff9a8a; } }
+      .cal button .s { font-size: 10.5px; font-weight: 900; color: var(--gold-deep); min-height: 13px; }
+      @media (prefers-color-scheme: dark) { .cal button .s { color: var(--gold); } }
+      .cal button.today { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-soft); }
+      .cal button .todaytag {
+        position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+        background: var(--red); color: #fff; font-size: 9.5px; font-weight: 900;
+        letter-spacing: .08em; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; white-space: nowrap;
+        box-shadow: 0 2px 6px rgba(0,0,0,.25);
+      }
+
+      footer.credit {
+        text-align: center; color: var(--ink-soft); font-weight: 700; font-size: 13.5px; line-height: 1.65;
+        margin-top: 30px; padding-top: 18px; border-top: 2px dashed var(--card-edge);
+      }
+
+      /* ---------- Ready / pass screen ---------- */
+      .ready { text-align: center; padding: 30px 10px 8px; }
+      .ready .pass-icon { font-size: 56px; line-height: 1; display: inline-block; animation: bob 1.6s ease-in-out infinite; }
+      @keyframes bob { 50% { transform: translateY(-7px) rotate(-3deg); } }
+      @media (prefers-reduced-motion: reduce) { .ready .pass-icon { animation: none; } }
+      .ready h2 { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 36px; margin: 12px 0 6px; color: var(--green-deep); }
+      @media (prefers-color-scheme: dark) { .ready h2 { color: #8fe3ae; } }
+      .ready p { color: var(--ink-soft); font-weight: 700; font-size: 16px; line-height: 1.55; max-width: 42ch; margin: 0 auto 20px; }
+      .ready .letterpeek {
+        display: inline-flex; align-items: center; gap: 10px; background: var(--card);
+        border: 2px solid var(--gold); border-radius: 14px; padding: 10px 18px; margin-bottom: 22px;
+        font-weight: 800; box-shadow: var(--shadow);
+      }
+      .ready .letterpeek b { font-family: "Baloo 2", sans-serif; font-size: 28px; color: var(--red); }
+      @media (prefers-color-scheme: dark) { .ready .letterpeek b { color: #ff9a8a; } }
+
+      /* ---------- Play screen ---------- */
+      .playhead { position: sticky; top: 0; z-index: 5; padding: 8px 0 12px; }
+      .playhead .row { display: flex; align-items: center; gap: 14px; }
+      .playhead .letter {
+        font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 56px; line-height: .95;
+        color: #fff; background: linear-gradient(160deg, #f04a3e, var(--red-deep));
+        border-radius: 18px; width: 76px; height: 76px; flex: none;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 6px 0 #7e130a, var(--shadow); transform: rotate(-3deg);
+        animation: letterpop .4s cubic-bezier(.2,.9,.3,1.4) both;
+      }
+      @keyframes letterpop { from { transform: scale(.4) rotate(8deg); opacity: 0; } to { transform: scale(1) rotate(-3deg); opacity: 1; } }
+      .playhead .meta { flex: 1; min-width: 0; background: var(--card); border: 2px solid var(--card-edge); border-radius: 14px; padding: 9px 13px; box-shadow: var(--shadow); }
+      .playhead .who { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 17px; }
+      .playhead .what { color: var(--ink-soft); font-weight: 700; font-size: 13.5px; }
+      .playhead .clock {
+        font-family: "Baloo 2", sans-serif; font-variant-numeric: tabular-nums; font-weight: 800;
+        font-size: 27px; text-align: center; background: var(--card); border: 2px solid var(--card-edge);
+        border-radius: 14px; padding: 8px 12px; box-shadow: var(--shadow); min-width: 86px;
+      }
+      .playhead .clock.low { color: #fff; background: linear-gradient(180deg, #f04a3e, var(--red-deep)); border-color: var(--red-deep); animation: shake .5s infinite; }
+      @keyframes shake { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-2.5deg) scale(1.05); } 75% { transform: rotate(2.5deg) scale(1.05); } }
+      @media (prefers-reduced-motion: reduce) { .playhead .clock.low { animation: none; } .playhead .letter { animation: none; } }
+      .timerbar { height: 13px; border-radius: 99px; background: var(--card); border: 2px solid var(--card-edge); overflow: hidden; margin-top: 11px; box-shadow: var(--shadow); }
+      .timerbar > div { height: 100%; background: linear-gradient(90deg, var(--green), #57d982); border-radius: 99px; transition: width .25s linear; }
+      .timerbar > div.low { background: linear-gradient(90deg, var(--red), #ff7a5c); }
+      #urgent-veil {
+        position: fixed; inset: 0; pointer-events: none; z-index: 3; opacity: 0;
+        box-shadow: inset 0 0 90px 28px rgba(229, 52, 43, .55); transition: opacity .3s;
+      }
+      #urgent-veil.on { opacity: 1; animation: veilpulse 1s ease-in-out infinite; }
+      @keyframes veilpulse { 50% { opacity: .45; } }
+      @media (prefers-reduced-motion: reduce) { #urgent-veil.on { animation: none; } }
+
+      .catrow { margin-bottom: 13px; animation: rise .3s ease both; }
+      .catrow label { display: block; font-weight: 900; font-size: 15.5px; margin-bottom: 5px; }
+      .catrow label .num {
+        display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;
+        border-radius: 50%; background: var(--gold); color: #3a2703; font-size: 13px; margin-right: 7px;
+        font-family: "Baloo 2", sans-serif; box-shadow: 0 2px 0 var(--gold-deep);
+      }
+      .answer-input.filled { border-color: var(--green); background: var(--green-soft); }
+      @media (prefers-color-scheme: dark) { .answer-input.filled { background: var(--field); border-color: var(--green); } }
+      .stopbtn {
+        width: 100%; margin-top: 10px; min-height: 66px; font-size: 23px; letter-spacing: .03em;
+        background: linear-gradient(180deg, #f04a3e, var(--red-deep)); color: #fff; border: none;
+        border-radius: 18px; cursor: pointer; font-family: "Baloo 2", "Nunito", sans-serif; font-weight: 800;
+        box-shadow: 0 7px 0 #7e130a, var(--shadow); transition: transform .07s ease, box-shadow .07s ease;
+      }
+      .stopbtn:active { transform: translateY(5px); box-shadow: 0 2px 0 #7e130a; }
+      .filled-count { text-align: center; color: var(--ink-soft); font-size: 14px; margin-top: 12px; font-weight: 900; }
+
+      /* ---------- Review ---------- */
+      .legend { display: flex; gap: 8px 16px; flex-wrap: wrap; font-size: 13.5px; font-weight: 700; color: var(--ink-soft); margin: 12px 0 2px; }
+      .legend b { color: var(--ink); }
+      .review-cat { margin-top: 20px; }
+      .review-cat h3 { font-size: 16.5px; font-weight: 900; margin: 0 0 9px; }
+      .review-cat h3 .num {
+        display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;
+        border-radius: 50%; background: var(--gold); color: #3a2703; font-size: 13px; margin-right: 7px;
+        font-family: "Baloo 2", sans-serif; box-shadow: 0 2px 0 var(--gold-deep);
+      }
+      .ans {
+        display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+        background: var(--card); border: 2px solid var(--card-edge); border-radius: 14px;
+        padding: 11px 13px; margin-bottom: 8px; cursor: pointer; font: inherit; color: var(--ink);
+        min-height: 52px; box-shadow: 0 3px 0 var(--card-edge);
+      }
+      .ans:active { transform: translateY(2px); box-shadow: none; }
+      .ans .who { font-size: 11.5px; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-soft); flex: none; max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .ans .txt { flex: 1; font-size: 16.5px; font-weight: 800; overflow-wrap: anywhere; }
+      .ans .note { display: block; font-size: 12.5px; font-weight: 700; color: var(--ink-soft); }
+      .ans .pts {
+        flex: none; font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 17px;
+        min-width: 44px; text-align: center; padding: 4px 10px; border-radius: 99px;
+        background: var(--gold-soft); color: var(--ink); box-shadow: inset 0 -3px 0 rgba(0,0,0,.12);
+        animation: pop .38s cubic-bezier(.2,.9,.3,1.5) both;
+      }
+      @keyframes pop { from { transform: scale(.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) { .ans .pts { animation: none; } }
+      .ans .tag { flex: none; font-size: 11px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; }
+      .ans.struck { opacity: .55; }
+      .ans.struck .txt { text-decoration: line-through; }
+      .ans.invalid .pts { background: var(--red-soft); color: var(--red); }
+      @media (prefers-color-scheme: dark) { .ans.invalid .pts { color: #ff9a8a; } }
+      .ans .tag.dup { color: var(--gold-deep); }
+      .ans .tag.bonus, .ans .tag.rare { color: var(--green-deep); }
+      @media (prefers-color-scheme: dark) { .ans .tag.bonus, .ans .tag.rare { color: #8fe3ae; } .ans .tag.dup { color: var(--gold); } }
+      .ans .tag.wrong, .ans .tag.strucktag { color: var(--red); }
+      @media (prefers-color-scheme: dark) { .ans .tag.wrong, .ans .tag.strucktag { color: #ff9a8a; } }
+
+      /* ---------- Results ---------- */
+      .winner { text-align: center; padding: 20px 14px 4px; }
+      .winner .trophy { font-size: 54px; display: inline-block; animation: bob 1.6s ease-in-out infinite; }
+      .winner h2 { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 38px; margin: 8px 0 4px; color: var(--green-deep); }
+      @media (prefers-color-scheme: dark) { .winner h2 { color: #8fe3ae; } }
+      .winner p { color: var(--ink-soft); font-weight: 700; margin: 0; font-size: 16px; line-height: 1.55; }
+      .standings { margin-top: 18px; }
+      .standing {
+        display: flex; align-items: center; gap: 12px;
+        background: var(--card); border: 2px solid var(--card-edge); border-radius: 16px;
+        padding: 14px 17px; margin-bottom: 10px; box-shadow: var(--shadow);
+        animation: rise .35s ease both;
+      }
+      .standing .rank { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 26px; color: var(--gold-deep); width: 32px; flex: none; text-align: center; }
+      @media (prefers-color-scheme: dark) { .standing .rank { color: var(--gold); } }
+      .standing .nm { flex: 1; font-weight: 900; font-size: 17.5px; overflow-wrap: anywhere; }
+      .standing .sc { font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 24px; font-variant-numeric: tabular-nums; }
+      .standing .sc small { font-size: 12px; color: var(--ink-soft); font-weight: 800; }
+      .standing.first { border-color: var(--gold); border-width: 3px; }
+      .bestline { text-align: center; color: var(--ink-soft); font-weight: 700; font-size: 15px; margin-top: 16px; line-height: 1.6; }
+      .bestline strong { color: var(--ink); }
+
+      /* ---------- Compare ---------- */
+      .vs-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+      .vs-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: stretch; margin-bottom: 8px; }
+      .vs-cell {
+        background: var(--card); border: 2px solid var(--card-edge); border-radius: 13px; padding: 9px 11px;
+        font-weight: 800; font-size: 14.5px; overflow-wrap: anywhere;
+      }
+      .vs-cell small { display: block; font-weight: 700; color: var(--ink-soft); font-size: 12px; margin-top: 2px; }
+      .vs-cell.win { border-color: var(--green); }
+      .vs-mid {
+        display: flex; align-items: center; justify-content: center; font-family: "Baloo 2", sans-serif;
+        font-weight: 800; font-size: 13px; color: var(--ink-soft); text-align: center; max-width: 92px;
+      }
+      .vs-cat { font-weight: 900; font-size: 14px; margin: 16px 0 7px; color: var(--ink-soft); }
+      .codeout {
+        background: var(--field); border: 2px dashed var(--gold); border-radius: 13px; padding: 12px;
+        font-size: 13px; font-weight: 600; word-break: break-all; line-height: 1.5; max-height: 110px; overflow: auto;
+        user-select: all;
+      }
+      .copied { color: var(--green-deep); font-weight: 900; font-size: 14px; min-height: 20px; }
+      @media (prefers-color-scheme: dark) { .copied { color: #8fe3ae; } }
+    </style>
+  </head>
+  <body>
+    <canvas id="snow" aria-hidden="true"></canvas>
+    <div id="lights" aria-hidden="true"><div class="wire"></div></div>
+    <div id="urgent-veil" aria-hidden="true"></div>
+    <div id="confetti" aria-hidden="true"></div>
+    <button type="button" class="music-toggle" id="music-toggle" aria-pressed="true" aria-label="Background Christmas music on or off" title="Background Christmas music">
+      <span class="mt-icon" id="music-icon" aria-hidden="true">🎵</span>
+      <span><span class="mt-state" id="music-state">Music on</span><span class="mt-song" id="music-song">Carols start with your first tap ♪</span></span>
+    </button>
+    <div class="wrap">
+
+      <!-- ================= HOME ================= -->
+      <section class="screen active" id="screen-home">
+        <div class="hero">
+          <span class="bus">🚌 Stop the Bus</span>
+          <h1>Advent Categories</h1>
+          <p class="sub">A brand-new list every day — December 1 to 25! 🎄</p>
+          <p class="lede">One letter. Ten categories. Two minutes on the clock.
+            Fill every line, then slam <strong>“Stop the bus!”</strong>
+            Obvious answers score a measly <strong>1 point</strong> — the weird, wonderful ones score <strong>2</strong>.</p>
+          <div><span class="streak" id="streak-pill" hidden><span class="flame">🔥</span><span id="streak-text"></span></span></div>
+        </div>
+
+        <div class="howto" aria-label="How to play">
+          <div class="step"><span class="n">1</span><p><strong>Draw a letter</strong>Every answer starts with it. “S” day? Think <em>sleigh</em>, <em>Silent Night</em>, <em>shortbread</em>…</p></div>
+          <div class="step"><span class="n">2</span><p><strong>Race the clock</strong>Ten categories, two minutes. Done early? Slam Stop the Bus and freeze everybody else out.</p></div>
+          <div class="step"><span class="n">3</span><p><strong>Rare wins!</strong>Solo: answers everybody gives score 1, rare finds score 2. Party: if somebody matches your answer, you BOTH score 0. Ouch.</p></div>
+        </div>
+
+        <div class="card featured" id="featured-card">
+          <div class="ribbon">List of the Day</div>
+          <h2 id="featured-title">Today's list</h2>
+          <p class="hint" id="featured-sub"></p>
+          <div class="dayline">
+            <span class="bigletter" id="featured-letter">S</span>
+            <div>
+              <div style="font-weight:900; font-size:18px;" id="featured-name"></div>
+              <div style="color:var(--ink-soft); font-weight:700; font-size:14px;" id="featured-meta"></div>
+            </div>
+          </div>
+          <ul class="cats" id="featured-cats"></ul>
+          <button class="btn btn-primary" id="btn-featured">▶ Play the List of the Day</button>
+        </div>
+
+        <div class="card">
+          <h2>🎮 Game setup</h2>
+          <p class="hint">Pick your crew and your clock, then grab any list — today's, one from the calendar, or a shuffled quick-play round.</p>
+          <div class="field">
+            <span class="label">Players</span>
+            <div class="seg" role="group" aria-label="Number of players">
+              <button type="button" id="mode-solo" aria-pressed="true">🧑 Just me</button>
+              <button type="button" id="mode-multi" aria-pressed="false">🎉 Party · pass &amp; play</button>
+            </div>
+          </div>
+          <div class="field" id="multi-fields" hidden>
+            <span class="label">Who's playing?</span>
+            <div class="seg" role="group" aria-label="Player count" style="margin-bottom:10px;">
+              <button type="button" class="pcount" data-n="2" aria-pressed="true">2 players</button>
+              <button type="button" class="pcount" data-n="3" aria-pressed="false">3 players</button>
+              <button type="button" class="pcount" data-n="4" aria-pressed="false">4 players</button>
+            </div>
+            <div class="names" id="name-inputs"></div>
+            <p class="hint" style="margin-top:10px;">One phone, passed hand to hand like a hot potato. Answers stay secret until the big reveal. 🥔</p>
+          </div>
+          <div class="field">
+            <span class="label">Clock</span>
+            <div class="seg" role="group" aria-label="Round length">
+              <button type="button" class="tlen" data-s="60" aria-pressed="false">60 sec · speed demon 😈</button>
+              <button type="button" class="tlen" data-s="120" aria-pressed="true">2 min · classic 🎅</button>
+              <button type="button" class="tlen" data-s="180" aria-pressed="false">3 min · cozy 🛋️</button>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-pine" id="btn-quick">🎲 Quick play — surprise me!</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📅 The Advent calendar</h2>
+          <p class="hint">Twenty-five lists, one for every day of December — every door is already open (we're not monsters). Play ahead, catch up, or chase a better score. The day's letter is right on its door.</p>
+          <div class="cal" id="calendar"></div>
+        </div>
+
+        <div class="card">
+          <h2>⚔️ Challenge a friend</h2>
+          <p class="hint">No accounts, no fuss — just a magic code. Send a friend a <strong>challenge code</strong> and they play the exact same list. When they're done, their <strong>results code</strong> comes back to you for a head-to-head showdown.</p>
+          <div class="btn-row" style="margin-top:0;">
+            <button class="btn btn-gold" id="btn-make-challenge">✉️ Make a challenge code</button>
+          </div>
+          <div id="challenge-out" hidden>
+            <p class="hint" style="margin:12px 0 6px;">Copy this code and send it any way you like — text, email, carrier pigeon:</p>
+            <div class="codeout" id="challenge-code"></div>
+            <div class="btn-row">
+              <button class="btn btn-pine" id="btn-copy-challenge">📋 Copy the code</button>
+            </div>
+            <div class="copied" id="challenge-copied"></div>
+          </div>
+          <div class="field">
+            <span class="label">Got a code? Paste it here</span>
+            <textarea class="codebox" id="code-input" placeholder="Paste a challenge code or a results code…" aria-label="Paste a game code"></textarea>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btn-open-code">🔓 Open the code</button>
+          </div>
+          <div class="copied" id="code-msg"></div>
+        </div>
+
+        <footer class="credit">
+          Stop the Bus is the old folk game of Categories — played with pencil, paper and loud opinions long before it ever had a box. This version finally grades the homework. 📝<br />
+          Built by Bryan Lee (Afnuke) · AI collaboration
+        </footer>
+      </section>
+
+      <!-- ================= READY / PASS ================= -->
+      <section class="screen" id="screen-ready">
+        <div class="ready">
+          <span class="pass-icon" id="ready-icon">📱</span>
+          <h2 id="ready-title">Your turn</h2>
+          <p id="ready-text"></p>
+          <div class="letterpeek" id="ready-peek"></div>
+          <button class="btn btn-primary" id="btn-start-turn" style="max-width:360px; margin:0 auto;">Start the clock</button>
+          <div class="btn-row" style="max-width:360px; margin:14px auto 0;">
+            <button class="btn btn-ghost" id="btn-quit-ready">Quit to home</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PLAY ================= -->
+      <section class="screen" id="screen-play">
+        <div class="playhead">
+          <div class="row">
+            <div class="letter" id="play-letter">S</div>
+            <div class="meta">
+              <div class="who" id="play-who"></div>
+              <div class="what" id="play-what"></div>
+            </div>
+            <div class="clock" id="play-clock">2:00</div>
+          </div>
+          <div class="timerbar"><div id="play-bar" style="width:100%"></div></div>
+        </div>
+        <form id="play-form" autocomplete="off"></form>
+        <button class="stopbtn" id="btn-stop">🚌 STOP THE BUS!</button>
+        <div class="filled-count" id="filled-count"></div>
+      </section>
+
+      <!-- ================= REVIEW ================= -->
+      <section class="screen" id="screen-review">
+        <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:34px; margin:12px 0 2px; color:var(--green-deep);">The big reveal! 🎉</h2>
+        <p style="color:var(--ink-soft); font-weight:700; margin:0; font-size:15.5px; line-height:1.55;" id="review-sub"></p>
+        <div class="legend" id="review-legend"></div>
+        <div id="review-body"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-results">🏆 See the results</button>
+        </div>
+      </section>
+
+      <!-- ================= RESULTS ================= -->
+      <section class="screen" id="screen-results">
+        <div class="winner">
+          <span class="trophy" id="result-trophy">🏆</span>
+          <h2 id="result-title"></h2>
+          <p id="result-sub"></p>
+        </div>
+        <div class="standings" id="standings"></div>
+        <p class="bestline" id="best-line"></p>
+        <div class="card" style="margin-top:20px;">
+          <h2 style="font-size:22px;">⚔️ Take this round to a friend</h2>
+          <p class="hint">Your <strong>results code</strong> carries your answers. Send it back to whoever challenged you — or start a fresh feud with the challenge code for this same list.</p>
+          <div class="btn-row" style="margin-top:0;">
+            <button class="btn btn-gold" id="btn-copy-results">📋 Copy my results code</button>
+            <button class="btn btn-ghost" id="btn-copy-round">✉️ Copy challenge code</button>
+          </div>
+          <div class="copied" id="results-copied"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-pine" id="btn-again">↻ Play this list again</button>
+          <button class="btn btn-ghost" id="btn-next-day">Next day's list →</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btn-home">📅 Back to the calendar</button>
+        </div>
+      </section>
+
+      <!-- ================= COMPARE ================= -->
+      <section class="screen" id="screen-compare">
+        <h2 style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:34px; margin:12px 0 2px; color:var(--green-deep);">Head to head! ⚔️</h2>
+        <p style="color:var(--ink-soft); font-weight:700; margin:0; font-size:15.5px; line-height:1.55;" id="compare-sub"></p>
+        <div class="standings" id="compare-standings"></div>
+        <div id="compare-body"></div>
+        <div class="btn-row">
+          <button class="btn btn-pine" id="btn-compare-home">📅 Back to the calendar</button>
+        </div>
+      </section>
+
+    </div>
+
+    <script>
+    "use strict";
+
+    /* ==================== DATA: 25 Advent lists, 10 categories each ==================== */
+    var DAYS = [
+      { day: 1,  name: "First Snow",        letter: "S", cats: ["Something on a Christmas tree", "A Christmas song or carol", "Something sweet at Christmas", "Something you wear when it's cold", "A word for winter weather", "Something found in a stocking", "A Christmas movie", "Something you do on Christmas morning", "Something that smells like Christmas", "A word on a Christmas card"] },
+      { day: 2,  name: "Candy Cane Lane",   letter: "C", cats: ["A Christmas song or carol", "Something red", "A cookie or baked treat", "Something that goes on a tree", "A gift for a child", "A Christmas character", "Something you drink hot", "A word that describes Santa", "Something made of chocolate", "Something that goes in a stocking"] },
+      { day: 3,  name: "Reindeer Games",    letter: "R", cats: ["One of Santa's reindeer", "Something red", "A Christmas song or carol", "Something round", "A type of weather", "A baked good", "Something in a living room", "A gift for a cook", "Something you put on a gift", "A Christmas Eve activity"] },
+      { day: 4,  name: "Tinsel & Twine",    letter: "T", cats: ["Something on a Christmas tree", "A Christmas tradition", "A toy", "Something you eat at Christmas dinner", "A Christmas song or carol", "Something warm to drink", "A word that means happy", "Something made of wood", "Something at the top of the tree", "Something kids leave for Santa"] },
+      { day: 5,  name: "Bells & Baubles",   letter: "B", cats: ["Something on a Christmas tree", "A Christmas song or carol", "Something baked", "A gift for a baby", "Something that rings or jingles", "A winter clothing item", "Something in a nativity scene", "A cold-weather word", "Something warm from the oven", "A word that describes winter"] },
+      { day: 6,  name: "Mistletoe Morning", letter: "M", cats: ["A Christmas song or carol", "Something you hang up", "A gift for Mom", "Something sweet", "A Christmas movie", "Something you send in December", "A month that can have snow", "Something that melts", "Something at a Christmas market", "A word meaning happy"] },
+      { day: 7,  name: "Partridge Day",     letter: "P", cats: ["Something on a Christmas tree", "A gift that comes in a box", "A Christmas dessert", "Something you do at a party", "A bird", "A party food or drink", "Something made of paper", "A place people travel to at Christmas", "Something that pops", "A game played at parties"] },
+      { day: 8,  name: "Gingerbread Row",   letter: "G", cats: ["A Christmas song or carol", "Something you wrap a gift in", "Something green", "A gift for a gardener", "Something sweet", "A Christmas character", "Something that sparkles", "A food at Christmas dinner", "Something gold or shiny", "A word for people coming together"] },
+      { day: 9,  name: "Hearth & Holly",    letter: "H", cats: ["A Christmas song or carol", "A holiday plant", "A hot drink", "Something you wear on your head in winter", "A word Santa says", "A meat at Christmas dinner", "Something that keeps you warm", "A place you visit in December", "A sweet baked good", "Something over a doorway"] },
+      { day: 10, name: "Winter Woolens",    letter: "W", cats: ["Something white in winter", "A Christmas song or carol", "Something warm", "A gift you can wrap", "Something on a front door", "Something that goes in hot cocoa", "A word for cold weather", "Something in a window at Christmas", "A Christmas wish", "Something made of wool"] },
+      { day: 11, name: "Dasher's Day",      letter: "D", cats: ["Something you do in December", "A Christmas song or carol", "A kind of candy", "A gift for Dad", "Something on the dinner table", "One of Santa's reindeer", "A word for the season", "A pet that might wear a costume", "Something people decorate", "A Christmas dinner side"] },
+      { day: 12, name: "Fireside",          letter: "F", cats: ["A Christmas song or carol", "Something in a fireplace", "A gift for a friend", "Something you eat with a fork", "A winter word", "Something on a mantel", "A Christmas character", "A type of Christmas tree", "Something fuzzy", "Something you feel at Christmas"] },
+      { day: 13, name: "String of Lights",  letter: "L", cats: ["Something on a Christmas tree", "A Christmas song or carol", "Something sweet", "A gift that glows", "Something Santa checks twice", "Something you do at night in December", "Something in a living room", "A word that means joyful", "Something on a stick", "A sound of joy"] },
+      { day: 14, name: "The North Star",    letter: "N", cats: ["A Christmas song or carol", "Something in the Christmas story", "A party snack", "A piece of jewelry you'd gift", "Something you see in the night sky", "A winter word", "A list Santa keeps", "A baked good with nuts", "Another name for Santa", "Something you see around town in December"] },
+      { day: 15, name: "Angels & Apples",   letter: "A", cats: ["A Christmas song or carol", "Something on a Christmas tree", "A warm drink", "A fruit", "Something in the night sky", "Something you do on Christmas Eve", "A kind of pie", "An animal that likes snow", "Something in a fruitcake", "Something an angel might do"] },
+      { day: 16, name: "Elf Workshop",      letter: "E", cats: ["One of Santa's helpers", "Something you drink at Christmas", "Something you send in December", "A feeling on Christmas morning", "A type of Christmas tree", "Something that plugs in", "Something you wear in winter", "Somewhere Santa goes", "A Christmas morning breakfast", "Something made in Santa's workshop"] },
+      { day: 17, name: "Jingle All the Way",letter: "J", cats: ["A song with bells in it", "A feeling at Christmas", "Something kept in a jar", "A toy", "Something you wear", "A name from the Christmas story", "A wobbly food", "A cold month", "Something you drink at breakfast", "A New Year resolution"] },
+      { day: 18, name: "Three Kings",       letter: "K", cats: ["Visitors to the manger", "Something you wear in winter", "A kind of chocolate", "A gift for a cook", "Something in a kitchen", "Something you do under the mistletoe", "Something for the fire", "A pet people might gift", "Something made of yarn", "A small gift"] },
+      { day: 19, name: "Oranges & Owls",    letter: "O", cats: ["Something on a Christmas tree", "A Christmas song or carol", "A citrus fruit", "Something round", "A kind of cookie", "Something you open in December", "A winter bird", "A hot breakfast food", "Something outside the house", "A chocolate shaped like fruit"] },
+      { day: 20, name: "Silver Bells",      letter: "S", cats: ["A Christmas movie", "A snack with some spice", "Something you shake", "Something Santa rides in", "Something that shines", "Something you do on Christmas Eve night", "A winter soup", "A tool in Santa's workshop", "Something sung together", "Something inside a snow globe"] },
+      { day: 21, name: "The Longest Night", letter: "C", cats: ["A Christmas movie", "Something you crunch at a movie", "A Christmas Eve tradition", "Something on the dinner table", "A chocolate treat", "A public place in December", "Something with numbers on it", "A store that's busy in December", "Something with a battery", "Something on the floor Christmas morning"] },
+      { day: 22, name: "Tamales & Toasts",  letter: "T", cats: ["A Christmas movie", "Something that twinkles", "A Christmas food from another country", "Something said at the dinner table", "A classic toy", "Something in a kitchen", "Something you feel after a big dinner", "Something people photograph in December", "Something you take to a party", "Something needing batteries"] },
+      { day: 23, name: "The Return Line",   letter: "R", cats: ["A Christmas movie", "Something cooked over a fire", "A reason families gather", "Something people stand in line for", "A party drink", "A quiet Christmas activity", "Something you recycle after Christmas", "An event that happens every December", "Something you read in December", "Something that keeps you inside"] },
+      { day: 24, name: "Christmas Eve",     letter: "M", cats: ["Something open late on Christmas Eve", "A Christmas song or carol", "Something in the manger scene", "Something you leave out for Santa", "A gift for a musician", "Something that makes music", "A Christmas wonder", "A service people attend", "Something floating in cocoa", "A merry sound"] },
+      { day: 25, name: "Christmas Morning — the Grand Finale", letter: "C", cats: ["The heart of Christmas", "A Christmas song everybody knows", "Something that flickers", "Something you can't wrap", "Something passed around the table", "A sound on Christmas morning", "The best moment of the season", "Why people travel in December", "A sound through the house", "Something money can't buy"] }
+    ];
+
+    /* Quick-play pool (everyday + festive mix) */
+    var POOL = [
+      "Something in a kitchen", "A color", "A fruit", "Something you wear", "A sport or game",
+      "An animal", "A movie title", "Something in a car", "A job or profession", "Something cold",
+      "A vegetable", "Something in a classroom", "A holiday", "Something round", "A drink",
+      "Something that can fly", "A musical instrument", "Something in a bathroom", "A flower or plant",
+      "Something sweet", "Something made of wood", "A country", "Something you sit on", "Something loud",
+      "A snack food", "Something at the beach", "A US state", "Something in a toolbox", "A farm animal",
+      "Something that melts", "A breakfast food", "Something in a garden", "A thing at a birthday party",
+      "Something you read", "Something made of metal", "A board or card game", "Something in winter",
+      "A kind of tree", "Something in a purse or wallet", "A pizza topping", "Something that smells good",
+      "A thing kids play with", "Something in a hospital", "A kind of weather", "Something you plug in"
+    ];
+    var QUICK_LETTERS = "ABCDEFGHJKLMNPRSTW".split(""); // no Q, X, Z — nobody needs that pain
+
+    /* ============ BANK of typical answers (solo rarity scoring) ============
+       If your answer is in the bank for that category, it's a crowd favorite (1 pt).
+       If it's valid but NOT in the bank, it's a rare find (2 pts). */
+    var SONGS = ["silent night","jingle bells","white christmas","deck the halls","frosty the snowman","rudolph the red nosed reindeer","rockin around the christmas tree","the twelve days of christmas","o holy night","hark the herald angels sing","angels we have heard on high","the first noel","feliz navidad","blue christmas","mary did you know","carol of the bells","silver bells","winter wonderland","let it snow","santa claus is comin to town","little drummer boy","god rest ye merry gentlemen","mele kalikimaka","jingle bell rock","all i want for christmas is you","sleigh ride","joy to the world","we wish you a merry christmas","away in a manger","o come all ye faithful","santa baby","last christmas","holly jolly christmas"];
+    var MOVIES = ["home alone","elf","the grinch","a christmas story","its a wonderful life","miracle on 34th street","the santa clause","christmas vacation","scrooged","rudolph the red nosed reindeer","frosty the snowman","the polar express","die hard","love actually","white christmas","a charlie brown christmas","the holiday","arthur christmas","klaus","jingle all the way","the christmas chronicles","how the grinch stole christmas"];
+    var TREE = ["star","lights","tinsel","ornaments","baubles","candy canes","garland","angel","popcorn string","icicles","ornament","ribbon","bows","beads"];
+    var DINNER = ["turkey","ham","mashed potatoes","gravy","stuffing","green beans","rolls","cranberry sauce","pie","dressing","sweet potatoes","corn"];
+    var BANK = {
+      "Something on a Christmas tree": TREE,
+      "Something that goes on a tree": TREE,
+      "A Christmas song or carol": SONGS,
+      "A Christmas song everybody knows": SONGS,
+      "A song with bells in it": ["jingle bells","silver bells","carol of the bells","sleigh ride","jingle bell rock","christmas bells"],
+      "Something sweet at Christmas": ["candy canes","cookies","fudge","gingerbread","chocolate","peppermints","sugar cookies","fruitcake","candy cane","sugar cookie"],
+      "Something sweet": ["candy","chocolate","cookies","cake","pie","fudge","brownies","ice cream","lollipop","gummies"],
+      "Something you wear when it's cold": ["coat","scarf","gloves","hat","mittens","boots","sweater","earmuffs","jacket","snow pants"],
+      "Something you wear in winter": ["coat","scarf","gloves","hat","mittens","boots","sweater","earmuffs","jacket","snow pants"],
+      "Something you wear": ["jacket","jeans","shoes","shirt","hat","coat","dress","socks","gloves","sweater"],
+      "A winter clothing item": ["boots","coat","scarf","gloves","hat","mittens","sweater","jacket","snow pants","earmuffs"],
+      "A word for winter weather": ["snow","frost","cold","blizzard","freezing","chilly","wind","ice","sleet"],
+      "A word for cold weather": ["windy","cold","freezing","frosty","chilly","snowy","icy","bitter","nippy"],
+      "A cold-weather word": ["blizzard","brisk","bitter","below zero","bone chilling"],
+      "A winter word": ["snow","frost","ice","cold","frozen","winter","sled","skate"],
+      "A word that describes winter": ["bitter","cold","white","long","dark","harsh","quiet","snowy","freezing","magical"],
+      "Something found in a stocking": ["candy","socks","orange","small toys","gift card","chocolate","candy cane","money","lip balm","coal","candy","toys"],
+      "Something that goes in a stocking": ["candy","socks","orange","small toys","gift card","chocolate","candy cane","money","lip balm","coal","candy","toys"],
+      "A Christmas movie": MOVIES,
+      "A movie title": ["avatar","titanic","jaws","rocky","frozen","shrek","batman","spider man","star wars","the lion king","home alone","toy story","elf","cars","up","coco"],
+      "Something you do on Christmas morning": ["open presents","sleep in","eat breakfast","open gifts","drink coffee","take photos","go to church","make breakfast","stockings","open stockings"],
+      "Something that smells like Christmas": ["pine","cinnamon","spruce","peppermint","gingerbread","fir","cookies baking","cloves","nutmeg","scented candle"],
+      "Something that smells good": ["flowers","perfume","cookies","coffee","soap","candles","bread","rain","oranges","lavender"],
+      "A word on a Christmas card": ["merry","seasons greetings","joy","peace","love","blessings","wishes","sincerely","hope","happy"],
+      "Something red": ["ribbon","cranberries","candy cane","ornament","bow","poinsettia","berries","apple","cardinal","roses"],
+      "A cookie or baked treat": ["sugar cookies","chocolate chip cookies","gingerbread","snickerdoodles","shortbread","brownies","oatmeal cookies","peanut butter cookies","sugar cookie","chocolate chip cookie"],
+      "A kind of cookie": ["oatmeal cookie","chocolate chip cookie","sugar cookie","ginger snap","snickerdoodle","shortbread","peanut butter cookie","oatmeal cookies"],
+      "A gift for a child": ["toy","book","bike","game","doll","puzzle","coloring book","teddy bear","train set","crayons"],
+      "A Christmas character": ["santa","grinch","frosty","rudolph","scrooge","elf","mrs claus","jack frost","cindy lou who","cupid","dasher","santa claus"],
+      "Something you drink hot": ["hot chocolate","cocoa","coffee","tea","cider","hot cider","mulled wine","hot toddy"],
+      "A hot drink": ["hot chocolate","cocoa","coffee","tea","cider","hot cider"],
+      "Something warm to drink": ["tea","cocoa","coffee","hot chocolate","cider","hot cider","apple cider"],
+      "A warm drink": ["apple cider","cocoa","coffee","tea","hot chocolate","cider","mulled wine"],
+      "A drink": ["water","soda","juice","milk","coffee","tea","lemonade","beer","wine","smoothie"],
+      "A word that describes Santa": ["cheerful","chubby","jolly","generous","merry","kind","round","bearded","happy","magical"],
+      "Something made of chocolate": ["chocolate coins","chocolate bar","chocolate cake","chocolate fudge","chocolate truffles","hot chocolate","chocolate santa","brownies"],
+      "A chocolate treat": ["chocolate coins","fudge","truffles","chocolate bar","chocolate santa","brownies","chocolate covered cherries"],
+      "A kind of chocolate": ["kisses","milk chocolate","dark chocolate","white chocolate","truffles","fudge"],
+      "A chocolate shaped like fruit": ["orange","chocolate orange","strawberry","banana","cherry"],
+      "One of Santa's reindeer": ["dasher","dancer","prancer","vixen","comet","cupid","donner","blitzen","rudolph","donder"],
+      "Something round": ["ornament","wreath","ball","orange","snowball","cookie","ring","globe","button","plate","rug"],
+      "A type of weather": ["rain","snow","sun","wind","storm","hail","fog","sleet","thunder","drizzle"],
+      "A kind of weather": ["rain","snow","sun","wind","storm","hail","fog","sleet","thunder","drizzle"],
+      "A baked good": ["bread","cookies","cake","pie","muffins","brownies","banana bread","rolls","fruitcake","biscuits","rum cake"],
+      "Something baked": ["bread","cookies","cake","pie","muffins","brownies","banana bread","rolls","fruitcake","biscuits"],
+      "Something warm from the oven": ["bread","cookies","pie","rolls","cake","muffins","casserole","biscuits"],
+      "Something in a living room": ["couch","sofa","rug","lamp","tv","fireplace","coffee table","chairs","tree","bookshelf"],
+      "A gift for a cook": ["recipe book","knife set","cookbook","apron","cutting board","spices","skillet","utensils","oven mitts"],
+      "Something you put on a gift": ["ribbon","bow","tag","wrapping paper","tape","sticker","card"],
+      "A Christmas Eve activity": ["reading","church","wrapping gifts","baking cookies","watching movies","caroling","driving to see lights","reading the christmas story"],
+      "A Christmas tradition": ["tree lighting","caroling","advent calendar","stockings","leaving cookies for santa","gift exchange","secret santa","church service","decorating the tree","matching pajamas"],
+      "A Christmas Eve tradition": ["candlelight service","church","reading the christmas story","one gift","cookies for santa","matching pajamas","movies","midnight mass"],
+      "A toy": ["train set","teddy bear","doll","blocks","puzzle","toy car","action figure","board game","kite","yo yo","jack in the box"],
+      "A classic toy": ["teddy bear","train set","wooden blocks","rocking horse","tin toy","doll","marbles","sled","top","kite","tin toys"],
+      "Something you eat at Christmas dinner": DINNER,
+      "A food at Christmas dinner": DINNER,
+      "Something on the dinner table": ["dishes","plates","candles","centerpiece","napkins","glasses","silverware","tablecloth","gravy boat","salt","table runner"],
+      "A word that means happy": ["thankful","thrilled","happy","joyful","merry","glad","cheerful","delighted","jolly","blessed","grateful"],
+      "A word meaning happy": ["merry","happy","joyful","glad","cheerful","thrilled","delighted","jolly","blessed","grateful"],
+      "A word that means joyful": ["lively","lighthearted","joyful","happy","merry","cheerful","jubilant","elated"],
+      "Something made of wood": ["table","chair","toy","blocks","cutting board","sled","rocking horse","spoon","crate","bench","wooden toy"],
+      "Something at the top of the tree": ["topper","tree topper","star","angel","bow","ribbon"],
+      "Something kids leave for Santa": ["treats","cookies","milk","carrots","notes","letter","snacks"],
+      "Something you leave out for Santa": ["milk","cookies","carrots","letter","snacks","treats","milk and cookies"],
+      "A gift for a baby": ["blanket","bottle","onesie","stuffed animal","rattle","book","bib","toy","diapers","blankie"],
+      "Something that rings or jingles": ["bells","bell","jingle bells","sleigh bells","phone","doorbell","wind chimes"],
+      "Something in a nativity scene": ["baby jesus","mary","joseph","manger","animals","shepherds","wise men","star","angel","donkey","sheep"],
+      "Something in the manger scene": ["manger","baby jesus","hay","animals","mary","joseph","star"],
+      "Something in the Christmas story": ["nazareth","bethlehem","manger","star","angels","shepherds","wise men","inn","jesus","mary"],
+      "Something you hang up": ["mistletoe","stockings","lights","wreath","garland","ornaments","cards","decorations"],
+      "A gift for Mom": ["mug","flowers","candle","jewelry","book","scarf","perfume","photo frame","slippers","chocolate"],
+      "Something you send in December": ["mail","cards","christmas cards","packages","gifts","letters","invitations","e card","e cards","money"],
+      "A month that can have snow": ["march","december","january","february","november"],
+      "A cold month": ["january","february","december","march","november"],
+      "Something that melts": ["snow","ice","marshmallow","chocolate","snowman","candle","butter","ice cream","frost"],
+      "Something at a Christmas market": ["mulled wine","ornaments","gifts","crafts","hot cocoa","gingerbread","lights","music","mugs"],
+      "A gift that comes in a box": ["puzzle","jewelry","watch","game","perfume","chocolates","candle","book"],
+      "A Christmas dessert": ["pie","pudding","fruitcake","cookies","fudge","cake","trifle","yule log","gingerbread","plum pudding"],
+      "Something you do at a party": ["play games","dance","eat","talk","sing","take photos","open gifts","laugh"],
+      "A bird": ["penguin","partridge","cardinal","robin","owl","goose","dove","chicken","turkey","bluebird"],
+      "A winter bird": ["owl","cardinal","penguin","snowy owl","junco","chickadee","goose"],
+      "A party food or drink": ["punch","chips","dip","cookies","pizza","soda","cake","nuts","cheese","crackers"],
+      "A party drink": ["raspberry punch","punch","soda","lemonade","eggnog","cider","hot cocoa","juice"],
+      "A party snack": ["nuts","chips","dip","pretzels","popcorn","cheese","crackers","cookies","candy"],
+      "Something made of paper": ["paper chains","cards","wrapping paper","snowflakes","gift tags","letters","books","napkins","calendars"],
+      "A place people travel to at Christmas": ["parents house","home","grandparents house","church","mountains","beach","family","cabin"],
+      "Something that pops": ["popcorn","balloon","champagne cork","bubbles","firecracker","bubble wrap"],
+      "A game played at parties": ["pictionary","charades","bingo","trivia","cards","monopoly","scrabble","uno"],
+      "A board or card game": ["monopoly","scrabble","chess","uno","checkers","clue","poker","solitaire","candy land","risk"],
+      "Something you wrap a gift in": ["gift wrap","wrapping paper","tissue paper","newspaper","fabric","bag","box"],
+      "Something green": ["garland","tree","holly","wreath","mistletoe","pine","grass","grinch"],
+      "A gift for a gardener": ["gloves","seeds","tools","watering can","plant","book","hat","kneeling pad"],
+      "Something that sparkles": ["glitter","tinsel","lights","ornaments","snow","stars","sequins","icicles"],
+      "Something gold or shiny": ["gold tinsel","gold ornament","ornaments","star","bells","ribbon","garland","wrapping paper"],
+      "A word for people coming together": ["gathering","reunion","fellowship","togetherness","unity","celebration"],
+      "A holiday plant": ["holly","poinsettia","mistletoe","pine","ivy","amaryllis","christmas cactus"],
+      "Something you wear on your head in winter": ["hat","beanie","earmuffs","hood","headband","santa hat"],
+      "A word Santa says": ["ho","ho ho ho","merry christmas","hello","happy","ho ho"],
+      "A meat at Christmas dinner": ["ham","turkey","roast beef","prime rib","chicken","goose","duck","lamb"],
+      "Something that keeps you warm": ["heater","blanket","fire","fireplace","coat","hot cocoa","sweater","gloves","furnace"],
+      "A place you visit in December": ["home","church","mall","family","grandparents","market","tree lot","ice rink"],
+      "A sweet baked good": ["honey cake","cookies","pie","brownies","cake","muffins","cinnamon rolls","banana bread"],
+      "Something over a doorway": ["holly garland","holly","mistletoe","wreath","garland","lights","banner"],
+      "Something white in winter": ["white snow","snow","ice","frost","clouds","polar bear","snowman","arctic fox"],
+      "Something warm": ["wool socks","blanket","fire","cocoa","sweater","soup","gloves","heater","bath","wool blanket"],
+      "A gift you can wrap": ["watch","book","game","jewelry","mug","candle","toy","scarf","perfume"],
+      "Something on a front door": ["wreath","bow","sign","garland","lights","knocker","mat","swag"],
+      "Something that goes in hot cocoa": ["whipped cream","marshmallows","cinnamon","candy cane","chocolate","peppermint","cream","nutmeg"],
+      "Something in a window at Christmas": ["window candles","wreath","lights","snowflakes","decorations","candles","stickers","garland"],
+      "A Christmas wish": ["world peace","snow","health","happiness","family together","peace","puppy","bike"],
+      "Something made of wool": ["wool sweater","socks","blanket","scarf","hat","mittens","coat","wool socks"],
+      "Something you do in December": ["decorate","decorating","shop","bake","wrap gifts","visit family","sing carols","send cards","work"],
+      "A kind of candy": ["divinity","candy cane","fudge","peppermint","lollipop","gumdrops","chocolate","taffy","mints"],
+      "A gift for Dad": ["drill","tools","mug","book","tie","wallet","grill set","socks","hat","gift card"],
+      "A word for the season": ["december","merry","festive","winter","joyful","blessed","magical","cozy"],
+      "A pet that might wear a costume": ["dog","cat","puppy","kitten","rabbit","hamster"],
+      "A pet people might gift": ["kitten","puppy","dog","cat","fish","hamster","rabbit"],
+      "Something people decorate": ["door","tree","house","cookies","yard","windows","mantel"],
+      "A Christmas dinner side": ["dressing","stuffing","mashed potatoes","green beans","cranberry sauce","rolls","yams","corn","gravy"],
+      "Something in a fireplace": ["fire","logs","flames","ashes","kindling","embers","grate","smoke"],
+      "A gift for a friend": ["frame","friendship bracelet","candle","book","mug","plant","journal","scarf","gift card"],
+      "Something you eat with a fork": ["fruitcake","pie","cake","salad","pasta","turkey","ham","potatoes"],
+      "Something on a mantel": ["family photos","candles","stockings","garland","cards","clock","mirror","photos","nativity"],
+      "A type of Christmas tree": ["fir","pine","spruce","evergreen","balsam","cedar"],
+      "A kind of tree": ["fir","pine","spruce","evergreen","balsam","cedar","oak","maple","apple tree"],
+      "Something fuzzy": ["fuzzy socks","blanket","sweater","slippers","teddy bear","scarf","earmuffs"],
+      "Something you feel at Christmas": ["festive","joyful","happy","grateful","excited","cozy","loved","merry","peaceful"],
+      "A feeling at Christmas": ["joy","excitement","happy","grateful","wonder","love","eager"],
+      "A feeling on Christmas morning": ["excitement","joy","happy","grateful","wonder","love","eager","anticipation"],
+      "A gift that glows": ["lantern","candle","lights","night light","lamp","glow stick","string lights"],
+      "Something Santa checks twice": ["list","naughty list","nice list","names","his list"],
+      "A list Santa keeps": ["naughty list","nice list","list","names"],
+      "Something you do at night in December": ["look at lights","looking at lights","watch movies","read","drive around","bake","wrap gifts","sleep","stargaze"],
+      "A piece of jewelry you'd gift": ["necklace","ring","bracelet","earrings","watch","pendant","brooch"],
+      "Something you see in the night sky": ["north star","stars","moon","aurora","milky way","constellations","santa","airplane"],
+      "Something in the night sky": ["aurora","stars","moon","north star","milky way","constellations"],
+      "A baked good with nuts": ["nut bread","fruitcake","banana nut bread","pecan pie","walnut brownies","almond cookies"],
+      "Another name for Santa": ["nicholas","saint nicholas","st nick","kris kringle","father christmas","santa claus","papa noel","saint nicholas"],
+      "Something you see around town in December": ["nativity displays","nativity scenes","lights","decorations","trees","santa","wreaths","parades","markets"],
+      "A fruit": ["apple","banana","orange","grape","pear","peach","mango","lemon","kiwi","strawberry","apricot"],
+      "A citrus fruit": ["orange","lemon","lime","grapefruit","tangerine","clementine"],
+      "Something you do on Christmas Eve": ["attend church","open one gift","read stories","leave cookies","watch movies","drive to see lights","wrap gifts","sing"],
+      "A kind of pie": ["apple pie","pumpkin pie","pecan pie","cherry pie","lemon pie","chocolate pie","sweet potato pie","mincemeat pie","applesauce pie"],
+      "An animal that likes snow": ["arctic fox","polar bear","penguin","husky","reindeer","snow leopard","owl","wolf"],
+      "Something in a fruitcake": ["almonds","raisins","cherries","nuts","dates","candied fruit","walnuts","spices"],
+      "Something an angel might do": ["announce","sing","appear","watch over","deliver news","shine","guard","announce good news"],
+      "One of Santa's helpers": ["elf","elves","mrs claus","reindeer","helper"],
+      "Something you drink at Christmas": ["eggnog","cocoa","cider","hot chocolate","punch","coffee","wine","milk"],
+      "Something that plugs in": ["electric lights","lights","tree","lamp","tv","phone charger","toaster","fan"],
+      "Something you plug in": ["electric lights","lights","tree","lamp","tv","phone charger","toaster","fan"],
+      "Somewhere Santa goes": ["everywhere","every house","chimneys","homes","around the world","rooftops","your house"],
+      "A Christmas morning breakfast": ["eggs","pancakes","bacon","cinnamon rolls","biscuits","waffles","oatmeal","french toast"],
+      "A hot breakfast food": ["oatmeal","eggs","pancakes","bacon","waffles","toast","grits","omelet"],
+      "A breakfast food": ["eggs","bacon","pancakes","toast","cereal","oatmeal","waffles","sausage","fruit","yogurt"],
+      "Something made in Santa's workshop": ["electronics","electronic games","toys","games","bikes","dolls","trains","books"],
+      "Something kept in a jar": ["jam","jelly","honey","pickles","candy","coins","sauce","preserves","jelly beans"],
+      "A name from the Christmas story": ["joseph","mary","jesus","gabriel","herod","elizabeth","john","caesar"],
+      "A wobbly food": ["jelly","jello","jell o","pudding","gelatin","flan","custard"],
+      "Something you drink at breakfast": ["juice","coffee","milk","tea","orange juice","water","smoothie"],
+      "A New Year resolution": ["join a gym","lose weight","save money","read more","quit smoking","exercise","eat healthy","travel","journal"],
+      "Visitors to the manger": ["kings","wise men","three kings","shepherds","magi","angels"],
+      "Something in a kitchen": ["kettle","stove","sink","fridge","table","toaster","oven","dishes","pots","knife"],
+      "Something you do under the mistletoe": ["kiss","hug","blush","stand","laugh"],
+      "Something for the fire": ["kindling","logs","wood","matches","newspaper","firewood","lighter"],
+      "Something made of yarn": ["knitted hat","knit scarf","knit hat","sweater","blanket","mittens","socks","afghan"],
+      "A small gift": ["keychain","candle","mug","candy","ornament","gift card","socks","lip balm","bookmark"],
+      "Something you open in December": ["ornament box","advent calendar","gifts","cards","presents","doors","packages","mail"],
+      "Something outside the house": ["outdoor lights","outdoor decorations","decorations","wreath","snowman","inflatable","tree","mailbox"],
+      "A snack with some spice": ["spiced nuts","ginger snaps","cinnamon almonds","jalapeno chips","hot wings"],
+      "Something you shake": ["snow globe","gift","dice","maracas","bell","present","salad dressing"],
+      "Something Santa rides in": ["sleigh","his sleigh"],
+      "Something that shines": ["silver tinsel","silver bells","star","lights","ornaments","moon","glitter","icicles","silver"],
+      "Something you do on Christmas Eve night": ["set out cookies","leave milk","read","wrap","sleep early","watch movies","track santa"],
+      "A winter soup": ["squash soup","tomato soup","chicken noodle","potato soup","chili","stew","broccoli cheddar"],
+      "A tool in Santa's workshop": ["screwdriver","hammer","saw","drill","wrench","paintbrush","glue"],
+      "Something sung together": ["seasonal songs","songs","carols","hymns","christmas carols"],
+      "Something inside a snow globe": ["snowman","tree","house","santa","church","deer","village"],
+      "Something you crunch at a movie": ["caramel popcorn","popcorn","chips","candy","nuts","pretzels","ice"],
+      "A public place in December": ["community center","church","mall","park","library","school","city hall","market"],
+      "Something with numbers on it": ["calendar","advent calendar","clock","phone","price tag","card","dice","license plate"],
+      "A store that's busy in December": ["craft store","toy store","mall","target","walmart","grocery store","book store","candy store"],
+      "Something with a battery": ["camera","toy","phone","flashlight","remote","watch","game controller","laptop"],
+      "Something needing batteries": ["toy","toys","remote","flashlight","camera","game","clock","controller"],
+      "Something on the floor Christmas morning": ["crumpled paper","wrapping paper","ribbons","toys","boxes","confetti","bows","tissue paper"],
+      "Something that twinkles": ["twinkle lights","stars","lights","candles","ornaments","eyes"],
+      "A Christmas food from another country": ["tamales","panettone","stollen","baklava","lefse","lutefisk","pavlova","tourtiere"],
+      "Something said at the dinner table": ["toast","grace","pass the rolls","merry christmas","thank you","blessing","cheers"],
+      "Something you feel after a big dinner": ["tired","full","sleepy","stuffed","happy","grateful","lazy"],
+      "Something people photograph in December": ["tree","family","lights","kids","santa","snow","gifts","decorations"],
+      "Something you take to a party": ["treats","dish","drinks","gift","dessert","casserole","wine","flowers"],
+      "Something cooked over a fire": ["roasting chestnuts","roasted chestnuts","chestnuts","marshmallows","hot dogs","smores","corn","kebabs"],
+      "A reason families gather": ["reunion","christmas","birthday","wedding","holiday","funeral","dinner","love"],
+      "Something people stand in line for": ["returns","sales","santa photos","coffee","tickets","checkout","rides","food"],
+      "A quiet Christmas activity": ["reading","napping","puzzles","writing cards","knitting","watching snow","journaling"],
+      "Something you recycle after Christmas": ["ribbons","wrapping paper","boxes","cards","trees","bottles","cans","ribbon"],
+      "An event that happens every December": ["recital","parade","party","concert","play","market","lighting ceremony","bazaar"],
+      "Something you read in December": ["recipes","cards","books","lists","letters","menus","the christmas story","ads"],
+      "Something that keeps you inside": ["rainstorm","snow","blizzard","rain","cold","storm","ice"],
+      "Something open late on Christmas Eve": ["movie theater","store","gas station","restaurant","pharmacy","church","mall","diner"],
+      "A gift for a musician": ["music book","music","instrument","metronome","sheet music","guitar picks","headphones","lessons"],
+      "Something that makes music": ["music box","music","piano","guitar","radio","bells","choir","carolers","stereo"],
+      "A Christmas wonder": ["miracle","baby jesus","star","snow on christmas","birth of jesus","kindness"],
+      "A service people attend": ["midnight mass","church service","candlelight service","mass","worship","choir concert"],
+      "Something floating in cocoa": ["marshmallows","whipped cream","candy cane","cinnamon stick","chocolate shavings"],
+      "A merry sound": ["music","laughter","bells","carols","singing","joy"],
+      "A sound of joy": ["laughter","cheering","singing","music","bells","giggling"],
+      "Something on a stick": ["lollipop","candy cane","corn dog","kebab","popsicle","marshmallow","cake pop"],
+      "The heart of Christmas": ["christ","jesus","love","family","giving","faith","hope"],
+      "Something that flickers": ["candle","candles","fireplace","lights","flame","lantern","stars"],
+      "Something you can't wrap": ["cuddles","love","time","hugs","company","memories","laughter","care","kindness"],
+      "Something money can't buy": ["care","love","time","health","family","happiness","faith","friendship"],
+      "Something passed around the table": ["cranberry sauce","rolls","gravy","potatoes","photos","dishes","butter","salt"],
+      "A sound on Christmas morning": ["carols playing","carols","children laughing","paper tearing","music","bells","laughter","excitement"],
+      "A sound through the house": ["carols","music","laughter","singing","bells","tv","radio"],
+      "The best moment of the season": ["christmas morning","family dinner","opening gifts","church","snowfall","giving gifts"],
+      "Why people travel in December": ["christmas","family","home","holidays","love","vacation","tradition"],
+      /* everyday pool */
+      "A color": ["red","blue","green","yellow","orange","purple","pink","black","white","brown","gold","silver"],
+      "A sport or game": ["soccer","football","baseball","basketball","tennis","golf","hockey","swimming","bowling","chess"],
+      "An animal": ["dog","cat","horse","cow","pig","lion","bear","elephant","monkey","rabbit","deer","fox"],
+      "Something in a car": ["steering wheel","seats","radio","mirror","glove box","tires","keys","dashboard","seatbelt"],
+      "A job or profession": ["teacher","doctor","nurse","farmer","chef","police officer","firefighter","lawyer","artist","driver"],
+      "Something cold": ["ice","snow","ice cream","freezer","cold drink","winter","popsicle","glacier"],
+      "A vegetable": ["carrot","potato","corn","peas","broccoli","onion","lettuce","tomato","cucumber","beans"],
+      "Something in a classroom": ["desk","chalkboard","books","pencils","teacher","chairs","globe","clock","whiteboard","backpacks"],
+      "A holiday": ["christmas","halloween","thanksgiving","easter","valentines day","fourth of july","new year","birthday","hanukkah"],
+      "Something that can fly": ["bird","airplane","kite","butterfly","bee","helicopter","rocket","balloon","drone"],
+      "A musical instrument": ["piano","guitar","drums","violin","trumpet","flute","saxophone","banjo","cello","harmonica"],
+      "Something in a bathroom": ["towel","soap","toothbrush","mirror","shower","sink","shampoo","toilet paper","bathtub"],
+      "A flower or plant": ["rose","tulip","sunflower","daisy","lily","orchid","fern","cactus","lavender","marigold"],
+      "A country": ["canada","mexico","france","italy","spain","japan","brazil","germany","australia","india","china","england"],
+      "Something you sit on": ["chair","couch","bench","stool","floor","swing","rock","log","bed"],
+      "Something loud": ["thunder","horn","siren","drums","fireworks","alarm","train","motorcycle","crowd","bell"],
+      "A snack food": ["chips","popcorn","nuts","pretzels","crackers","candy","cookies","trail mix","granola bar"],
+      "Something at the beach": ["sand","shells","umbrella","towel","sunscreen","waves","bucket","lifeguard","seagulls"],
+      "A US state": ["texas","florida","ohio","maine","alaska","hawaii","oregon","nevada","georgia","colorado","arizona","virginia"],
+      "Something in a toolbox": ["hammer","wrench","screwdriver","nails","tape measure","drill","pliers","saw","level"],
+      "A farm animal": ["cow","pig","horse","chicken","sheep","goat","duck","donkey","rooster","turkey"],
+      "Something in a garden": ["flowers","tomatoes","hose","shovel","weeds","fence","bench","bees","dirt","seeds"],
+      "A thing at a birthday party": ["cake","balloons","candles","gifts","games","music","hats","ice cream","friends","decorations"],
+      "Something you read": ["book","newspaper","magazine","letter","email","menu","sign","bible","comic","instructions"],
+      "Something made of metal": ["car","knife","fork","bike","can","key","pot","tools","bridge","coins"],
+      "Something in winter": ["snow","ice","coats","sleds","hot cocoa","fireplace","mittens","skiing","holidays"],
+      "Something in a purse or wallet": ["money","cards","keys","phone","lipstick","receipts","id","coins","gum","photos"],
+      "A pizza topping": ["pepperoni","cheese","mushrooms","onions","peppers","sausage","olives","bacon","pineapple","ham"],
+      "A thing kids play with": ["blocks","dolls","balls","crayons","bikes","kites","puzzles","toy cars","bubbles","jump rope"],
+      "Something in a hospital": ["bed","doctor","nurse","wheelchair","medicine","x ray","waiting room","ambulance"]
+    };
+
+    /* ==================== STATE ==================== */
+    var state = {
+      mode: "solo",
+      playerCount: 2,
+      names: ["", "", "", ""],
+      seconds: 120,
+      round: null,          // {title, subtitle, letter, cats[], day|null}
+      turn: 0,
+      answers: [],          // per player: [strings]
+      struck: [],           // per player: [bool]
+      scoresByDay: {},      // session best per advent day
+      dailyDone: {},        // advent days completed this visit
+      streak: 0,            // featured "List of the Day" completions this visit
+      lastRound: null,      // last completed round {round, answers, name} for compare
+      pendingCompare: null  // decoded results code waiting for a matching played round
+    };
+
+    function $(id) { return document.getElementById(id); }
+    function show(id) {
+      var screens = document.querySelectorAll(".screen");
+      for (var i = 0; i < screens.length; i++) screens[i].classList.remove("active");
+      $(id).classList.add("active");
+      window.scrollTo(0, 0);
+    }
+    function playerName(i) {
+      var n = (state.names[i] || "").trim();
+      return n || ("Player " + (i + 1));
+    }
+    function numPlayers() { return state.mode === "solo" ? 1 : state.playerCount; }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    }
+
+    /* ==================== AUDIO ==================== */
+    var audioCtx = null;
+    function beep(freq, dur, delay, type) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        var t = audioCtx.currentTime + (delay || 0);
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = type || "sine"; o.frequency.value = freq;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.22, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t); o.stop(t + dur + 0.05);
+      } catch (e) { /* garnish, never a blocker */ }
+    }
+    function jingleTimesUp() { beep(523, .18, 0); beep(659, .18, .16); beep(784, .3, .32); }
+    function jingleStop() { beep(784, .12, 0); beep(1047, .22, .1); }
+    function jingleWin() { beep(523, .14, 0); beep(659, .14, .12); beep(784, .14, .24); beep(1047, .34, .36); }
+
+    /* ==================== BACKGROUND CHRISTMAS MUSIC ====================
+       Gentle music-box carols, synthesized note by note with WebAudio —
+       no audio files. All three tunes are traditional / public domain:
+       Jingle Bells (1857), Deck the Halls (traditional Welsh),
+       We Wish You a Merry Christmas (traditional English).
+       Notes are [midi, beats]; midi 0 is a rest. */
+    function midiHz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+    var CAROLS = [
+      { title: "Jingle Bells", beat: 0.36, notes: [
+        [76,1],[76,1],[76,2], [76,1],[76,1],[76,2],
+        [76,1],[79,1],[72,1.5],[74,0.5],[76,3],[0,1],
+        [77,1],[77,1],[77,1.5],[77,0.5], [77,1],[76,1],[76,1],[76,1],
+        [76,1],[74,1],[74,1],[76,1],[74,2],[79,2],
+        [76,1],[76,1],[76,2], [76,1],[76,1],[76,2],
+        [76,1],[79,1],[72,1.5],[74,0.5],[76,3],[0,1],
+        [77,1],[77,1],[77,1.5],[77,0.5], [77,1],[76,1],[76,1],[76,1],
+        [76,1],[74,1],[74,1],[76,1],[74,2],[72,3],[0,1]
+      ]},
+      { title: "Deck the Halls", beat: 0.32, notes: [
+        [79,1],[77,0.5],[76,0.5],[74,1],[72,0.5],[74,0.5],[76,1],[72,1],
+        [76,0.5],[77,0.5],[79,1],[76,1],[77,0.5],[79,0.5],[76,1],[72,1],
+        [74,1],[76,0.5],[77,0.5],[74,1],[76,0.5],[74,0.5],[71,1],[72,1],
+        [76,0.5],[77,0.5],[79,1],[76,1],[77,0.5],[79,0.5],[76,2],
+        [79,1],[77,0.5],[76,0.5],[74,1],[72,0.5],[74,0.5],[76,1],[72,1],
+        [76,0.5],[77,0.5],[79,1],[76,1],[77,0.5],[79,0.5],[76,1],[72,1],
+        [74,1],[76,0.5],[77,0.5],[74,1],[76,0.5],[74,0.5],[71,1],[72,1],
+        [76,0.5],[77,0.5],[79,1],[76,1],[77,0.5],[79,0.5],[76,1],[72,3],[0,1]
+      ]},
+      { title: "We Wish You a Merry Christmas", beat: 0.38, notes: [
+        [67,1],[72,1],[72,0.5],[74,0.5],[72,0.5],[71,0.5],[69,1],[69,1],
+        [74,1],[76,1],[76,0.5],[77,0.5],[76,0.5],[74,0.5],[72,1],[72,1],
+        [74,1],[67,1],[74,1],[76,1],[74,1],[72,1],[71,1],[69,1],
+        [67,1],[72,1],[72,0.5],[74,0.5],[72,0.5],[71,0.5],[69,1],[69,1],
+        [67,3],[0,1]
+      ]}
+    ];
+    var musicOn = true;          // player's intent (the toggle)
+    var musicGain = null;        // music bus — kept low under the game sounds
+    var musicTimer = null;       // scheduler interval, non-null while playing
+    var musicEverStarted = false;
+    var musicSong = 0, musicNote = 0, musicNextTime = 0;
+
+    function ensureAudioCtx() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      return audioCtx;
+    }
+    function musicBoxNote(midi, t, durSec) {
+      // Music box: bright sine fundamental + a whisper of octave, fast pluck, long shimmer decay.
+      var f = midiHz(midi);
+      var decay = Math.min(1.4, durSec + 0.7);
+      [[1, 0.16], [2, 0.045], [3, 0.012]].forEach(function (partial) {
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = "sine"; o.frequency.value = f * partial[0];
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(partial[1], t + 0.008);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+        o.connect(g); g.connect(musicGain);
+        o.start(t); o.stop(t + decay + 0.05);
+      });
+    }
+    function musicSchedule() {
+      if (!audioCtx || !musicGain) return;
+      while (musicNextTime < audioCtx.currentTime + 0.35) {
+        var carol = CAROLS[musicSong];
+        if (musicNote === 0) {
+          var lbl = $("music-song");
+          if (lbl && musicOn) lbl.textContent = "Now playing: " + carol.title + " ♪";
+        }
+        var step = carol.notes[musicNote];
+        if (step[0] > 0) musicBoxNote(step[0], musicNextTime, step[1] * carol.beat);
+        musicNextTime += step[1] * carol.beat;
+        musicNote++;
+        if (musicNote >= carol.notes.length) {
+          musicNote = 0;
+          musicSong = (musicSong + 1) % CAROLS.length;
+          musicNextTime += 2.4; // a breath of quiet between carols
+        }
+      }
+    }
+    function musicStartScheduler() {
+      if (musicTimer || !audioCtx) return;
+      musicNextTime = audioCtx.currentTime + 0.12;
+      musicSchedule();
+      musicTimer = setInterval(musicSchedule, 90);
+    }
+    function startMusic() {
+      try {
+        ensureAudioCtx();
+        if (!musicGain) {
+          musicGain = audioCtx.createGain();
+          musicGain.gain.value = 0.55; // low, under the gameplay beeps
+          musicGain.connect(audioCtx.destination);
+        }
+        musicEverStarted = true;
+        musicStartScheduler();
+        var ic = $("music-icon"); if (ic) ic.classList.add("dancing");
+      } catch (e) { /* music is garnish, never a blocker */ }
+    }
+    function pauseMusicScheduler() {
+      if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
+      var ic = $("music-icon"); if (ic) ic.classList.remove("dancing");
+    }
+    function setMusic(on) {
+      musicOn = on;
+      var btn = $("music-toggle");
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.classList.toggle("off", !on);
+      $("music-icon").textContent = on ? "🎵" : "🔇";
+      $("music-state").textContent = on ? "Music on" : "Music off";
+      if (on) {
+        startMusic();
+      } else {
+        pauseMusicScheduler();
+        $("music-song").textContent = "Tap to bring the carols back ♪";
+      }
+    }
+    $("music-toggle").addEventListener("click", function () { setMusic(!musicOn); });
+    // Browsers block audio before the first gesture — so the carols fade in
+    // on the player's very first tap or keypress, like a weather app's ambience.
+    function firstTapMusic(ev) {
+      if (ev.target && ev.target.closest && ev.target.closest("#music-toggle")) return;
+      if (musicOn && !musicEverStarted) startMusic();
+    }
+    document.addEventListener("pointerdown", firstTapMusic);
+    document.addEventListener("keydown", firstTapMusic);
+    // Don't burn battery singing to an empty room: pause in a hidden tab, resume on return.
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) pauseMusicScheduler();
+      else if (musicOn && musicEverStarted) { try { ensureAudioCtx(); musicStartScheduler(); var ic = $("music-icon"); if (ic) ic.classList.add("dancing"); } catch (e) {} }
+    });
+
+    /* ==================== SCORING CORE ==================== */
+    function normalize(raw) {
+      var s = (raw || "").toLowerCase().replace(/[^a-z0-9' ]+/g, " ").replace(/\s+/g, " ").trim();
+      s = s.replace(/^(the|a|an) /, "");
+      return s;
+    }
+    function bankSet(cat) {
+      var arr = BANK[cat];
+      if (!arr) return null;
+      var set = {};
+      arr.forEach(function (a) { set[normalize(a)] = true; });
+      return set;
+    }
+    /* Score a set of answer sheets.
+       answersByPlayer: [[raw,...], ...]; mode: "solo" (rarity) or "party" (duplicates cancel).
+       struckByPlayer optional. Returns {detail, totals}; detail[p][i] = {pts, kind, note} */
+    function scoreSheets(round, answersByPlayer, struckByPlayer, mode) {
+      var P = answersByPlayer.length, C = round.cats.length;
+      var detail = [], totals = [];
+      for (var p = 0; p < P; p++) { detail.push([]); totals.push(0); }
+      // solo repeat tracking: a player can't score the same answer twice
+      var seen = [];
+      for (p = 0; p < P; p++) seen.push({});
+      for (var i = 0; i < C; i++) {
+        var counts = {};
+        for (p = 0; p < P; p++) {
+          var n0 = normalize(answersByPlayer[p][i]);
+          var ok0 = n0.length > 0 && n0.charAt(0) === round.letter.toLowerCase();
+          var struck0 = struckByPlayer ? struckByPlayer[p][i] : false;
+          if (ok0 && !struck0) counts[n0] = (counts[n0] || 0) + 1;
+        }
+        var set = bankSet(round.cats[i]);
+        for (p = 0; p < P; p++) {
+          var raw = answersByPlayer[p][i] || "";
+          var n = normalize(raw);
+          var struck = struckByPlayer ? struckByPlayer[p][i] : false;
+          var d = { pts: 0, kind: "blank", note: "That category got coal. 🪨" };
+          var valid = n.length > 0 && n.charAt(0) === round.letter.toLowerCase();
+          if (raw.trim().length === 0) { d.kind = "blank"; }
+          else if (!valid) { d.kind = "wrong"; d.note = "Doesn't start with " + round.letter + " — the bus leaves without it!"; }
+          else if (struck) { d.kind = "struck"; d.note = "The room has spoken. Struck! ⚖️"; }
+          else if (mode === "solo") {
+            if (seen[p][n]) { d.kind = "repeat"; d.note = "You already used that one — no double-dipping! 🍦"; }
+            else if (set && set[n]) { d.kind = "common"; d.pts = 1; d.note = "Crowd favorite — everybody says that one."; }
+            else { d.kind = "rare"; d.pts = 2; d.note = "Rare find! The elves are impressed. 🧝"; }
+          } else { // party
+            if (counts[n] > 1) { d.kind = "dup"; d.note = "Matched! You both score a big fat 0. 😱"; }
+            else {
+              d.kind = "unique"; d.pts = 10; d.note = "All yours — nobody else had it!";
+              var words = n.split(" ").filter(function (w) { return w.length > 0; });
+              if (words.length >= 2 && words.every(function (w) { return w.charAt(0) === round.letter.toLowerCase(); })) {
+                d.kind = "bonus"; d.pts += 5; d.note = "Every word starts with " + round.letter + " — bonus points! ✨";
+              }
+            }
+          }
+          if (valid && !struck && d.kind !== "repeat") seen[p][n] = true;
+          detail[p][i] = d;
+          totals[p] += d.pts;
+        }
+      }
+      return { detail: detail, totals: totals };
+    }
+
+    /* ==================== HOME ==================== */
+    function featuredDay() {
+      var now = new Date();
+      if (now.getMonth() === 11) {
+        var d = now.getDate();
+        if (d >= 1 && d <= 25) return DAYS[d - 1];
+      }
+      return DAYS[0];
+    }
+    function isToday(dayObj) {
+      var now = new Date();
+      return now.getMonth() === 11 && now.getDate() === dayObj.day;
+    }
+    function renderHome() {
+      var f = featuredDay();
+      $("featured-title").textContent = isToday(f) ? "Today's list — December " + f.day : "Start here — December " + f.day;
+      $("featured-sub").textContent = isToday(f)
+        ? "Fresh out of Santa's workshop this morning. Tomorrow brings a whole new letter — no pressure. 😅"
+        : "The Advent run officially starts December 1, but every list is unlocked right now. Warm up on Day 1 or go rogue and jump ahead.";
+      $("featured-letter").textContent = f.letter;
+      $("featured-name").textContent = "“" + f.name + "”";
+      $("featured-meta").textContent = "December " + f.day + " · Letter " + f.letter + " · 10 categories";
+      var ul = $("featured-cats"); ul.innerHTML = "";
+      f.cats.forEach(function (c) { var li = document.createElement("li"); li.textContent = c; ul.appendChild(li); });
+
+      var pill = $("streak-pill");
+      var doneCount = Object.keys(state.dailyDone).length;
+      pill.hidden = false;
+      $("streak-text").textContent = doneCount > 0
+        ? "Daily streak: " + state.streak + " · Advent doors opened: " + doneCount + " of 25"
+        : "Daily streak: 0 · Advent doors opened: 0 of 25 — play today's list to light the flame!";
+
+      var cal = $("calendar"); cal.innerHTML = "";
+      DAYS.forEach(function (d) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.setAttribute("aria-label", "December " + d.day + ", " + d.name + ", letter " + d.letter);
+        var best = state.scoresByDay[d.day];
+        b.innerHTML =
+          (isToday(d) ? '<span class="todaytag">Today</span>' : "") +
+          '<span class="d">' + d.day + "</span>" +
+          '<span class="l">' + d.letter + "</span>" +
+          '<span class="s">' + (best != null ? "★ " + best : "") + "</span>";
+        if (isToday(d)) b.classList.add("today");
+        b.addEventListener("click", function () { startRound(dayRound(d)); });
+        cal.appendChild(b);
+      });
+    }
+    function dayRound(d) {
+      return { title: "December " + d.day + " — " + d.name, subtitle: "Advent list · Letter " + d.letter, letter: d.letter, cats: d.cats.slice(), day: d.day };
+    }
+    function quickRound() {
+      var letter = QUICK_LETTERS[Math.floor(Math.random() * QUICK_LETTERS.length)];
+      var pool = POOL.slice(), cats = [];
+      for (var i = 0; i < 10 && pool.length; i++) {
+        cats.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+      }
+      return { title: "Quick play", subtitle: "Shuffled list · Letter " + letter, letter: letter, cats: cats, day: null };
+    }
+
+    /* ==================== SETUP CONTROLS ==================== */
+    function renderNameInputs() {
+      var box = $("name-inputs"); box.innerHTML = "";
+      for (var i = 0; i < state.playerCount; i++) {
+        (function (i) {
+          var inp = document.createElement("input");
+          inp.type = "text"; inp.maxLength = 18; inp.placeholder = "Player " + (i + 1) + " name";
+          inp.value = state.names[i] || "";
+          inp.setAttribute("aria-label", "Player " + (i + 1) + " name");
+          inp.addEventListener("input", function () { state.names[i] = inp.value; });
+          box.appendChild(inp);
+        })(i);
+      }
+    }
+    $("mode-solo").addEventListener("click", function () {
+      state.mode = "solo";
+      $("mode-solo").setAttribute("aria-pressed", "true");
+      $("mode-multi").setAttribute("aria-pressed", "false");
+      $("multi-fields").hidden = true;
+    });
+    $("mode-multi").addEventListener("click", function () {
+      state.mode = "multi";
+      $("mode-multi").setAttribute("aria-pressed", "true");
+      $("mode-solo").setAttribute("aria-pressed", "false");
+      $("multi-fields").hidden = false;
+      renderNameInputs();
+    });
+    document.querySelectorAll(".pcount").forEach(function (b) {
+      b.addEventListener("click", function () {
+        state.playerCount = parseInt(b.getAttribute("data-n"), 10);
+        document.querySelectorAll(".pcount").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+        renderNameInputs();
+      });
+    });
+    document.querySelectorAll(".tlen").forEach(function (b) {
+      b.addEventListener("click", function () {
+        state.seconds = parseInt(b.getAttribute("data-s"), 10);
+        document.querySelectorAll(".tlen").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      });
+    });
+    $("btn-featured").addEventListener("click", function () { startRound(dayRound(featuredDay())); });
+    $("btn-quick").addEventListener("click", function () { startRound(quickRound()); });
+
+    /* ==================== CHALLENGE CODES ==================== */
+    function encodeCode(obj) {
+      var json = JSON.stringify(obj);
+      var b64 = btoa(unescape(encodeURIComponent(json)));
+      return "STB1." + b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+    function decodeCode(str) {
+      var s = (str || "").trim();
+      var dot = s.indexOf("STB1.");
+      if (dot >= 0) s = s.slice(dot + 5);
+      s = s.replace(/\s+/g, "").replace(/-/g, "+").replace(/_/g, "/");
+      while (s.length % 4) s += "=";
+      var json = decodeURIComponent(escape(atob(s)));
+      return JSON.parse(json);
+    }
+    function roundCode(round) {
+      return encodeCode({ v: 1, t: "round", title: round.title, letter: round.letter, cats: round.cats, day: round.day });
+    }
+    function resultsCode(round, answers, name) {
+      return encodeCode({ v: 1, t: "result", title: round.title, letter: round.letter, cats: round.cats, day: round.day, name: name, answers: answers });
+    }
+    function copyText(text, msgEl) {
+      function done() { msgEl.textContent = "Copied! Go start some trouble. 😏"; }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(); });
+      } else fallback();
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); done(); }
+        catch (e) { msgEl.textContent = "Copy didn't work — long-press the code above to copy it manually."; }
+        document.body.removeChild(ta);
+      }
+    }
+    $("btn-make-challenge").addEventListener("click", function () {
+      var r = dayRound(featuredDay());
+      $("challenge-code").textContent = roundCode(r);
+      $("challenge-out").hidden = false;
+      $("challenge-copied").textContent = "";
+    });
+    $("btn-copy-challenge").addEventListener("click", function () {
+      copyText($("challenge-code").textContent, $("challenge-copied"));
+    });
+    $("btn-open-code").addEventListener("click", function () {
+      var msg = $("code-msg");
+      var obj;
+      try { obj = decodeCode($("code-input").value); }
+      catch (e) { msg.textContent = "That code didn't survive the trip — check you pasted the whole thing. 📬"; return; }
+      if (!obj || !obj.letter || !obj.cats || !obj.cats.length) {
+        msg.textContent = "That code didn't survive the trip — check you pasted the whole thing. 📬"; return;
+      }
+      if (obj.t === "round") {
+        msg.textContent = "";
+        state.mode = "solo";
+        $("mode-solo").setAttribute("aria-pressed", "true");
+        $("mode-multi").setAttribute("aria-pressed", "false");
+        $("multi-fields").hidden = true;
+        startRound({ title: obj.title || "Challenge round", subtitle: "Challenge list · Letter " + obj.letter, letter: obj.letter, cats: obj.cats.slice(), day: obj.day != null ? obj.day : null });
+      } else if (obj.t === "result") {
+        var theirRound = { title: obj.title || "Challenge round", letter: obj.letter, cats: obj.cats.slice(), day: obj.day != null ? obj.day : null };
+        var theirs = { round: theirRound, answers: [obj.answers || []], name: obj.name || "Your friend" };
+        if (state.lastRound && sameList(state.lastRound.round, theirRound)) {
+          showCompare(state.lastRound, theirs);
+        } else {
+          state.pendingCompare = theirs;
+          msg.textContent = "That's " + (obj.name || "a friend") + "'s results! Play this same list and the head-to-head appears the second you finish. 🏁";
+          state.mode = "solo";
+          $("mode-solo").setAttribute("aria-pressed", "true");
+          $("mode-multi").setAttribute("aria-pressed", "false");
+          $("multi-fields").hidden = true;
+          startRound({ title: theirRound.title, subtitle: "Challenge list · Letter " + theirRound.letter, letter: theirRound.letter, cats: theirRound.cats.slice(), day: theirRound.day });
+        }
+      } else {
+        msg.textContent = "Hmm, that code is from a different sleigh. Check it and try again. 🛷";
+      }
+    });
+    function sameList(a, b) {
+      if (!a || !b || a.letter !== b.letter || a.cats.length !== b.cats.length) return false;
+      for (var i = 0; i < a.cats.length; i++) if (a.cats[i] !== b.cats[i]) return false;
+      return true;
+    }
+
+    /* ==================== ROUND FLOW ==================== */
+    function startRound(round) {
+      state.round = round;
+      state.turn = 0;
+      state.answers = [];
+      state.struck = [];
+      for (var p = 0; p < numPlayers(); p++) {
+        state.answers.push(round.cats.map(function () { return ""; }));
+        state.struck.push(round.cats.map(function () { return false; }));
+      }
+      showReady();
+    }
+    function showReady() {
+      var multi = state.mode === "multi";
+      var name = playerName(state.turn);
+      $("ready-icon").textContent = multi ? "📱" : "🎄";
+      $("ready-title").textContent = multi ? ("Pass it to " + name + "!") : "Ready when you are";
+      $("ready-text").textContent = multi
+        ? name + ", you're up! No peeking at anyone else's answers — the phone is a vault. Tap below when it's safely in your hands."
+        : "One letter, ten categories, " + Math.round(state.seconds / 60 * 10) / 10 + " minutes on the clock. Remember: the obvious answer is worth 1. The weird one is worth 2. Be weird. 😜";
+      $("ready-peek").innerHTML = "The letter is <b>" + state.round.letter + "</b> · " + escapeHtml(state.round.title);
+      $("btn-start-turn").textContent = multi ? ("I'm " + name + " — start my clock!") : "▶ Start the clock!";
+      show("screen-ready");
+    }
+    $("btn-quit-ready").addEventListener("click", function () { stopTimer(); renderHome(); show("screen-home"); });
+    $("btn-start-turn").addEventListener("click", function () { beginTurn(); });
+
+    var timerId = null, timeLeft = 0;
+    function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } $("urgent-veil").classList.remove("on"); }
+    function fmt(s) { return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+
+    function beginTurn() {
+      var r = state.round;
+      $("play-letter").textContent = r.letter;
+      $("play-who").textContent = state.mode === "multi" ? playerName(state.turn) + "'s turn" : r.title;
+      $("play-what").textContent = state.mode === "multi" ? r.title + " · every answer starts with " + r.letter : "Every answer starts with " + r.letter + " — go go go!";
+      var form = $("play-form"); form.innerHTML = "";
+      r.cats.forEach(function (cat, i) {
+        var row = document.createElement("div"); row.className = "catrow";
+        row.style.animationDelay = (i * 0.04) + "s";
+        var lab = document.createElement("label");
+        lab.setAttribute("for", "ans-" + i);
+        lab.innerHTML = '<span class="num">' + (i + 1) + "</span>";
+        lab.appendChild(document.createTextNode(cat));
+        var inp = document.createElement("input");
+        inp.className = "answer-input"; inp.id = "ans-" + i; inp.type = "text";
+        inp.placeholder = "Starts with " + r.letter + "…";
+        inp.setAttribute("enterkeyhint", i === r.cats.length - 1 ? "done" : "next");
+        inp.setAttribute("aria-label", cat);
+        inp.addEventListener("input", function () {
+          state.answers[state.turn][i] = inp.value;
+          inp.classList.toggle("filled", inp.value.trim().length > 0);
+          updateFilledCount();
+        });
+        inp.addEventListener("keydown", function (ev) {
+          if (ev.key === "Enter") {
+            ev.preventDefault();
+            var next = $("ans-" + (i + 1));
+            if (next) next.focus(); else endTurn(false);
+          }
+        });
+        row.appendChild(lab); row.appendChild(inp); form.appendChild(row);
+      });
+      updateFilledCount();
+      show("screen-play");
+      timeLeft = state.seconds;
+      paintClock();
+      stopTimer();
+      timerId = setInterval(function () {
+        timeLeft--;
+        paintClock();
+        if (timeLeft === 10) beep(880, .12, 0);
+        if (timeLeft <= 0) { stopTimer(); jingleTimesUp(); endTurn(true); }
+      }, 1000);
+      var first = $("ans-0"); if (first) first.focus();
+    }
+    function paintClock() {
+      var c = $("play-clock");
+      c.textContent = fmt(Math.max(0, timeLeft));
+      var pct = state.seconds ? (timeLeft / state.seconds) * 100 : 0;
+      var bar = $("play-bar");
+      bar.style.width = pct + "%";
+      var low = timeLeft <= 10 && timeLeft > 0;
+      c.classList.toggle("low", low);
+      bar.classList.toggle("low", low);
+      $("urgent-veil").classList.toggle("on", low);
+    }
+    function updateFilledCount() {
+      var n = state.answers[state.turn].filter(function (a) { return a.trim().length > 0; }).length;
+      var total = state.round.cats.length;
+      $("filled-count").textContent = n === total ? "🎉 All " + total + " filled — slam that button!" : n + " of " + total + " filled";
+    }
+    $("play-form").addEventListener("submit", function (ev) { ev.preventDefault(); });
+    $("btn-stop").addEventListener("click", function () { stopTimer(); jingleStop(); endTurn(false); });
+
+    function endTurn(timedOut) {
+      stopTimer();
+      if (state.turn < numPlayers() - 1) {
+        state.turn++;
+        showReady();
+      } else {
+        buildReview(timedOut);
+      }
+    }
+
+    /* ==================== REVIEW ==================== */
+    function tagFor(d, letter) {
+      switch (d.kind) {
+        case "common": return '<span class="tag dup">Crowd favorite</span>';
+        case "rare": return '<span class="tag rare">Rare find!</span>';
+        case "dup": return '<span class="tag wrong">Matched!</span>';
+        case "unique": return '<span class="tag rare">Unique!</span>';
+        case "bonus": return '<span class="tag bonus">All-' + letter + ' bonus!</span>';
+        case "wrong": return '<span class="tag wrong">Wrong letter</span>';
+        case "repeat": return '<span class="tag wrong">Repeat</span>';
+        case "struck": return '<span class="tag strucktag">Struck</span>';
+        default: return '<span class="tag wrong">Blank</span>';
+      }
+    }
+    function buildReview(timedOut) {
+      var r = state.round, P = numPlayers();
+      $("review-sub").textContent = timedOut
+        ? "⏰ TIME! Pencils down, hands up! Here's what everybody wrote for “" + r.title + "” — letter " + r.letter + "."
+        : "🚌 BUS STOPPED! Here's what everybody wrote for “" + r.title + "” — letter " + r.letter + ".";
+      $("review-legend").innerHTML = state.mode === "solo"
+        ? "<span><b>+2</b> — rare find, nobody's first thought</span><span><b>+1</b> — crowd favorite</span><span><b>0</b> — blank, wrong letter, or a repeat</span><span><b>Tap an answer</b> — to strike it if it's fishy 🐟</span>"
+        : "<span><b>10 pts</b> — all yours</span><span><b>0 pts</b> — somebody matched you 😱</span><span><b>+5</b> — every word starts with the letter</span><span><b>Tap an answer</b> — to strike it if the room says no good</span>";
+      var body = $("review-body"); body.innerHTML = "";
+      var sc = scoreSheets(r, state.answers, state.struck, state.mode);
+      r.cats.forEach(function (cat, i) {
+        var wrap = document.createElement("div"); wrap.className = "review-cat";
+        var h = document.createElement("h3");
+        h.innerHTML = '<span class="num">' + (i + 1) + "</span>";
+        h.appendChild(document.createTextNode(cat));
+        wrap.appendChild(h);
+        for (var p = 0; p < P; p++) {
+          (function (p, i) {
+            var d = sc.detail[p][i];
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "ans" + (state.struck[p][i] ? " struck" : "") + ((d.kind === "wrong" || d.kind === "blank") ? " invalid" : "");
+            btn.setAttribute("aria-label", "Toggle strike for " + playerName(p) + "'s answer to " + cat);
+            var txt = state.answers[p][i].trim() || "(left blank)";
+            var note = state.struck[p][i] ? "The room has spoken. Struck! ⚖️" : d.note;
+            btn.innerHTML =
+              (P > 1 ? '<span class="who">' + escapeHtml(playerName(p)) + "</span>" : "") +
+              '<span class="txt">' + escapeHtml(txt) + '<span class="note">' + escapeHtml(note) + "</span></span>" +
+              tagFor(state.struck[p][i] ? { kind: "struck" } : d, r.letter) +
+              '<span class="pts" style="animation-delay:' + (i * 0.05 + p * 0.03) + 's">' + (state.struck[p][i] ? 0 : d.pts) + "</span>";
+            btn.addEventListener("click", function () {
+              state.struck[p][i] = !state.struck[p][i];
+              buildReview(false);
+            });
+            wrap.appendChild(btn);
+          })(p, i);
+        }
+        body.appendChild(wrap);
+      });
+      show("screen-review");
+    }
+    $("btn-results").addEventListener("click", showResults);
+
+    /* ==================== RESULTS ==================== */
+    function confettiBurst() {
+      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      var box = $("confetti");
+      var colors = ["#e5342b", "#1e9e50", "#f6b41e", "#ffffff", "#ff7a5c", "#57d982"];
+      for (var i = 0; i < 90; i++) {
+        var d = document.createElement("div");
+        d.className = "confetto";
+        d.style.left = Math.random() * 100 + "%";
+        d.style.background = colors[i % colors.length];
+        d.style.animationDuration = (2.2 + Math.random() * 1.8) + "s";
+        d.style.animationDelay = (Math.random() * 0.5) + "s";
+        d.style.transform = "rotate(" + Math.random() * 360 + "deg)";
+        if (i % 3 === 0) d.style.borderRadius = "50%";
+        box.appendChild(d);
+      }
+      setTimeout(function () { box.innerHTML = ""; }, 4800);
+    }
+
+    function showResults() {
+      var r = state.round, P = numPlayers();
+      var sc = scoreSheets(r, state.answers, state.struck, state.mode);
+      var order = [];
+      for (var p = 0; p < P; p++) order.push(p);
+      order.sort(function (a, b) { return sc.totals[b] - sc.totals[a]; });
+      var top = sc.totals[order[0]];
+      var tied = order.filter(function (p) { return sc.totals[p] === top; });
+
+      if (P === 1) {
+        var max = r.cats.length * 2;
+        $("result-trophy").textContent = top >= max * 0.85 ? "🏆" : top >= max * 0.6 ? "🎄" : top >= max * 0.35 ? "🚌" : "🛷";
+        $("result-title").textContent = "You scored " + top + " of " + max + "!";
+        $("result-sub").textContent = top >= max * 0.85 ? "Certified Christmas genius. Santa's putting you on the payroll. 🎅" :
+          top >= max * 0.6 ? "Strong list! The reindeer are nodding respectfully. 🦌" :
+          top >= max * 0.35 ? "A solid ride. The bus driver believes in you. Mostly." :
+          "The bus has seen better lists — but every legend starts somewhere. Run it back! 💪";
+      } else if (tied.length > 1) {
+        $("result-trophy").textContent = "🤝";
+        $("result-title").textContent = "It's a TIE!";
+        $("result-sub").textContent = tied.map(playerName).join(" and ") + " deadlocked at " + top + " points. There's only one way to settle this: another list. 😤";
+      } else {
+        $("result-trophy").textContent = "🏆";
+        $("result-title").textContent = playerName(order[0]) + " wins!";
+        $("result-sub").textContent = top + " points on “" + r.title + "”. Somewhere, an elf is updating the trophy shelf. 🧝";
+      }
+
+      // session bookkeeping
+      if (r.day != null) {
+        if (state.scoresByDay[r.day] == null || top > state.scoresByDay[r.day]) state.scoresByDay[r.day] = top;
+        if (!state.dailyDone[r.day]) {
+          state.dailyDone[r.day] = true;
+          if (r.day === featuredDay().day) state.streak++;
+        }
+      }
+      state.lastRound = { round: r, answers: state.answers.map(function (a) { return a.slice(); }), name: P === 1 ? (playerName(0) === "Player 1" ? "Me" : playerName(0)) : playerName(order[0]) };
+
+      var box = $("standings"); box.innerHTML = "";
+      order.forEach(function (p, idx) {
+        var row = document.createElement("div");
+        row.className = "standing" + (idx === 0 ? " first" : "");
+        row.style.animationDelay = (idx * 0.09) + "s";
+        var good = sc.detail[p].filter(function (d) { return d.pts > 0; }).length;
+        row.innerHTML =
+          '<span class="rank">' + (idx + 1) + "</span>" +
+          '<span class="nm">' + escapeHtml(playerName(p)) + "</span>" +
+          '<span style="color:var(--ink-soft); font-size:13px; font-weight:800;">' + good + " scoring answers</span>" +
+          '<span class="sc">' + sc.totals[p] + " <small>pts</small></span>";
+        box.appendChild(row);
+      });
+
+      // best answer of the round
+      var bestTxt = "";
+      outer:
+      for (var p2 = 0; p2 < P; p2++) {
+        for (var i = 0; i < r.cats.length; i++) {
+          var d = sc.detail[p2][i];
+          if (!state.struck[p2][i] && (d.kind === "bonus" || (d.kind === "rare" && state.answers[p2][i].trim().length >= 8))) {
+            bestTxt = "⭐ Best answer of the round: <strong>“" + escapeHtml(state.answers[p2][i].trim()) + "”</strong> (" + escapeHtml(r.cats[i]) + ") — " + (d.kind === "bonus" ? "every single word starts with " + r.letter + "!" : "a rare find worth double.");
+            break outer;
+          }
+        }
+      }
+      $("best-line").innerHTML = bestTxt;
+      $("results-copied").textContent = "";
+
+      var nextBtn = $("btn-next-day");
+      if (r.day != null && r.day < 25) nextBtn.textContent = "Next: December " + (r.day + 1) + " →";
+      else if (r.day === 25) nextBtn.textContent = "🎲 Finish with a quick-play round";
+      else nextBtn.textContent = "🎲 Another quick-play round";
+
+      show("screen-results");
+      jingleWin();
+      confettiBurst();
+
+      // pending head-to-head from a pasted results code?
+      if (state.pendingCompare && sameList(state.pendingCompare.round, r)) {
+        var theirs = state.pendingCompare;
+        state.pendingCompare = null;
+        setTimeout(function () { showCompare(state.lastRound, theirs); }, 600);
+      }
+    }
+    $("btn-again").addEventListener("click", function () {
+      if (state.round.day != null) startRound(dayRound(DAYS[state.round.day - 1]));
+      else if (state.round.title === "Quick play") startRound(quickRound());
+      else startRound({ title: state.round.title, subtitle: state.round.subtitle, letter: state.round.letter, cats: state.round.cats.slice(), day: state.round.day });
+    });
+    $("btn-next-day").addEventListener("click", function () {
+      if (state.round.day != null && state.round.day < 25) startRound(dayRound(DAYS[state.round.day]));
+      else startRound(quickRound());
+    });
+    $("btn-home").addEventListener("click", function () { renderHome(); show("screen-home"); });
+    $("btn-copy-results").addEventListener("click", function () {
+      var lr = state.lastRound;
+      if (lr) copyText(resultsCode(lr.round, lr.answers[0], lr.name), $("results-copied"));
+    });
+    $("btn-copy-round").addEventListener("click", function () {
+      if (state.lastRound) copyText(roundCode(state.lastRound.round), $("results-copied"));
+    });
+
+    /* ==================== COMPARE ==================== */
+    function showCompare(mine, theirs) {
+      var r = theirs.round;
+      var mySc = scoreSheets(r, [mine.answers[0]], null, "solo");
+      var thSc = scoreSheets(r, [theirs.answers[0]], null, "solo");
+      var myTotal = mySc.totals[0], thTotal = thSc.totals[0];
+      $("compare-sub").textContent = "“" + r.title + "” · Letter " + r.letter + " · Same list, same letter, scored by the same rules. No mercy. 😄";
+      var box = $("compare-standings"); box.innerHTML = "";
+      var rows = [
+        { nm: mine.name || "You", sc: myTotal, me: true },
+        { nm: theirs.name || "Your friend", sc: thTotal, me: false }
+      ].sort(function (a, b) { return b.sc - a.sc; });
+      rows.forEach(function (row, idx) {
+        var div = document.createElement("div");
+        div.className = "standing" + (idx === 0 ? " first" : "");
+        div.innerHTML =
+          '<span class="rank">' + (idx + 1) + "</span>" +
+          '<span class="nm">' + escapeHtml(row.nm) + (row.me ? " (you)" : "") + "</span>" +
+          '<span class="sc">' + row.sc + " <small>pts</small></span>";
+        box.appendChild(div);
+      });
+      var body = $("compare-body"); body.innerHTML = "";
+      r.cats.forEach(function (cat, i) {
+        var h = document.createElement("div");
+        h.className = "vs-cat";
+        h.textContent = (i + 1) + ". " + cat;
+        body.appendChild(h);
+        var row = document.createElement("div"); row.className = "vs-row";
+        var myD = mySc.detail[0][i], thD = thSc.detail[0][i];
+        var myTxt = (mine.answers[0][i] || "").trim() || "(blank)";
+        var thTxt = (theirs.answers[0][i] || "").trim() || "(blank)";
+        row.innerHTML =
+          '<div class="vs-cell' + (myD.pts > thD.pts ? " win" : "") + '">' + escapeHtml(myTxt) + "<small>" + escapeHtml(mine.name || "You") + " · " + myD.pts + " pts</small></div>" +
+          '<div class="vs-mid">vs</div>' +
+          '<div class="vs-cell' + (thD.pts > myD.pts ? " win" : "") + '">' + escapeHtml(thTxt) + "<small>" + escapeHtml(theirs.name || "Friend") + " · " + thD.pts + " pts</small></div>";
+        body.appendChild(row);
+      });
+      show("screen-compare");
+      confettiBurst();
+    }
+    $("btn-compare-home").addEventListener("click", function () { renderHome(); show("screen-home"); });
+
+    /* ==================== LIGHTS + SNOW ==================== */
+    (function () {
+      var lights = $("lights");
+      var colors = ["#e5342b", "#f6b41e", "#1e9e50", "#ffffff", "#ff7a5c"];
+      var N = 16;
+      for (var i = 0; i < N; i++) {
+        var pct = (i + 0.5) / N * 100;
+        var drop = Math.round(Math.sin((i + 0.5) / N * Math.PI) * 16) + 6; // shallow arc
+        var b = document.createElement("div");
+        b.className = "bulb";
+        b.style.left = pct + "%";
+        var c = colors[i % colors.length];
+        b.innerHTML = '<div class="stem" style="height:' + drop + 'px"></div><div class="glow" style="background:radial-gradient(circle at 50% 35%, #fff8, transparent 45%), ' + c + '; color:' + c + '; animation-delay:' + (i * 0.17) + 's"></div>';
+        lights.appendChild(b);
+      }
+    })();
+    (function () {
+      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      var cv = $("snow"), ctx = cv.getContext("2d");
+      var flakes = [], W = 0, H = 0;
+      function resize() { W = cv.width = window.innerWidth; H = cv.height = window.innerHeight; }
+      resize(); window.addEventListener("resize", resize);
+      for (var i = 0; i < 60; i++) {
+        flakes.push({ x: Math.random(), y: Math.random(), r: 1 + Math.random() * 2.4, s: .12 + Math.random() * .35, drift: Math.random() * Math.PI * 2 });
+      }
+      var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      function tick() {
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = dark ? "rgba(255,255,255,.8)" : "rgba(255,255,255,.95)";
+        ctx.shadowColor = dark ? "transparent" : "rgba(120,140,160,.35)";
+        ctx.shadowBlur = dark ? 0 : 2;
+        flakes.forEach(function (f) {
+          f.y += f.s / H * 2.2; f.drift += .008;
+          if (f.y > 1.02) { f.y = -.02; f.x = Math.random(); }
+          var x = f.x * W + Math.sin(f.drift) * 14, y = f.y * H;
+          ctx.beginPath(); ctx.arc(x, y, f.r, 0, Math.PI * 2); ctx.fill();
+        });
+        requestAnimationFrame(tick);
+      }
+      tick();
+    })();
+
+    renderHome();
+    </script>
+  </body>
+</html>

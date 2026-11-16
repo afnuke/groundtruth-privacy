@@ -1,0 +1,1107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="data:," />
+    <title>Charades: Jolly Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2rem; }
+    </style>
+    <style>
+      :root{
+        --red:#e8323f; --red-deep:#a30f22; --red-dark:#7c0a1a;
+        --green:#22b45e; --green-deep:#128a41; --green-dark:#0b5c2c;
+        --pine:#0e4d2e; --pine-deep:#07331d;
+        --gold:#ffcf3f; --gold-deep:#e0a400;
+        --cream:#fff9ee; --paper:#fffdf7;
+        --ink:#22331f; --ink-soft:#4c5a48;
+        --radius:22px;
+        --shadow-btn:0 6px 0 rgba(0,0,0,.28);
+      }
+      *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+      body{
+        margin:0; color:#fff; font-family:"Nunito",system-ui,sans-serif;
+        background:linear-gradient(168deg, #8f1128 0%, #b3122f 30%, #14532d 78%, #0b3d21 100%);
+        min-height:100dvh; overflow-x:hidden;
+      }
+      #bg{ position:fixed; inset:0; z-index:0; pointer-events:none;
+        background:
+          radial-gradient(1100px 500px at 85% -10%, rgba(255,207,63,.28), transparent 60%),
+          radial-gradient(900px 600px at -10% 110%, rgba(232,50,63,.35), transparent 60%);
+      }
+      #snow,#confetti{ position:fixed; inset:0; pointer-events:none; }
+      #snow{ z-index:40; }
+      #confetti{ z-index:80; }
+
+      /* ---------- twinkling light string ---------- */
+      .lights{ position:relative; height:44px; max-width:640px; margin:0 auto; z-index:5; }
+      .lights svg.wire{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+      .bulb{ position:absolute; width:15px; height:15px; border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+        transform:translate(-50%,0); animation:twinkle 1.6s ease-in-out infinite; }
+      .bulb::before{ content:""; position:absolute; top:-5px; left:50%; transform:translateX(-50%);
+        width:6px; height:6px; background:#2c2c2c; border-radius:2px; }
+      @keyframes twinkle{ 0%,100%{ filter:brightness(1); } 50%{ filter:brightness(1.75); } }
+
+      .wrap{ position:relative; z-index:10; max-width:640px; margin:0 auto; padding:0 18px 40px; }
+
+      /* ---------- screens ---------- */
+      .screen{ display:none; }
+      .screen.active{ display:block; animation:screenIn .38s cubic-bezier(.2,1.4,.4,1) both; }
+      @keyframes screenIn{ from{ opacity:0; transform:translateY(16px) scale(.985); } to{ opacity:1; transform:none; } }
+
+      /* ---------- title ---------- */
+      .title-block{ text-align:center; padding:6px 0 4px; }
+      .title-block .hat{ width:64px; height:64px; margin:0 auto -6px; display:block;
+        filter:drop-shadow(0 4px 8px rgba(0,0,0,.35)); animation:bob 3.2s ease-in-out infinite; }
+      @keyframes bob{ 0%,100%{ transform:rotate(-4deg) translateY(0);} 50%{ transform:rotate(3deg) translateY(-5px);} }
+      h1.game-title{ font-family:"Fredoka",sans-serif; font-weight:700; margin:0; line-height:.95;
+        font-size:clamp(3rem,14vw,4.6rem); letter-spacing:.5px; color:#fff;
+        text-shadow:0 3px 0 var(--red-deep), 0 6px 0 rgba(0,0,0,.22), 0 12px 28px rgba(0,0,0,.35); }
+      h1.game-title .charades-word{ display:block; }
+      .jolly{ font-family:"Fredoka",sans-serif; font-weight:600; font-size:clamp(1.5rem,6.5vw,2.1rem);
+        color:var(--gold); text-shadow:0 2px 0 rgba(0,0,0,.3); margin-top:2px; }
+      .jolly .star{ color:#fff; }
+      .tagline{ margin:10px auto 0; max-width:44ch; font-weight:700; font-size:1.02rem; color:#ffeec9;
+        text-shadow:0 1px 3px rgba(0,0,0,.4); }
+
+      /* ---------- panels & headings ---------- */
+      .panel{ background:var(--paper); color:var(--ink); border-radius:var(--radius);
+        padding:20px 18px; margin-top:20px; box-shadow:0 14px 34px rgba(0,0,0,.32), inset 0 2px 0 #fff; }
+      .panel h2{ font-family:"Fredoka",sans-serif; font-weight:600; font-size:1.28rem; margin:0 0 4px; color:var(--pine); }
+      .panel .sub{ margin:0 0 14px; color:var(--ink-soft); font-weight:700; font-size:.92rem; }
+
+      /* ---------- deck grid ---------- */
+      .deck-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+      .deck-card{ position:relative; border:3px solid #e7ddc8; background:#fff; border-radius:18px;
+        padding:16px 12px 13px; text-align:center; cursor:pointer; font-family:inherit; color:var(--ink);
+        transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease; min-height:118px;
+        display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; }
+      .deck-card:active{ transform:scale(.96); }
+      .deck-card .dic{ width:46px; height:46px; border-radius:14px; display:grid; place-items:center; color:#fff;
+        box-shadow:inset 0 -4px 0 rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.15); }
+      .deck-card .dic svg{ width:27px; height:27px; }
+      .deck-card .dname{ font-family:"Fredoka",sans-serif; font-weight:600; font-size:1.06rem; line-height:1.1; }
+      .deck-card .dcount{ font-size:.78rem; font-weight:800; color:var(--ink-soft); }
+      .deck-card.selected{ border-color:var(--gold-deep); background:#fff6da;
+        box-shadow:0 0 0 3px var(--gold), 0 10px 20px rgba(0,0,0,.18); transform:translateY(-2px); }
+      .deck-card.selected::after{ content:"PICKED!"; position:absolute; top:-11px; right:-6px; background:var(--red);
+        color:#fff; font-family:"Fredoka",sans-serif; font-weight:600; font-size:.68rem; letter-spacing:.6px;
+        padding:4px 9px; border-radius:999px; transform:rotate(6deg); box-shadow:0 3px 6px rgba(0,0,0,.3); }
+      .deck-card.wide{ grid-column:1 / -1; min-height:96px; flex-direction:row; gap:14px; text-align:left; justify-content:flex-start; padding-left:20px; }
+      .deck-card.wide .dmeta{ display:flex; flex-direction:column; gap:2px; }
+
+      /* ---------- chips ---------- */
+      .chip-row{ display:flex; flex-wrap:wrap; gap:10px; }
+      .chip{ flex:1 1 auto; border:3px solid #e7ddc8; background:#fff; color:var(--ink); border-radius:999px;
+        font-family:"Fredoka",sans-serif; font-weight:600; font-size:1rem; padding:11px 10px; cursor:pointer;
+        transition:all .12s ease; min-height:52px; }
+      .chip:active{ transform:scale(.95); }
+      .chip.selected{ background:var(--pine); border-color:var(--pine); color:#fff;
+        box-shadow:0 5px 0 var(--pine-deep); }
+      .chip small{ display:block; font-family:"Nunito",sans-serif; font-weight:800; font-size:.7rem; opacity:.75; }
+
+      /* ---------- toggle ---------- */
+      .toggle-row{ display:flex; align-items:center; gap:14px; background:#fff; border:3px solid #e7ddc8; width:100%;
+        border-radius:18px; padding:14px 16px; cursor:pointer; min-height:64px; font-family:inherit; text-align:left; }
+      .toggle-row:active{ transform:scale(.985); }
+      .toggle-row .ttext{ flex:1; }
+      .toggle-row .ttext b{ font-family:"Fredoka",sans-serif; font-weight:600; font-size:1.05rem; display:block; color:var(--ink); }
+      .toggle-row .ttext span{ font-size:.85rem; font-weight:700; color:var(--ink-soft); }
+      .switch{ flex:none; width:60px; height:34px; border-radius:999px; background:#d8cfb8; position:relative; transition:background .15s; }
+      .switch::after{ content:""; position:absolute; top:4px; left:4px; width:26px; height:26px; border-radius:50%;
+        background:#fff; box-shadow:0 2px 5px rgba(0,0,0,.3); transition:left .15s; }
+      .switch.on{ background:var(--green); }
+      .switch.on::after{ left:30px; }
+
+      /* ---------- big buttons ---------- */
+      .btn{ display:block; width:100%; border:none; cursor:pointer; font-family:"Fredoka",sans-serif; font-weight:600;
+        border-radius:20px; padding:18px 20px; font-size:1.35rem; letter-spacing:.3px; color:#fff;
+        transition:transform .07s ease, box-shadow .07s ease, filter .15s; text-align:center; text-decoration:none; }
+      .btn:active{ transform:translateY(5px); }
+      .btn-green{ background:linear-gradient(180deg,#2ecc71,var(--green-deep)); box-shadow:0 7px 0 var(--green-dark), 0 14px 24px rgba(0,0,0,.3); text-shadow:0 2px 0 rgba(0,0,0,.18); }
+      .btn-green:active{ box-shadow:0 2px 0 var(--green-dark); }
+      .btn-red{ background:linear-gradient(180deg,#ff5a4e,var(--red-deep)); box-shadow:0 7px 0 var(--red-dark), 0 14px 24px rgba(0,0,0,.3); text-shadow:0 2px 0 rgba(0,0,0,.18); }
+      .btn-red:active{ box-shadow:0 2px 0 var(--red-dark); }
+      .btn-gold{ background:linear-gradient(180deg,#ffd94d,#f5b800); color:#5c3a00; box-shadow:0 7px 0 #b57f00, 0 14px 24px rgba(0,0,0,.3); }
+      .btn-gold:active{ box-shadow:0 2px 0 #b57f00; }
+      .btn-ghost{ background:rgba(255,255,255,.14); color:#fff; box-shadow:inset 0 0 0 2px rgba(255,255,255,.55); font-size:1.05rem; padding:13px 18px; }
+      .btn-ghost:active{ box-shadow:inset 0 0 0 2px rgba(255,255,255,.55); transform:translateY(2px); }
+      .btn-row{ display:flex; gap:12px; margin-top:14px; }
+      .btn-row .btn{ flex:1; }
+
+      .start-wrap{ margin-top:22px; }
+      .start-wrap .btn{ font-size:1.6rem; padding:21px; animation:pulseGlow 2s ease-in-out infinite; }
+      @keyframes pulseGlow{ 0%,100%{ filter:brightness(1);} 50%{ filter:brightness(1.1);} }
+
+      /* ---------- scoreboard strip ---------- */
+      .scoreboard{ display:flex; gap:12px; margin-top:20px; }
+      .team-box{ flex:1; border-radius:18px; padding:13px 10px 11px; text-align:center; color:#fff;
+        box-shadow:0 8px 18px rgba(0,0,0,.3), inset 0 2px 0 rgba(255,255,255,.35); position:relative; overflow:hidden; }
+      .team-box::after{ content:""; position:absolute; inset:auto -20% -55% -20%; height:70%; border-radius:50%;
+        background:rgba(255,255,255,.14); }
+      .team-a{ background:linear-gradient(160deg,#ff5a4e,#c1121f); }
+      .team-b{ background:linear-gradient(160deg,#2ecc71,#0e7a38); }
+      .team-box .tname{ font-family:"Fredoka",sans-serif; font-weight:600; font-size:1rem; position:relative; z-index:1; }
+      .team-box .tscore{ font-family:"Fredoka",sans-serif; font-weight:700; font-size:2.2rem; line-height:1; position:relative; z-index:1; }
+      .team-box .tround{ font-size:.75rem; font-weight:800; opacity:.85; position:relative; z-index:1; }
+      .team-box.turn{ outline:4px solid var(--gold); outline-offset:2px; }
+
+      /* ---------- how to play ---------- */
+      details.howto{ margin-top:20px; background:rgba(0,0,0,.22); border-radius:var(--radius); padding:4px 18px; }
+      details.howto summary{ font-family:"Fredoka",sans-serif; font-weight:600; font-size:1.05rem; color:var(--gold);
+        cursor:pointer; padding:13px 0; list-style:none; min-height:48px; display:flex; align-items:center; }
+      details.howto summary::-webkit-details-marker{ display:none; }
+      details.howto ol{ margin:0 0 16px; padding-left:22px; font-weight:700; line-height:1.55; color:#fff6e3; }
+      details.howto li{ margin-bottom:7px; }
+
+      footer.credit{ text-align:center; margin-top:26px; font-weight:800; font-size:.85rem; color:#ffe9bd;
+        text-shadow:0 1px 3px rgba(0,0,0,.45); }
+      footer.credit .snow-dot{ color:#fff; }
+
+      .topbar{ display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; max-width:640px; margin:0 auto; padding:10px 18px 0; position:relative; z-index:10; }
+      .topbar-btns{ display:flex; gap:8px; margin-left:auto; }
+      .sound-btn{ display:inline-flex; align-items:center; gap:7px; background:rgba(0,0,0,.28); color:#fff; border:none;
+        border-radius:999px; padding:9px 15px; font-family:"Nunito",sans-serif; font-weight:800; font-size:.85rem; cursor:pointer; min-height:40px; }
+      .sound-btn svg{ width:18px; height:18px; flex:none; }
+      .sound-btn:active{ transform:scale(.94); }
+      .sound-btn.music-on{ background:linear-gradient(180deg,#b3122f,#7c0a1a); box-shadow:0 3px 0 rgba(0,0,0,.35), inset 0 0 0 2px rgba(255,207,63,.75); }
+      .sound-btn .music-note{ display:inline-block; }
+      .sound-btn.music-on .music-note{ animation:musicBob 1s ease-in-out infinite; }
+      @keyframes musicBob{ 0%,100%{ transform:translateY(0) rotate(-6deg);} 50%{ transform:translateY(-2px) rotate(6deg);} }
+      .now-playing{ display:inline-flex; align-items:center; gap:6px; font-weight:800; font-size:.8rem; color:#ffeec9;
+        text-shadow:0 1px 3px rgba(0,0,0,.5); min-height:40px; }
+      .now-playing .eq{ display:inline-flex; gap:2px; align-items:flex-end; height:12px; }
+      .now-playing .eq i{ display:block; width:3px; background:var(--gold); border-radius:2px; height:5px; }
+      .now-playing.playing .eq i{ animation:eqBounce .7s ease-in-out infinite alternate; }
+      .now-playing.playing .eq i:nth-child(2){ animation-delay:.18s; } .now-playing.playing .eq i:nth-child(3){ animation-delay:.36s; }
+      @keyframes eqBounce{ from{ height:4px; } to{ height:12px; } }
+
+      /* ---------- ready screen ---------- */
+      .ready-card{ text-align:center; margin-top:26px; }
+      .ready-card .up-next{ font-family:"Fredoka",sans-serif; font-weight:600; letter-spacing:2px; font-size:.95rem; color:var(--gold); text-transform:uppercase; }
+      .ready-card .team-big{ font-family:"Fredoka",sans-serif; font-weight:700; font-size:clamp(2.4rem,10vw,3.4rem); line-height:1.05; margin:8px 0 4px; text-shadow:0 3px 0 rgba(0,0,0,.25); }
+      .ready-card .round-big{ font-weight:900; font-size:1.1rem; color:#ffeec9; }
+      .ready-panel{ text-align:left; }
+      .ready-panel ul{ margin:0; padding-left:20px; font-weight:700; line-height:1.6; color:var(--ink); }
+      .pass-note{ text-align:center; font-weight:800; color:#ffeec9; margin-top:16px; text-shadow:0 1px 3px rgba(0,0,0,.4); }
+
+      /* ---------- play screen ---------- */
+      .play-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; }
+      .play-team{ font-family:"Fredoka",sans-serif; font-weight:600; font-size:.95rem; padding:8px 12px; border-radius:999px;
+        box-shadow:0 4px 10px rgba(0,0,0,.3); white-space:nowrap; }
+      .play-team.a{ background:linear-gradient(160deg,#ff5a4e,#c1121f); }
+      .play-team.b{ background:linear-gradient(160deg,#2ecc71,#0e7a38); }
+      .play-score{ font-family:"Fredoka",sans-serif; font-weight:600; font-size:.92rem; background:rgba(0,0,0,.3);
+        padding:8px 12px; border-radius:999px; white-space:nowrap; }
+      .timer-wrap{ position:relative; width:84px; height:84px; flex:none; }
+      .timer-wrap svg{ transform:rotate(-90deg); width:84px; height:84px; }
+      .timer-ring-bg{ stroke:rgba(255,255,255,.25); }
+      .timer-ring-fg{ stroke:var(--gold); transition:stroke .3s; }
+      .timer-num{ position:absolute; inset:0; display:grid; place-items:center; font-family:"Fredoka",sans-serif;
+        font-weight:700; font-size:2rem; text-shadow:0 2px 4px rgba(0,0,0,.4); }
+      .timer-wrap.urgent .timer-ring-fg{ stroke:#ff4d3d; }
+      .timer-wrap.urgent .timer-num{ color:#ffb3ab; animation:urgentPulse .5s ease-in-out infinite alternate; }
+      @keyframes urgentPulse{ from{ transform:scale(1);} to{ transform:scale(1.14);} }
+
+      .word-card{ position:relative; background:var(--paper); color:var(--ink); border-radius:28px; margin-top:16px;
+        min-height:250px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+        padding:30px 22px; box-shadow:0 20px 40px rgba(0,0,0,.38), inset 0 3px 0 #fff; overflow:hidden; }
+      .word-card::before,.word-card::after{ content:""; position:absolute; width:110px; height:110px; border-radius:50%;
+        background:radial-gradient(circle, rgba(255,207,63,.35), transparent 70%); }
+      .word-card::before{ top:-45px; left:-35px; }
+      .word-card::after{ bottom:-45px; right:-35px; }
+      .word-card .deck-tag{ font-family:"Fredoka",sans-serif; font-weight:600; font-size:.82rem; letter-spacing:1.6px;
+        text-transform:uppercase; color:var(--red); margin-bottom:10px; position:relative; z-index:1; }
+      .word-card .the-word{ font-family:"Fredoka",sans-serif; font-weight:700; line-height:1.04; color:var(--pine);
+        font-size:clamp(2.7rem,12.5vw,4.6rem); position:relative; z-index:1; overflow-wrap:break-word; }
+      .word-card .the-word.long{ font-size:clamp(2rem,9.5vw,3.4rem); }
+      .word-card .the-word.xlong{ font-size:clamp(1.55rem,7.5vw,2.6rem); }
+      .word-card.pop{ animation:cardPop .3s cubic-bezier(.2,1.6,.4,1); }
+      @keyframes cardPop{ 0%{ transform:scale(.9) rotate(-1.2deg); opacity:.4; } 100%{ transform:scale(1) rotate(0); opacity:1; } }
+      .word-card.flash-good{ animation:flashGood .35s ease; }
+      .word-card.flash-pass{ animation:flashPass .35s ease; }
+      @keyframes flashGood{ 0%{ box-shadow:0 0 0 0 rgba(46,204,113,.0), inset 0 0 0 0 rgba(46,204,113,0);} 40%{ box-shadow:0 0 0 8px rgba(46,204,113,.75), 0 20px 40px rgba(0,0,0,.38);} 100%{ box-shadow:0 20px 40px rgba(0,0,0,.38);} }
+      @keyframes flashPass{ 0%{ transform:translateX(0);} 30%{ transform:translateX(-9px);} 60%{ transform:translateX(8px);} 100%{ transform:translateX(0);} }
+
+      .play-actions{ display:flex; gap:14px; margin-top:18px; }
+      .play-actions .btn{ flex:1; font-size:1.5rem; padding:24px 10px; border-radius:24px; }
+      .play-actions .btn small{ display:block; font-family:"Nunito",sans-serif; font-weight:800; font-size:.78rem; opacity:.85; margin-top:2px; }
+      .end-round{ display:block; margin:18px auto 0; background:none; border:none; color:#ffd9d4; font-weight:800;
+        font-size:.95rem; cursor:pointer; padding:12px 20px; text-decoration:underline; text-underline-offset:3px; min-height:44px; }
+
+      /* forehead mode */
+      .forehead{ display:none; }
+      body.forehead-on .normal-play{ display:none; }
+      body.forehead-on .forehead{ display:block; }
+      .fh-zones{ position:relative; display:flex; border-radius:28px; overflow:hidden; margin-top:16px; min-height:300px;
+        box-shadow:0 20px 40px rgba(0,0,0,.38); }
+      .fh-zone{ flex:1; border:none; cursor:pointer; font-family:"Fredoka",sans-serif; font-weight:700; color:#fff;
+        font-size:1.3rem; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:0 8px 20px; gap:2px; }
+      .fh-zone small{ font-family:"Nunito",sans-serif; font-weight:800; font-size:.75rem; opacity:.85; }
+      .fh-zone.good{ background:linear-gradient(180deg,#2ecc71,#0e7a38); }
+      .fh-zone.pass{ background:linear-gradient(180deg,#ff7a3d,#d63c12); }
+      .fh-zone:active{ filter:brightness(1.2); }
+      .fh-word{ position:absolute; left:50%; top:38%; transform:translate(-50%,-50%); width:88%; text-align:center;
+        background:var(--paper); color:var(--pine); font-family:"Fredoka",sans-serif; font-weight:700; line-height:1.05;
+        font-size:clamp(2rem,9.5vw,3.4rem); border-radius:20px; padding:20px 14px; pointer-events:none;
+        box-shadow:0 12px 26px rgba(0,0,0,.35); overflow-wrap:break-word; }
+      .fh-word.long{ font-size:clamp(1.5rem,7.5vw,2.5rem); }
+      .fh-hint{ text-align:center; font-weight:800; color:#ffeec9; margin-top:14px; text-shadow:0 1px 3px rgba(0,0,0,.4); }
+
+      /* ---------- countdown overlay ---------- */
+      #countdown{ position:fixed; inset:0; z-index:90; display:none; place-items:center;
+        background:rgba(60,4,14,.72); backdrop-filter:blur(3px); }
+      #countdown.show{ display:grid; }
+      #countdown .cd-num{ font-family:"Fredoka",sans-serif; font-weight:700; font-size:clamp(6rem,34vw,11rem); color:var(--gold);
+        text-shadow:0 6px 0 var(--red-deep), 0 18px 44px rgba(0,0,0,.6); }
+      #countdown .cd-num.tick{ animation:cdTick .8s cubic-bezier(.2,1.5,.4,1) both; }
+      @keyframes cdTick{ 0%{ transform:scale(1.7); opacity:0;} 45%{ transform:scale(1); opacity:1;} 100%{ transform:scale(.94); opacity:1;} }
+
+      /* ---------- summary & winner ---------- */
+      .summary-hero{ text-align:center; margin-top:24px; }
+      .summary-hero .s-team{ font-family:"Fredoka",sans-serif; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); font-size:.95rem; }
+      .summary-hero .s-score{ font-family:"Fredoka",sans-serif; font-weight:700; font-size:clamp(3.4rem,16vw,5.2rem); line-height:1; text-shadow:0 4px 0 rgba(0,0,0,.25); }
+      .summary-hero .s-quip{ font-weight:800; font-size:1.08rem; color:#ffeec9; margin-top:6px; text-shadow:0 1px 3px rgba(0,0,0,.4); }
+      .word-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+      .word-list li{ display:flex; align-items:center; gap:11px; font-weight:800; font-size:1rem; padding:10px 13px; border-radius:13px; background:#fff; border:2px solid #eee3cb; }
+      .word-list li .mark{ flex:none; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; color:#fff; font-size:.95rem; font-weight:900; }
+      .word-list li.got .mark{ background:var(--green); }
+      .word-list li.passed{ color:#9a8f78; }
+      .word-list li.passed .mark{ background:#e0a400; }
+      .word-list li.passed .w{ text-decoration:line-through; text-decoration-thickness:2px; }
+      .empty-note{ font-weight:800; color:var(--ink-soft); text-align:center; padding:8px 0; }
+
+      .winner-hero{ text-align:center; margin-top:20px; }
+      .winner-hero .trophy{ width:104px; height:104px; margin:0 auto; display:block; filter:drop-shadow(0 10px 18px rgba(0,0,0,.4)); animation:bob 2.6s ease-in-out infinite; }
+      .winner-hero .w-label{ font-family:"Fredoka",sans-serif; font-weight:600; letter-spacing:2.5px; text-transform:uppercase; color:var(--gold); margin-top:8px; }
+      .winner-hero .w-name{ font-family:"Fredoka",sans-serif; font-weight:700; font-size:clamp(2.6rem,12vw,4.2rem); line-height:1.02; text-shadow:0 4px 0 rgba(0,0,0,.25); margin-top:4px; }
+      .winner-hero .w-quip{ font-weight:800; font-size:1.1rem; color:#ffeec9; margin-top:10px; text-shadow:0 1px 3px rgba(0,0,0,.4); }
+      .final-scores{ display:flex; gap:12px; margin-top:22px; }
+
+      @media (prefers-reduced-motion: reduce){
+        *,*::before,*::after{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="bg" aria-hidden="true"></div>
+    <canvas id="snow" aria-hidden="true"></canvas>
+    <canvas id="confetti" aria-hidden="true"></canvas>
+
+    <div class="topbar">
+      <div class="now-playing" id="nowPlaying" aria-live="polite"><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span id="nowPlayingText">Music starts on your first tap ♪</span></div>
+      <div class="topbar-btns">
+      <button class="sound-btn music-on" id="musicBtn" type="button" aria-pressed="true" aria-label="Toggle background Christmas music">
+        <span class="music-note" aria-hidden="true">🎵</span>
+        <span id="musicLabel">Music on</span>
+      </button>
+      <button class="sound-btn" id="soundBtn" type="button" aria-pressed="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor" stroke="none"/><path class="sound-waves" d="M15.5 8.5a5 5 0 0 1 0 7"/><path class="sound-waves" d="M18.4 5.6a9 9 0 0 1 0 12.8"/></svg>
+        <span id="soundLabel">Sound on</span>
+      </button>
+      </div>
+    </div>
+
+    <div class="lights" id="lights" aria-hidden="true"></div>
+
+    <div class="wrap">
+
+      <!-- ============ SETUP ============ -->
+      <section class="screen active" id="screen-setup">
+        <div class="title-block">
+          <svg class="hat" viewBox="0 0 100 100" aria-hidden="true"><path d="M22 62 Q50 -8 84 44 Q88 52 80 54 Q50 60 30 70 Q20 74 22 62Z" fill="#e8323f"/><ellipse cx="53" cy="63" rx="36" ry="9" fill="#fff"/><circle cx="83" cy="46" r="10" fill="#fff"/></svg>
+          <h1 class="game-title"><span class="charades-word">CHARADES</span></h1>
+          <div class="jolly"><span class="star">★</span> Jolly Edition <span class="star">★</span></div>
+          <p class="tagline">One phone, a room full of shouters, and acting so bad it circles back to brilliant.</p>
+        </div>
+
+        <div class="scoreboard" aria-label="Team scores">
+          <div class="team-box team-a" id="boxA">
+            <div class="tname">🎄 Team Holly</div>
+            <div class="tscore" id="scoreA">0</div>
+            <div class="tround">Red corner · chief gift-wrappers</div>
+          </div>
+          <div class="team-box team-b" id="boxB">
+            <div class="tname">🔔 Team Jingle</div>
+            <div class="tscore" id="scoreB">0</div>
+            <div class="tround">Green corner · professional carolers</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>1 · Pick a deck</h2>
+          <p class="sub">Every card is fair game. No peeking, actors.</p>
+          <div class="deck-grid" id="deckGrid"></div>
+        </div>
+
+        <div class="panel">
+          <h2>2 · Round length</h2>
+          <p class="sub">How long each actor gets to flail around.</p>
+          <div class="chip-row" id="timeChips">
+            <button class="chip" type="button" data-seconds="30">30 sec<small>Speedy &amp; chaotic</small></button>
+            <button class="chip selected" type="button" data-seconds="60">60 sec<small>The classic</small></button>
+            <button class="chip" type="button" data-seconds="90">90 sec<small>Drama-club mode</small></button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>3 · Rounds per team</h2>
+          <p class="sub">Teams take turns until everybody's had their rounds.</p>
+          <div class="chip-row" id="roundChips">
+            <button class="chip" type="button" data-rounds="2">2 rounds<small>Quick &amp; jolly</small></button>
+            <button class="chip selected" type="button" data-rounds="3">3 rounds<small>A proper party</small></button>
+            <button class="chip" type="button" data-rounds="5">5 rounds<small>The full marathon</small></button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>4 · Forehead mode <span style="color:var(--gold-deep)">(optional)</span></h2>
+          <p class="sub">Hold the phone on your forehead, screen facing the room. Your team shouts, you guess — tap the left side when you're right, right side to pass.</p>
+          <button class="toggle-row" id="foreheadToggleBtn" type="button" role="switch" aria-checked="false">
+            <span class="ttext"><b>Forehead mode</b><span>Big tap zones, zero button-hunting</span></span>
+            <span class="switch" id="foreheadSwitch" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="start-wrap">
+          <button class="btn btn-red" id="startGameBtn" type="button">🎅 Start the Show!</button>
+        </div>
+
+        <details class="howto">
+          <summary>How to play — the 20-second version</summary>
+          <ol>
+            <li><b>Team Holly</b> goes first. One Holly player grabs the phone — they're the actor. No talking, no mouthing words, no pointing at things. Pure mime chaos.</li>
+            <li>The card shows a word or phrase. The actor acts it out while their team shouts guesses like their lives depend on it.</li>
+            <li>Guessed it? Smash <b>CORRECT</b>. Hopeless? Hit <b>PASS</b> and move on — no shame, some cards are just evil.</li>
+            <li>When the timer buzzes, the round's over. Count the haul, pass the phone to <b>Team Jingle</b>, and repeat.</li>
+            <li>After every team has played all their rounds, the high score takes the crown — and bragging rights until New Year's.</li>
+          </ol>
+        </details>
+
+        <footer class="credit">Built by Bryan Lee (Afnuke) <span class="snow-dot">·</span> AI collaboration</footer>
+      </section>
+
+      <!-- ============ READY ============ -->
+      <section class="screen" id="screen-ready">
+        <div class="ready-card">
+          <div class="up-next">Up next</div>
+          <div class="team-big" id="readyTeam">Team Holly</div>
+          <div class="round-big" id="readyRound">Round 1 of 3</div>
+        </div>
+        <div class="panel ready-panel">
+          <h2>Actor, your mission:</h2>
+          <ul id="readyTips">
+            <li>Take the phone. You're the star now. Act humble later.</li>
+            <li>No words, no sounds, no spelling in the air. Mime only!</li>
+            <li>Your team shouts guesses — the louder, the better.</li>
+          </ul>
+        </div>
+        <p class="pass-note" id="readyPassNote">Pass the phone to a Team Holly player, then hit the big button.</p>
+        <div class="start-wrap">
+          <button class="btn btn-green" id="startRoundBtn" type="button">I'm Ready — Go! 🎬</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="quitToSetupBtn" type="button">Back to setup</button>
+        </div>
+      </section>
+
+      <!-- ============ PLAY ============ -->
+      <section class="screen" id="screen-play">
+        <div class="play-head">
+          <div class="play-team a" id="playTeam">Team Holly</div>
+          <div class="timer-wrap" id="timerWrap" role="timer" aria-label="Time remaining">
+            <svg width="92" height="92" viewBox="0 0 92 92">
+              <circle class="timer-ring-bg" cx="46" cy="46" r="40" fill="none" stroke-width="9"/>
+              <circle class="timer-ring-fg" id="timerRing" cx="46" cy="46" r="40" fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="0"/>
+            </svg>
+            <div class="timer-num" id="timerNum">60</div>
+          </div>
+          <div class="play-score">⭐ <span id="roundScore">0</span> this round</div>
+        </div>
+
+        <div class="normal-play">
+          <div class="word-card" id="wordCard">
+            <div class="deck-tag" id="deckTag">Christmas</div>
+            <div class="the-word" id="theWord">Santa Claus</div>
+          </div>
+          <div class="play-actions">
+            <button class="btn btn-gold" id="passBtn" type="button">PASS 😅<small>Skip it — no shame</small></button>
+            <button class="btn btn-green" id="correctBtn" type="button">CORRECT! 🎉<small>They got it!</small></button>
+          </div>
+        </div>
+
+        <div class="forehead">
+          <div class="fh-zones">
+            <button class="fh-zone good" id="fhCorrect" type="button">✓ CORRECT<small>tap left</small></button>
+            <button class="fh-zone pass" id="fhPass" type="button">✕ PASS<small>tap right</small></button>
+            <div class="fh-word" id="fhWord">Santa Claus</div>
+          </div>
+          <p class="fh-hint">Phone on forehead, screen facing your team. They act, YOU guess!</p>
+        </div>
+
+        <button class="end-round" id="endRoundBtn" type="button">End round early</button>
+      </section>
+
+      <!-- ============ ROUND SUMMARY ============ -->
+      <section class="screen" id="screen-summary">
+        <div class="summary-hero">
+          <div class="s-team" id="sumTeam">Team Holly · Round 1</div>
+          <div class="s-score"><span id="sumScore">0</span> ⭐</div>
+          <div class="s-quip" id="sumQuip">The elves are taking notes.</div>
+        </div>
+        <div class="panel">
+          <h2>The haul</h2>
+          <p class="sub">Everything your team nailed — and everything that nailed them.</p>
+          <ul class="word-list" id="sumList"></ul>
+        </div>
+        <div class="scoreboard">
+          <div class="team-box team-a"><div class="tname">🎄 Team Holly</div><div class="tscore" id="sumScoreA">0</div><div class="tround">Total so far</div></div>
+          <div class="team-box team-b"><div class="tname">🔔 Team Jingle</div><div class="tscore" id="sumScoreB">0</div><div class="tround">Total so far</div></div>
+        </div>
+        <div class="start-wrap">
+          <button class="btn btn-green" id="nextBtn" type="button">Next team ➜</button>
+        </div>
+      </section>
+
+      <!-- ============ WINNER ============ -->
+      <section class="screen" id="screen-winner">
+        <div class="winner-hero">
+          <svg class="trophy" viewBox="0 0 100 100" aria-hidden="true"><path d="M28 12h44v10c0 14-9 24-22 24S28 36 28 22V12z" fill="#ffcf3f"/><path d="M28 18H12c0 14 8 22 20 24M72 18h16c0 14-8 22-20 24" fill="none" stroke="#ffcf3f" stroke-width="7" stroke-linecap="round"/><rect x="44" y="46" width="12" height="14" fill="#e0a400"/><path d="M32 74h36l4 12H28l4-12z" fill="#b57f00"/><path d="M38 22l5 8 9 1-6.5 6.5 1.5 9L50 42l-7 4.5 1.5-9L38 31l9-1z" fill="#fff3c4" transform="translate(-1,-4) scale(.92) translate(4,4)"/></svg>
+          <div class="w-label">The crown goes to</div>
+          <div class="w-name" id="winnerName">Team Holly</div>
+          <div class="w-quip" id="winnerQuip">Victory lap around the tree — you've earned it.</div>
+        </div>
+        <div class="final-scores">
+          <div class="team-box team-a"><div class="tname">🎄 Team Holly</div><div class="tscore" id="finalScoreA">0</div><div class="tround">Final score</div></div>
+          <div class="team-box team-b"><div class="tname">🔔 Team Jingle</div><div class="tscore" id="finalScoreB">0</div><div class="tround">Final score</div></div>
+        </div>
+        <div class="start-wrap">
+          <button class="btn btn-red" id="playAgainBtn" type="button">🔁 Rematch — Same Setup</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="changeDeckBtn" type="button">Change deck &amp; settings</button>
+        </div>
+        <footer class="credit">Built by Bryan Lee (Afnuke) <span class="snow-dot">·</span> AI collaboration</footer>
+      </section>
+
+    </div>
+
+    <div id="countdown" aria-hidden="true"><div class="cd-num" id="cdNum">3</div></div>
+
+    <script>
+    "use strict";
+
+    /* ================= DECKS — original lists written for this game ================= */
+    var DECKS = {
+      christmas: { name: "Christmas Chaos", color: "#e8323f", icon: "tree", cards: [
+        "Santa Claus","Rudolph the Red-Nosed Reindeer","Frosty the Snowman","The Grinch","Mrs. Claus",
+        "An elf wrapping presents","Santa stuck in the chimney","Decorating the Christmas tree","Untangling Christmas lights",
+        "Building a snowman","A snowball fight","Drinking hot cocoa with marshmallows","Hanging a stocking","Kissing under the mistletoe",
+        "Writing a letter to Santa","Baking gingerbread cookies","A gingerbread house falling apart","Ice skating and wobbling",
+        "Sledding down a huge hill","Making a snow angel","Carolers singing at the door","Opening presents at 5 in the morning",
+        "Regifting a fruitcake","The world's driest fruitcake","Shoveling the driveway","Roasting chestnuts","A partridge in a pear tree",
+        "Twelve drummers drumming","Five golden rings","Reindeer pulling the sleigh","The North Pole","A candy cane sword fight",
+        "Secret Santa gift swap","The Nutcracker ballet","Scrooge counting his money","Jingle Bells","Silent Night",
+        "Rockin' Around the Christmas Tree","A kid sitting on Santa's lap","Waiting up for Santa","Cookies and milk left out for Santa",
+        "A cat knocking over the Christmas tree","Tangled in tinsel","The star on top of the tree","Wrapping a present with way too much tape",
+        "A snowman melting","Slipping on ice","A reindeer with a tangled harness","Christmas dinner food coma","Ugly Christmas sweater contest",
+        "Stringing popcorn garland","A chimney with no fireplace","Elves on strike at the toy shop","Santa's sleigh stuck in traffic","Blowing on cold hands"
+      ]},
+      movies: { name: "Movie Magic", color: "#7b2fbe", icon: "film", cards: [
+        "Titanic","The Lion King","Star Wars","Jurassic Park","Finding Nemo","Toy Story","Frozen","Shrek","Spider-Man","Batman",
+        "Superman","Harry Potter","The Wizard of Oz","King Kong","Godzilla","Jaws","E.T. the Extra-Terrestrial","Ghostbusters",
+        "Back to the Future","The Avengers","Wonder Woman","Black Panther","Moana","Encanto","Cars","Up","WALL-E","Ratatouille",
+        "The Incredibles","Monsters, Inc.","Aladdin","Beauty and the Beast","Cinderella","Snow White and the Seven Dwarfs","Pinocchio",
+        "Dumbo","Peter Pan","Mary Poppins","The Sound of Music","Rocky","Home Alone","Elf","The Polar Express","A Christmas Story",
+        "How the Grinch Stole Christmas","The Nightmare Before Christmas","Miracle on 34th Street","It's a Wonderful Life","Die Hard (yes, it's a Christmas movie)","National Lampoon's Christmas Vacation"
+      ]},
+      animals: { name: "Animal Antics", color: "#f07818", icon: "paw", cards: [
+        "Elephant","Giraffe","Kangaroo boxing","A penguin waddling","Octopus","Butterfly","A dog chasing its own tail",
+        "A cat ignoring you completely","Monkey scratching","A sloth moving very slowly","Owl turning its head","A frog catching a fly",
+        "A bear catching a salmon","A flamingo standing on one leg","A peacock showing off","A crab walking sideways","A snake slithering",
+        "A horse galloping","A pig rolling in mud","A chicken crossing the road","A duck waddling with ducklings","A beaver building a dam",
+        "A squirrel hiding a nut","A bat hanging upside down","A shark circling","A jellyfish floating","A chameleon changing color",
+        "A porcupine getting scared","A skunk spraying","A gorilla beating its chest","A lion roaring","A tiger stalking","A wolf howling at the moon",
+        "A mouse sneaking cheese","A hamster on a wheel","A parrot copying you","A woodpecker pecking","A goose honking at everyone",
+        "A raccoon washing its food","A hippo yawning","A cheetah sprinting","A koala napping","A panda eating bamboo","A moose in the road",
+        "A turkey strutting","A donkey being stubborn","A sheep getting sheared","A spider spinning a web","A bee stinging and regretting it"
+      ]},
+      actions: { name: "Actions & Jobs", color: "#128a9e", icon: "briefcase", cards: [
+        "Brushing your teeth","Mowing the lawn","A firefighter sliding down the pole","An astronaut walking on the moon","A plumber unclogging a drain",
+        "Changing a baby's diaper","A dentist pulling a tooth","Riding a roller coaster","A chef flipping pancakes","Parallel parking and failing",
+        "A traffic cop directing cars","Fishing and catching nothing","A hairdresser giving a wild haircut","Milking a cow","A surgeon operating",
+        "Trying to assemble furniture","A referee calling a foul","Vacuuming under the couch","A lifeguard saving a swimmer","Hanging Christmas lights on the roof",
+        "A teacher writing on the board","Carrying too many grocery bags","A mail carrier chased by a dog","Blowing out birthday candles","A pilot landing a plane",
+        "Washing a car","A baker kneading dough","Raking leaves into a pile and jumping in","A construction worker jackhammering","Walking a dog that's walking you",
+        "A cashier scanning groceries","Shoveling snow off a car","A farmer planting seeds","Trying not to laugh in church","A librarian shushing everyone",
+        "A window washer on a tall building","Painting a fence","A bus driver opening the doors","Climbing a ladder to change a bulb","A zookeeper feeding lions",
+        "Directing an orchestra","A photographer saying 'say cheese'","Trying to open a stuck jar","A plumber fixing a geyser leak","Ironing a wrinkly shirt",
+        "A chimney sweep","Delivering pizza in a snowstorm","A referee counting a knockout","Wrapping a burrito","A crossing guard with a stop sign","Trying to fold a fitted sheet"
+      ]},
+      places: { name: "Famous Places", color: "#2f6fd0", icon: "pin", cards: [
+        "The Eiffel Tower","The Statue of Liberty","The Grand Canyon","The Moon","A beach in Hawaii","The North Pole","Mount Everest",
+        "The Great Wall of China","Niagara Falls","The Leaning Tower of Pisa","Big Ben in London","The Sydney Opera House","The Pyramids of Egypt",
+        "The Golden Gate Bridge","Times Square on New Year's Eve","The White House","A farm in Kansas","The bottom of the ocean","A haunted house",
+        "The top of a roller coaster","A treehouse","Disney World","A lighthouse","The desert at noon","A snowy mountaintop cabin",
+        "The inside of a volcano","A pirate ship","A castle in Scotland","The International Space Station","A jungle temple","An igloo",
+        "The Wild West","A submarine","A hot air balloon","The farmer's market","A drive-in movie theater","The library","A bowling alley",
+        "The dentist's waiting room","A wedding chapel in Las Vegas","Santa's workshop","A gingerbread village","The middle of nowhere"
+      ]},
+      kids: { name: "Easy · Kids", color: "#e84393", icon: "smile", cards: [
+        "Cat","Dog","Fish","Bird","Horse","Cow","Pig","Duck","Frog","Bear","Lion","Monkey","Elephant","Bunny","Snake",
+        "Banana","Pizza","Ice cream","Happy birthday","Brushing teeth","Going to sleep","Waking up","Dancing","Singing","Swimming",
+        "Riding a bike","Flying a kite","Blowing bubbles","Eating spaghetti","Drinking water","Washing hands","Tying shoes","Reading a book",
+        "Playing soccer","Jumping rope","Hide and seek","Tag — you're it!","A snowman","Santa Claus","A birthday cake","Rain","Snowball",
+        "A big yawn","Tickle fight","Peekaboo","Clapping hands","A happy dance"
+      ]},
+      advent: { name: "Advent · 25 Days", color: "#b57f00", icon: "calendar", wide: true, cards: [
+        "Day 1 · Hanging the first ornament","Day 2 · A partridge in a pear tree","Day 3 · Licking the spoon of cookie dough","Day 4 · Snow falling on your tongue",
+        "Day 5 · Five golden rings","Day 6 · Santa checking his list twice","Day 7 · A reindeer learning to fly","Day 8 · Wrapping paper everywhere",
+        "Day 9 · Nine ladies dancing","Day 10 · Hot cocoa mustache","Day 11 · The tree lights finally working","Day 12 · Twelve drummers drumming",
+        "Day 13 · An elf hiding in the pantry","Day 14 · Sledding in pajamas","Day 15 · Caroling to the neighbors' dog","Day 16 · A snowball ambush",
+        "Day 17 · Gingerbread house roof collapse","Day 18 · Untangling the same lights again","Day 19 · Writing your wish list","Day 20 · A cat in the Christmas tree",
+        "Day 21 · Roasting marshmallows by the fire","Day 22 · Peeking at one present early","Day 23 · Santa's sleigh warming up","Day 24 · Too excited to sleep on Christmas Eve",
+        "Day 25 · Christmas morning present frenzy"
+      ]}
+    };
+
+    var ICONS = {
+      tree: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 6.5 9h3L5 15h5.5v5h3v-5H19l-4.5-6h3L12 2z" fill="currentColor" stroke="none"/></svg>',
+      film: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7.5 4v5M16.5 4v5M7.5 15v5M16.5 15v5"/></svg>',
+      paw: '<svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="15.5" rx="4.4" ry="3.6"/><ellipse cx="5" cy="10.5" rx="1.9" ry="2.4" transform="rotate(-18 5 10.5)"/><ellipse cx="9" cy="6.8" rx="2" ry="2.6" transform="rotate(-6 9 6.8)"/><ellipse cx="15" cy="6.8" rx="2" ry="2.6" transform="rotate(6 15 6.8)"/><ellipse cx="19" cy="10.5" rx="1.9" ry="2.4" transform="rotate(18 19 10.5)"/></svg>',
+      briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V6a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v2M3 13.5h18"/></svg>',
+      pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.8"/></svg>',
+      smile: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1 1.4 2.2 2 3.5 2s2.5-.6 3.5-2"/><circle cx="9" cy="9.5" r=".4" fill="currentColor"/><circle cx="15" cy="9.5" r=".4" fill="currentColor"/></svg>',
+      calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><text x="12" y="18.2" text-anchor="middle" font-size="7.5" font-weight="700" fill="currentColor" stroke="none" font-family="Fredoka,sans-serif">25</text></svg>'
+    };
+
+    var QUIPS_GREAT = ["The elves are taking notes — for a raise.","Oscar-worthy. The Academy of the Living Room agrees.","Somewhere, a Broadway scout just felt a disturbance.","That acting could melt the North Pole. In a good way."];
+    var QUIPS_GOOD  = ["Solid mime work. Santa approves.","The reindeer are nodding respectfully.","Not bad! The fruitcake remains the only disaster here."];
+    var QUIPS_ROUGH = ["Bold strategy. The points disagree, but bold.","The snowman saw that and melted out of sympathy.","Hey — even Santa burns the first batch of cookies.","Somewhere a mime is quietly taking notes. And stealing them."];
+    var WIN_QUIPS = { A: "Team Holly takes the crown! Victory lap around the tree — you've earned it.",
+                      B: "Team Jingle takes the crown! Ring those bells all the way home.",
+                      tie: "A dead heat! Both teams share the crown — and the last slice of pie." };
+
+    /* ================= STATE ================= */
+    var TEAMS = [ { id:"A", name:"Team Holly", emoji:"🎄" }, { id:"B", name:"Team Jingle", emoji:"🔔" } ];
+    var state = {
+      deckKey: "christmas", seconds: 60, roundsPerTeam: 3, forehead: false,
+      scores: { A: 0, B: 0 }, turn: 0, roundForTeam: { A: 0, B: 0 },
+      queue: [], current: null, roundResults: [], roundScore: 0,
+      timeLeft: 0, timerId: null, playing: false, sound: true, music: true
+    };
+
+    var $ = function(id){ return document.getElementById(id); };
+    var screens = ["setup","ready","play","summary","winner"];
+
+    function showScreen(name){
+      screens.forEach(function(s){ $("screen-"+s).classList.toggle("active", s===name); });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    /* ================= SOUND (tiny WebAudio synth) ================= */
+    var audioCtx = null;
+    function ac(){
+      if (!audioCtx){ try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+      if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      return audioCtx;
+    }
+    function tone(freq, t0, dur, type, vol){
+      if (!state.sound) return;
+      var ctx = ac(); if (!ctx) return;
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type || "sine"; o.frequency.value = freq;
+      var start = ctx.currentTime + t0;
+      g.gain.setValueAtTime(0.0001, start);
+      g.gain.exponentialRampToValueAtTime(vol || 0.16, start + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(start); o.stop(start + dur + 0.05);
+    }
+    function sndCorrect(){ tone(659,0,.14,"triangle",.18); tone(784,.09,.14,"triangle",.18); tone(1047,.18,.26,"triangle",.2); }
+    function sndPass(){ tone(330,0,.13,"sawtooth",.07); tone(262,.1,.2,"sawtooth",.07); }
+    function sndTick(){ tone(1150,0,.05,"square",.06); }
+    function sndBuzz(){ tone(196,0,.5,"sawtooth",.14); tone(185,.02,.5,"sawtooth",.12); }
+    function sndFanfare(){ [523,659,784,1047,784,1047,1319].forEach(function(f,i){ tone(f, i*0.13, .3, "triangle", .18); }); }
+
+    $("soundBtn").addEventListener("click", function(){
+      state.sound = !state.sound;
+      $("soundLabel").textContent = state.sound ? "Sound on" : "Sound off";
+      this.setAttribute("aria-pressed", String(state.sound));
+      var waves = this.querySelectorAll(".sound-waves");
+      waves.forEach(function(w){ w.style.display = state.sound ? "" : "none"; });
+      if (state.sound) sndCorrect();
+    });
+
+    /* ================= BACKGROUND MUSIC — music-box carols (WebAudio, no files) =================
+       Public-domain carols only: Jingle Bells (1857), Deck the Halls (traditional Welsh),
+       We Wish You a Merry Christmas (traditional English). No copyrighted carols are used.
+       Notes are [midi, beats]; midi 0 = rest. Played as a soft music box, low under the game sounds. */
+    var CAROLS = [
+      { title: "Jingle Bells", beat: 0.42, notes: [
+        [64,1],[64,1],[64,2],[64,1],[64,1],[64,2],[64,1],[67,1],[60,1.5],[62,.5],[64,4],
+        [65,1],[65,1],[65,1],[65,1],[65,1],[64,1],[64,1],[64,1],[62,1],[62,1],[64,1],[62,2],[67,2],
+        [64,1],[64,1],[64,2],[64,1],[64,1],[64,2],[64,1],[67,1],[60,1.5],[62,.5],[64,4],
+        [65,1],[65,1],[65,1],[65,1],[65,1],[64,1],[64,1],[64,1],[67,1],[67,1],[65,1],[62,1],[60,4],[0,2]
+      ]},
+      { title: "Deck the Halls", beat: 0.40, notes: [
+        [72,1],[71,.5],[69,.5],[67,1],[69,1],[71,1],[72,1],[71,.5],[69,.5],[71,1],[72,.5],[74,.5],[72,1],[71,.5],[69,.5],[67,1],[64,1],
+        [67,1],[69,1],[71,1],[67,1],[69,.5],[71,.5],[72,1],[71,.5],[69,.5],[67,1],[69,1],[71,2],
+        [72,1],[71,.5],[69,.5],[67,1],[69,1],[71,1],[72,1],[71,.5],[69,.5],[71,1],[72,.5],[74,.5],[72,1],[71,.5],[69,.5],[67,2],[0,2]
+      ]},
+      { title: "We Wish You a Merry Christmas", beat: 0.42, notes: [
+        [67,1],[72,1],[72,1],[74,1],[72,1],[71,1],[69,2],[69,1],
+        [74,1],[74,1],[76,1],[74,1],[72,1],[71,2],[67,1],
+        [72,1],[72,1],[74,1],[72,1],[71,1],[69,2],[69,1],
+        [74,1],[72,1],[71,1],[69,1],[67,3],[0,1],
+        [67,1],[72,1],[72,1],[74,1],[72,1],[71,1],[69,2],[69,1],
+        [74,1],[76,1],[74,1],[72,1],[71,2],[67,1],
+        [69,1],[69,1],[71,1],[69,1],[67,1],[65,1],[72,1],[71,1],[69,1],[67,3],[0,2]
+      ]}
+    ];
+    var musicGain = null, musicTimer = null, musicStarted = false;
+    var musicPos = { carol: 0, note: 0, nextTime: 0 };
+    function ensureMusicGain(ctx){
+      if (!musicGain){ musicGain = ctx.createGain(); musicGain.gain.value = 0.9; musicGain.connect(ctx.destination); }
+      return musicGain;
+    }
+    function musicBoxNote(ctx, midi, when, beats, beatDur){
+      if (!midi) return;
+      var freq = 440 * Math.pow(2, (midi - 69) / 12);
+      var ring = Math.max(beats * beatDur * 1.15, 0.5);
+      var out = ensureMusicGain(ctx);
+      /* main music-box tine */
+      var o1 = ctx.createOscillator(), g1 = ctx.createGain();
+      o1.type = "sine"; o1.frequency.value = freq;
+      g1.gain.setValueAtTime(0.0001, when);
+      g1.gain.exponentialRampToValueAtTime(0.11, when + 0.012);
+      g1.gain.exponentialRampToValueAtTime(0.0001, when + ring);
+      o1.connect(g1); g1.connect(out); o1.start(when); o1.stop(when + ring + 0.05);
+      /* soft octave sparkle */
+      var o2 = ctx.createOscillator(), g2 = ctx.createGain();
+      o2.type = "sine"; o2.frequency.value = freq * 2;
+      g2.gain.setValueAtTime(0.0001, when);
+      g2.gain.exponentialRampToValueAtTime(0.032, when + 0.008);
+      g2.gain.exponentialRampToValueAtTime(0.0001, when + ring * 0.55);
+      o2.connect(g2); g2.connect(out); o2.start(when); o2.stop(when + ring);
+      /* gentle low root cushion on longer notes */
+      if (beats >= 2){
+        var o3 = ctx.createOscillator(), g3 = ctx.createGain();
+        o3.type = "triangle"; o3.frequency.value = freq / 2;
+        g3.gain.setValueAtTime(0.0001, when);
+        g3.gain.exponentialRampToValueAtTime(0.022, when + 0.03);
+        g3.gain.exponentialRampToValueAtTime(0.0001, when + ring);
+        o3.connect(g3); g3.connect(out); o3.start(when); o3.stop(when + ring + 0.05);
+      }
+    }
+    function updateNowPlaying(){
+      var el = $("nowPlaying"), txt = $("nowPlayingText");
+      if (!state.music){ el.classList.remove("playing"); txt.textContent = "Music is off — tap Music to bring the carols back"; return; }
+      if (!musicStarted){ txt.textContent = "Music starts on your first tap ♪"; return; }
+      el.classList.add("playing");
+      txt.textContent = "♪ Now playing: " + CAROLS[musicPos.carol].title;
+    }
+    function scheduleMusic(){
+      var ctx = ac(); if (!ctx || !state.music) return;
+      ensureMusicGain(ctx);
+      while (musicPos.nextTime < ctx.currentTime + 0.7){
+        var carol = CAROLS[musicPos.carol];
+        if (musicPos.note >= carol.notes.length){
+          musicPos.carol = (musicPos.carol + 1) % CAROLS.length;
+          musicPos.note = 0;
+          musicPos.nextTime += 1.1; /* breath between carols */
+          updateNowPlaying();
+          carol = CAROLS[musicPos.carol];
+        }
+        var entry = carol.notes[musicPos.note];
+        musicBoxNote(ctx, entry[0], musicPos.nextTime, entry[1], carol.beat);
+        musicPos.nextTime += entry[1] * carol.beat;
+        musicPos.note++;
+      }
+      updateNowPlaying();
+    }
+    function startMusic(){
+      if (!state.music || musicTimer) return;
+      var ctx = ac(); if (!ctx) return;
+      if (!musicStarted){ musicStarted = true; musicPos.nextTime = ctx.currentTime + 0.15; }
+      if (musicPos.nextTime < ctx.currentTime) musicPos.nextTime = ctx.currentTime + 0.1;
+      scheduleMusic();
+      musicTimer = setInterval(scheduleMusic, 220);
+      updateNowPlaying();
+    }
+    function stopMusic(){
+      if (musicTimer){ clearInterval(musicTimer); musicTimer = null; }
+      updateNowPlaying();
+    }
+    $("musicBtn").addEventListener("click", function(){
+      state.music = !state.music;
+      $("musicLabel").textContent = state.music ? "Music on" : "Music off";
+      this.setAttribute("aria-pressed", String(state.music));
+      this.classList.toggle("music-on", state.music);
+      if (state.music){ musicStarted = true; var ctx = ac(); if (ctx && musicPos.nextTime < ctx.currentTime) musicPos.nextTime = ctx.currentTime + 0.1; startMusic(); }
+      else stopMusic();
+    });
+    /* Browsers block autoplay — start the carols on the player's very first tap anywhere. */
+    document.addEventListener("pointerdown", function(){ if (state.music) startMusic(); }, { once: false });
+    updateNowPlaying();
+
+    /* ================= SNOW ================= */
+    var snowCanvas = $("snow"), snowCtx = snowCanvas.getContext("2d"), flakes = [];
+    var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function sizeSnow(){
+      snowCanvas.width = window.innerWidth; snowCanvas.height = window.innerHeight;
+    }
+    function initSnow(){
+      sizeSnow(); flakes = [];
+      var n = Math.min(90, Math.floor(window.innerWidth / 12));
+      for (var i=0;i<n;i++) flakes.push({ x: Math.random()*snowCanvas.width, y: Math.random()*snowCanvas.height,
+        r: 1 + Math.random()*2.6, s: .35 + Math.random()*.9, drift: Math.random()*Math.PI*2, a: .35 + Math.random()*.55 });
+    }
+    function drawSnow(){
+      snowCtx.clearRect(0,0,snowCanvas.width,snowCanvas.height);
+      flakes.forEach(function(f){
+        f.y += f.s; f.drift += .008; f.x += Math.sin(f.drift)*.45;
+        if (f.y > snowCanvas.height + 5){ f.y = -5; f.x = Math.random()*snowCanvas.width; }
+        snowCtx.globalAlpha = f.a; snowCtx.fillStyle = "#fff";
+        snowCtx.beginPath(); snowCtx.arc(f.x, f.y, f.r, 0, Math.PI*2); snowCtx.fill();
+      });
+      snowCtx.globalAlpha = 1;
+      if (!reducedMotion) requestAnimationFrame(drawSnow);
+    }
+    window.addEventListener("resize", initSnow);
+    initSnow(); drawSnow();
+
+    /* ================= TWINKLING LIGHTS ================= */
+    (function buildLights(){
+      var holder = $("lights");
+      var colors = ["#ff4d4d","#ffcf3f","#4dff88","#4dc3ff","#ff8ae2"];
+      var N = 14, wire = document.createElementNS("http://www.w3.org/2000/svg","svg");
+      wire.setAttribute("class","wire"); wire.setAttribute("viewBox","0 0 100 44"); wire.setAttribute("preserveAspectRatio","none");
+      var path = document.createElementNS("http://www.w3.org/2000/svg","path");
+      path.setAttribute("d","M0 4 Q 25 34, 50 10 T 100 4"); path.setAttribute("fill","none");
+      path.setAttribute("stroke","rgba(0,0,0,.45)"); path.setAttribute("stroke-width","1.4");
+      wire.appendChild(path); holder.appendChild(wire);
+      for (var i=0;i<N;i++){
+        var t = i/(N-1), x = t*100;
+        var y = (1-t)*(1-t)*4 + 2*(1-t)*t*34 + t*t*10; /* approx along first curve segment for looks */
+        var b = document.createElement("div");
+        b.className = "bulb";
+        b.style.left = x + "%";
+        b.style.top = (6 + Math.sin(t*Math.PI*2.2)*13 + t*4) + "px";
+        var c = colors[i % colors.length];
+        b.style.background = c;
+        b.style.boxShadow = "0 0 12px 3px " + c;
+        b.style.animationDelay = (i * 0.23) + "s";
+        holder.appendChild(b);
+      }
+    })();
+
+    /* ================= CONFETTI ================= */
+    var confCanvas = $("confetti"), confCtx = confCanvas.getContext("2d"), confetti = [], confRunning = false;
+    function sizeConf(){ confCanvas.width = window.innerWidth; confCanvas.height = window.innerHeight; }
+    window.addEventListener("resize", sizeConf); sizeConf();
+    function burstConfetti(count, spread){
+      var colors = ["#e8323f","#22b45e","#ffcf3f","#ffffff","#4dc3ff","#ff8ae2"];
+      for (var i=0;i<count;i++){
+        confetti.push({ x: window.innerWidth/2 + (Math.random()-.5)*(spread||220), y: window.innerHeight*0.32,
+          vx: (Math.random()-.5)*9, vy: -4 - Math.random()*8, w: 6+Math.random()*6, h: 4+Math.random()*5,
+          rot: Math.random()*Math.PI, vr: (Math.random()-.5)*.3, color: colors[i % colors.length], life: 90 + Math.random()*50 });
+      }
+      if (!confRunning && !reducedMotion){ confRunning = true; requestAnimationFrame(drawConfetti); }
+    }
+    function drawConfetti(){
+      confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
+      confetti = confetti.filter(function(p){ return p.life > 0 && p.y < confCanvas.height + 30; });
+      confetti.forEach(function(p){
+        p.x += p.vx; p.y += p.vy; p.vy += .22; p.vx *= .99; p.rot += p.vr; p.life--;
+        confCtx.save(); confCtx.translate(p.x,p.y); confCtx.rotate(p.rot);
+        confCtx.globalAlpha = Math.min(1, p.life/40);
+        confCtx.fillStyle = p.color; confCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h); confCtx.restore();
+      });
+      if (confetti.length){ requestAnimationFrame(drawConfetti); }
+      else { confRunning = false; confCtx.clearRect(0,0,confCanvas.width,confCanvas.height); }
+    }
+
+    /* ================= SETUP UI ================= */
+    function buildDeckGrid(){
+      var grid = $("deckGrid"); grid.innerHTML = "";
+      Object.keys(DECKS).forEach(function(key){
+        var d = DECKS[key];
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "deck-card" + (d.wide ? " wide" : "") + (key === state.deckKey ? " selected" : "");
+        btn.setAttribute("data-deck", key);
+        btn.innerHTML = '<span class="dic" style="background:' + d.color + '">' + ICONS[d.icon] + '</span>' +
+          (d.wide
+            ? '<span class="dmeta"><span class="dname">' + d.name + '</span><span class="dcount">' + d.cards.length + ' cards · one for every day of Advent</span></span>'
+            : '<span class="dname">' + d.name + '</span><span class="dcount">' + d.cards.length + ' cards</span>');
+        btn.addEventListener("click", function(){
+          state.deckKey = key;
+          grid.querySelectorAll(".deck-card").forEach(function(c){ c.classList.toggle("selected", c.getAttribute("data-deck") === key); });
+          tone(740, 0, .08, "triangle", .1);
+        });
+        grid.appendChild(btn);
+      });
+    }
+    buildDeckGrid();
+
+    function wireChips(id, attr, apply){
+      $(id).querySelectorAll(".chip").forEach(function(chip){
+        chip.addEventListener("click", function(){
+          $(id).querySelectorAll(".chip").forEach(function(c){ c.classList.remove("selected"); });
+          chip.classList.add("selected");
+          apply(parseInt(chip.getAttribute(attr), 10));
+          tone(740, 0, .08, "triangle", .1);
+        });
+      });
+    }
+    wireChips("timeChips", "data-seconds", function(v){ state.seconds = v; });
+    wireChips("roundChips", "data-rounds", function(v){ state.roundsPerTeam = v; });
+    $("foreheadToggleBtn").addEventListener("click", function(){
+      state.forehead = !state.forehead;
+      this.setAttribute("aria-checked", String(state.forehead));
+      $("foreheadSwitch").classList.toggle("on", state.forehead);
+      tone(state.forehead ? 880 : 520, 0, .09, "triangle", .1);
+    });
+
+    function refreshScoreboard(){
+      $("scoreA").textContent = state.scores.A;
+      $("scoreB").textContent = state.scores.B;
+      $("boxA").classList.toggle("turn", state.turn === 0);
+      $("boxB").classList.toggle("turn", state.turn === 1);
+    }
+
+    /* ================= GAME FLOW ================= */
+    function shuffledDeck(){
+      var cards = DECKS[state.deckKey].cards.slice();
+      for (var i = cards.length - 1; i > 0; i--){
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = cards[i]; cards[i] = cards[j]; cards[j] = t;
+      }
+      return cards;
+    }
+
+    function startGame(){
+      state.scores = { A: 0, B: 0 };
+      state.roundForTeam = { A: 0, B: 0 };
+      state.turn = 0;
+      state.queue = shuffledDeck();
+      refreshScoreboard();
+      goReady();
+    }
+
+    function goReady(){
+      var team = TEAMS[state.turn];
+      state.roundForTeam[team.id]++;
+      $("readyTeam").textContent = team.emoji + " " + team.name;
+      $("readyTeam").style.color = team.id === "A" ? "#ffb3ab" : "#a9f2c4";
+      $("readyRound").textContent = "Round " + state.roundForTeam[team.id] + " of " + state.roundsPerTeam + " · " + DECKS[state.deckKey].name + " · " + state.seconds + " seconds on the clock";
+      $("readyPassNote").textContent = state.forehead
+        ? "Actor, phone goes on your forehead — screen facing your team. Then hit the big button."
+        : "Pass the phone to a " + team.name + " player, then hit the big button.";
+      $("readyTips").innerHTML = state.forehead
+        ? "<li>Phone on forehead, screen facing your team. They act, YOU guess out loud.</li><li>They can't talk either — mime only, same rules.</li><li>Got it right? Tap the <b>left</b> side. Stuck? Tap the <b>right</b> side to pass.</li>"
+        : "<li>Take the phone. You're the star now. Act humble later.</li><li>No words, no sounds, no spelling in the air. Mime only!</li><li>Your team shouts guesses — the louder, the better.</li>";
+      showScreen("ready");
+    }
+
+    function runCountdown(done){
+      var cd = $("countdown"), num = $("cdNum");
+      cd.classList.add("show");
+      var steps = ["3","2","1","GO!"];
+      var i = 0;
+      function step(){
+        num.textContent = steps[i];
+        num.classList.remove("tick"); void num.offsetWidth; num.classList.add("tick");
+        tone(i === 3 ? 1047 : 660, 0, .16, "triangle", .16);
+        i++;
+        if (i < steps.length){ setTimeout(step, 780); }
+        else setTimeout(function(){ cd.classList.remove("show"); done(); }, 620);
+      }
+      step();
+    }
+
+    function startRound(){
+      runCountdown(function(){
+        state.roundResults = [];
+        state.roundScore = 0;
+        state.playing = true;
+        document.body.classList.toggle("forehead-on", state.forehead);
+        var team = TEAMS[state.turn];
+        var pt = $("playTeam");
+        pt.textContent = team.emoji + " " + team.name;
+        pt.className = "play-team " + (team.id === "A" ? "a" : "b");
+        $("deckTag").textContent = DECKS[state.deckKey].name;
+        $("roundScore").textContent = "0";
+        showScreen("play");
+        nextCard(true);
+        startTimer();
+      });
+    }
+
+    function wordSizeClass(w){
+      if (w.length > 34) return "xlong";
+      if (w.length > 19) return "long";
+      return "";
+    }
+
+    function nextCard(first){
+      if (!state.queue.length) state.queue = shuffledDeck();
+      state.current = state.queue.pop();
+      var w = $("theWord");
+      w.textContent = state.current;
+      w.className = "the-word " + wordSizeClass(state.current);
+      var fw = $("fhWord");
+      fw.textContent = state.current;
+      fw.className = "fh-word " + (wordSizeClass(state.current) === "xlong" ? "long" : wordSizeClass(state.current));
+      if (!first){
+        var card = $("wordCard");
+        card.classList.remove("pop"); void card.offsetWidth; card.classList.add("pop");
+      }
+    }
+
+    function startTimer(){
+      clearInterval(state.timerId);
+      state.timeLeft = state.seconds;
+      var RING = 251.3;
+      var endAt = Date.now() + state.seconds * 1000;
+      var lastWhole = state.seconds;
+      $("timerWrap").classList.remove("urgent");
+      $("timerNum").textContent = state.seconds;
+      $("timerRing").style.strokeDashoffset = "0";
+      state.timerId = setInterval(function(){
+        var remain = Math.max(0, (endAt - Date.now()) / 1000);
+        state.timeLeft = remain;
+        var whole = Math.ceil(remain);
+        $("timerNum").textContent = whole;
+        $("timerRing").style.strokeDashoffset = String(RING * (1 - remain / state.seconds));
+        if (whole !== lastWhole){
+          lastWhole = whole;
+          if (whole <= 10 && whole > 0) sndTick();
+        }
+        if (remain <= 10.05) $("timerWrap").classList.add("urgent");
+        if (remain <= 0) endRound();
+      }, 100);
+    }
+
+    function markCorrect(){
+      if (!state.playing) return;
+      state.roundResults.push({ word: state.current, got: true });
+      state.roundScore++;
+      $("roundScore").textContent = state.roundScore;
+      sndCorrect();
+      if (navigator.vibrate) navigator.vibrate(50);
+      burstConfetti(26, 160);
+      var card = $("wordCard");
+      card.classList.remove("flash-good"); void card.offsetWidth; card.classList.add("flash-good");
+      nextCard(false);
+    }
+
+    function markPass(){
+      if (!state.playing) return;
+      state.roundResults.push({ word: state.current, got: false });
+      sndPass();
+      if (navigator.vibrate) navigator.vibrate([25, 40, 25]);
+      var card = $("wordCard");
+      card.classList.remove("flash-pass"); void card.offsetWidth; card.classList.add("flash-pass");
+      nextCard(false);
+    }
+
+    function endRound(){
+      if (!state.playing) return;
+      state.playing = false;
+      clearInterval(state.timerId);
+      sndBuzz();
+      if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+      var team = TEAMS[state.turn];
+      state.scores[team.id] += state.roundScore;
+      showSummary(team);
+    }
+
+    function gameIsOver(){
+      return state.roundForTeam.A >= state.roundsPerTeam && state.roundForTeam.B >= state.roundsPerTeam;
+    }
+
+    function showSummary(team){
+      document.body.classList.remove("forehead-on");
+      $("sumTeam").textContent = team.emoji + " " + team.name + " · Round " + state.roundForTeam[team.id] + " done";
+      $("sumScore").textContent = state.roundScore;
+      var ratio = state.roundResults.length ? state.roundScore / state.roundResults.length : 0;
+      var quip = (state.roundScore >= 6 || (state.roundScore >= 3 && ratio >= 0.75)) ? QUIPS_GREAT[Math.floor(Math.random()*QUIPS_GREAT.length)]
+               : (state.roundScore >= 2 && ratio >= 0.5) ? QUIPS_GOOD[Math.floor(Math.random()*QUIPS_GOOD.length)]
+               : QUIPS_ROUGH[Math.floor(Math.random()*QUIPS_ROUGH.length)];
+      if (state.roundResults.length === 0) quip = "A bold, card-free strategy. Zero cards attempted.";
+      $("sumQuip").textContent = quip;
+      var list = $("sumList"); list.innerHTML = "";
+      if (!state.roundResults.length){
+        list.innerHTML = '<li class="empty-note" style="justify-content:center">No cards played — the timer won this one.</li>';
+      } else {
+        state.roundResults.forEach(function(r){
+          var li = document.createElement("li");
+          li.className = r.got ? "got" : "passed";
+          li.innerHTML = '<span class="mark">' + (r.got ? "✓" : "✕") + '</span><span class="w"></span>';
+          li.querySelector(".w").textContent = r.word;
+          list.appendChild(li);
+        });
+      }
+      $("sumScoreA").textContent = state.scores.A;
+      $("sumScoreB").textContent = state.scores.B;
+      var nextTeam = TEAMS[1 - state.turn];
+      $("nextBtn").textContent = gameIsOver() ? "🏆 See the Final Results" : "Next: " + nextTeam.emoji + " " + nextTeam.name + " ➜";
+      refreshScoreboard();
+      showScreen("summary");
+    }
+
+    function showWinner(){
+      var a = state.scores.A, b = state.scores.B;
+      $("finalScoreA").textContent = a;
+      $("finalScoreB").textContent = b;
+      if (a === b){
+        $("winnerName").textContent = "It's a Tie!";
+        $("winnerQuip").textContent = WIN_QUIPS.tie;
+      } else {
+        var winner = a > b ? TEAMS[0] : TEAMS[1];
+        $("winnerName").textContent = winner.emoji + " " + winner.name + "!";
+        $("winnerQuip").textContent = a > b ? WIN_QUIPS.A : WIN_QUIPS.B;
+      }
+      showScreen("winner");
+      sndFanfare();
+      burstConfetti(130, 420);
+      setTimeout(function(){ burstConfetti(90, 300); }, 450);
+      setTimeout(function(){ burstConfetti(70, 520); }, 950);
+    }
+
+    /* ================= WIRING ================= */
+    $("startGameBtn").addEventListener("click", function(){ ac(); startGame(); });
+    $("startRoundBtn").addEventListener("click", function(){ ac(); startRound(); });
+    $("quitToSetupBtn").addEventListener("click", function(){
+      state.roundForTeam[TEAMS[state.turn].id]--; /* ready screen hadn't started yet */
+      showScreen("setup");
+    });
+    $("correctBtn").addEventListener("click", markCorrect);
+    $("passBtn").addEventListener("click", markPass);
+    $("fhCorrect").addEventListener("click", markCorrect);
+    $("fhPass").addEventListener("click", markPass);
+    $("endRoundBtn").addEventListener("click", endRound);
+    $("nextBtn").addEventListener("click", function(){
+      if (gameIsOver()){ showWinner(); }
+      else { state.turn = 1 - state.turn; goReady(); }
+    });
+    $("playAgainBtn").addEventListener("click", function(){ startGame(); });
+    $("changeDeckBtn").addEventListener("click", function(){ refreshScoreboard(); showScreen("setup"); });
+
+    document.addEventListener("keydown", function(e){
+      if (!$("screen-play").classList.contains("active") || !state.playing) return;
+      if (e.key === "ArrowRight" || e.key === " "){ e.preventDefault(); markCorrect(); }
+      if (e.key === "ArrowLeft"){ e.preventDefault(); markPass(); }
+    });
+
+    refreshScoreboard();
+    </script>
+  </body>
+</html>
