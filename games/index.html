@@ -203,6 +203,20 @@
   .sig{ font-family:"Mountains of Christmas",cursive; font-size:1.6rem; color:#7f1d1d; transform:rotate(-2deg); }
   .signoff span{ font-weight:800; color:#6b7280; font-size:.95rem; }
 
+  /* ---------- workshop note ---------- */
+  .workshop-note{
+    margin:30px auto 0; max-width:660px; background:var(--cream); color:var(--ink);
+    border:2px dashed #d97706; border-radius:14px; padding:20px 22px 16px;
+    box-shadow:0 10px 26px rgba(4,30,20,.3); transform:rotate(-1deg); position:relative; text-align:left;
+  }
+  .workshop-note::before{
+    content:""; position:absolute; top:-13px; left:50%; transform:translateX(-50%) rotate(2deg);
+    width:110px; height:24px; background:rgba(255,209,102,.75); border:1px solid rgba(217,119,6,.35); border-radius:2px;
+  }
+  .workshop-note h2{ font-family:"Mountains of Christmas",cursive; font-size:1.55rem; margin:2px 0 6px; color:#7f1d1d; }
+  .workshop-note p{ margin:0; font-size:.99rem; line-height:1.6; font-weight:600; color:#374151; }
+  .workshop-note .note-sig{ margin-top:12px; font-family:"Mountains of Christmas",cursive; font-size:1.3rem; color:#14532d; transform:rotate(-1.5deg); display:inline-block; }
+
   footer{ text-align:center; margin-top:42px; color:var(--mint); }
   footer .credit{ font-weight:900; font-size:1.02rem; color:var(--cream); }
   footer p{ font-weight:600; opacity:.85; font-size:.92rem; }
@@ -461,6 +475,13 @@
       <span>— signed together, like everything else here.</span>
     </div>
   </section>
+
+  <!-- ======== WORKSHOP NOTE ======== -->
+  <aside class="workshop-note" aria-labelledby="workshopTitle">
+    <h2 id="workshopTitle">📌 A Note from the Workshop</h2>
+    <p>Straight talk, the way we'd want it told to us: these three games were polished with care and checked end to end before they went out — but they have <strong>not</strong> been through a long beta with a big crowd of testers. They were publishable, so we published them. If something breaks, sticks, or just feels off when you play, we'd rather hear about it than hide it — that's how the next version gets better.</p>
+    <span class="note-sig">— Bryan Lee (Afnuke) × AI</span>
+  </aside>
 
   <footer>
     <p class="credit">Built by Bryan Lee (Afnuke) · AI collaboration</p>
