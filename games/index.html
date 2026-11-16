@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Three Jolly Games — Christmas Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --pine:#0c3b2e; --pine-deep:#07271e; --pine-soft:#12503c;
+    --holly:#d9232e; --holly-deep:#a8121d; --berry:#ff4757;
+    --gold:#ffb703; --gold-soft:#ffd166; --cream:#fff8ea; --paper:#fffdf6;
+    --ink:#22301f; --mint:#bfe8cf; --sky:#aee7ff;
+    --card-shadow:0 18px 40px rgba(4,30,20,.35);
+    --radius:22px;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --pine:#0e4634; --pine-deep:#0a3527; --card-shadow:0 18px 40px rgba(7,50,35,.28); }
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; font-family:"Nunito",system-ui,sans-serif; color:var(--cream);
+    background:
+      radial-gradient(1100px 500px at 85% -80px, rgba(255,183,3,.20), transparent 60%),
+      radial-gradient(900px 480px at -10% 240px, rgba(217,35,46,.22), transparent 55%),
+      linear-gradient(180deg, var(--pine) 0%, var(--pine-deep) 55%, #051f17 100%);
+    min-height:100vh; overflow-x:hidden;
+  }
+  button, a.btn, [role="button"]{ min-height:44px; }
+  :focus-visible{ outline:3px solid var(--gold); outline-offset:3px; border-radius:8px; }
+
+  #snow{ position:fixed; inset:0; pointer-events:none; z-index:3; }
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 18px 64px; position:relative; z-index:4; }
+
+  /* ---------- twinkle lights ---------- */
+  .lights{ display:flex; justify-content:space-between; padding:10px 2px 0; }
+  .lights span{ width:13px; height:13px; border-radius:50%; position:relative; animation:twinkle 1.6s ease-in-out infinite; box-shadow:0 0 14px 3px currentColor; }
+  .lights span::before{ content:""; position:absolute; left:50%; top:-9px; width:2px; height:9px; background:rgba(255,248,234,.5); transform:translateX(-50%); }
+  .lights span:nth-child(4n+1){ background:#ff5964; color:#ff5964; }
+  .lights span:nth-child(4n+2){ background:#ffd166; color:#ffd166; animation-delay:.4s; }
+  .lights span:nth-child(4n+3){ background:#6ee7a0; color:#6ee7a0; animation-delay:.8s; }
+  .lights span:nth-child(4n){ background:#7dd7ff; color:#7dd7ff; animation-delay:1.2s; }
+  @keyframes twinkle{ 0%,100%{ opacity:1; transform:scale(1);} 50%{ opacity:.45; transform:scale(.8);} }
+
+  /* ---------- hero ---------- */
+  .hero{ text-align:center; padding:26px 6px 8px; }
+  .hero .kicker{
+    display:inline-block; background:var(--holly); color:#fff; font-weight:900; letter-spacing:.14em;
+    font-size:.78rem; text-transform:uppercase; padding:8px 16px; border-radius:999px;
+    border:2px dashed rgba(255,255,255,.55); box-shadow:0 6px 18px rgba(0,0,0,.3); transform:rotate(-1.5deg);
+  }
+  h1{
+    font-family:"Mountains of Christmas",cursive; font-weight:700; line-height:.95;
+    font-size:clamp(3rem, 10vw, 5.6rem); margin:14px 0 4px; color:var(--cream);
+    text-shadow:0 3px 0 var(--holly-deep), 0 10px 28px rgba(0,0,0,.45);
+  }
+  h1 .gold{ color:var(--gold-soft); }
+  .hero p.lede{ font-size:clamp(1.05rem,2.6vw,1.3rem); font-weight:700; color:var(--mint); max-width:640px; margin:10px auto 0; }
+  .hero p.sub{ color:#e9f5ec; opacity:.92; max-width:600px; margin:8px auto 0; font-size:1rem; line-height:1.55; }
+  .hero-cta{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:22px; }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:9px; text-decoration:none;
+    font-weight:900; font-size:1.02rem; padding:13px 24px; border-radius:999px; border:none; cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease; font-family:inherit;
+  }
+  .btn:active{ transform:scale(.97); }
+  .btn-red{ background:linear-gradient(180deg,#f43f4e,var(--holly) 55%,var(--holly-deep)); color:#fff; box-shadow:0 10px 24px rgba(217,35,46,.45), inset 0 2px 0 rgba(255,255,255,.35); }
+  .btn-gold{ background:linear-gradient(180deg,#ffd166,var(--gold)); color:#4a2c00; box-shadow:0 10px 24px rgba(255,183,3,.4), inset 0 2px 0 rgba(255,255,255,.6); }
+  .btn-ghost{ background:rgba(255,248,234,.1); color:var(--cream); border:2px solid rgba(255,248,234,.45); }
+  .btn-ghost[aria-pressed="true"]{ background:rgba(255,209,102,.25); border-color:var(--gold); }
+
+  /* ---------- video marquee ---------- */
+  .section-head{ text-align:center; margin:44px 0 16px; }
+  .section-head h2{ font-family:"Mountains of Christmas",cursive; font-size:clamp(2rem,6vw,2.9rem); margin:0; color:var(--cream); text-shadow:0 2px 0 rgba(0,0,0,.35); }
+  .section-head p{ color:var(--mint); font-weight:700; margin:6px auto 0; max-width:560px; }
+  .marquee{
+    background:linear-gradient(180deg,#8f0f1a,var(--holly-deep));
+    border-radius:28px; padding:14px; box-shadow:var(--card-shadow);
+    border:3px solid rgba(255,209,102,.65); position:relative;
+  }
+  .marquee .bulbs{ display:flex; justify-content:space-between; padding:0 6px 10px; }
+  .marquee .bulbs i{ width:11px; height:11px; border-radius:50%; background:var(--gold-soft); box-shadow:0 0 12px 3px rgba(255,209,102,.85); animation:twinkle 1.3s infinite; }
+  .marquee .bulbs i:nth-child(even){ animation-delay:.65s; background:#fff3d6; }
+  .screen{
+    position:relative; aspect-ratio:16/9; border-radius:16px; overflow:hidden; background:#0a0f1e;
+    border:3px solid #04150e;
+  }
+  .scene{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; opacity:0; visibility:hidden; transform:scale(1.04); transition:opacity .35s ease, transform .35s ease, visibility 0s linear .35s; pointer-events:none; }
+  .scene.on{ opacity:1; visibility:visible; transform:scale(1); pointer-events:auto; transition:opacity .35s ease, transform .35s ease, visibility 0s; }
+  .scene .big{ font-family:"Mountains of Christmas",cursive; font-weight:700; font-size:clamp(1.7rem,5.4vw,3.1rem); line-height:1.05; color:#fff; text-shadow:0 3px 14px rgba(0,0,0,.5); }
+  .scene .small{ font-weight:800; color:#ffeec2; font-size:clamp(.92rem,2.4vw,1.15rem); margin-top:10px; max-width:520px; }
+  .scene-1{ background:radial-gradient(600px 300px at 50% 0%, rgba(255,183,3,.35), transparent), linear-gradient(160deg,#14532d,#7f1d1d); }
+  .scene-2{ background:linear-gradient(160deg,#b91c1c,#7c2d12); }
+  .scene-3{ background:linear-gradient(160deg,#166534,#14532d); }
+  .scene-4{ background:linear-gradient(160deg,#9a3412,#7f1d1d); }
+  .scene-5{ background:radial-gradient(600px 300px at 50% 100%, rgba(255,183,3,.4), transparent), linear-gradient(160deg,#14532d,#831843); }
+  .scene .emoji-row{ font-size:clamp(2rem,7vw,3.4rem); letter-spacing:.15em; margin-bottom:8px; }
+  .scene .chain{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:12px; }
+  .scene .chain b{ background:rgba(255,255,255,.16); border:2px solid rgba(255,255,255,.4); padding:7px 13px; border-radius:999px; font-size:.9rem; color:#fff; }
+  .scene .chain b.hot{ background:var(--gold); color:#4a2c00; border-color:#fff2c9; }
+  .screen.idle .scene{ display:none; }
+  .big-play{
+    position:absolute; inset:0; display:flex; flex-direction:column; gap:12px; align-items:center; justify-content:center;
+    background:radial-gradient(600px 300px at 50% 0%, rgba(255,183,3,.35), transparent), linear-gradient(160deg,#14532d,#7f1d1d);
+    border:none; cursor:pointer; color:#fff; font-family:inherit; z-index:5; padding:18px;
+  }
+  .big-play .disc{ width:92px; height:92px; border-radius:50%; background:linear-gradient(180deg,#f43f4e,var(--holly-deep)); display:flex; align-items:center; justify-content:center; box-shadow:0 14px 34px rgba(0,0,0,.5), inset 0 3px 0 rgba(255,255,255,.4); animation:pulse 1.8s ease-in-out infinite; }
+  .big-play .disc svg{ width:40px; height:40px; fill:#fff; margin-left:5px; }
+  .big-play strong{ font-family:"Mountains of Christmas",cursive; font-size:1.7rem; text-shadow:0 2px 10px rgba(0,0,0,.7); }
+  .big-play small{ font-weight:800; color:#ffeec2; }
+  @keyframes pulse{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.07);} }
+  .reel-bar{ display:flex; align-items:center; gap:12px; margin-top:12px; }
+  .reel-bar .seg{ flex:1; height:8px; border-radius:99px; background:rgba(255,255,255,.25); overflow:hidden; }
+  .reel-bar .seg i{ display:block; height:100%; width:0%; background:var(--gold-soft); border-radius:99px; }
+  .reel-ctl{ display:flex; gap:8px; }
+  .reel-ctl button{ background:rgba(255,248,234,.14); color:#fff; border:2px solid rgba(255,255,255,.4); border-radius:999px; font-weight:900; padding:9px 16px; cursor:pointer; font-family:inherit; font-size:.92rem; }
+  .caption{ text-align:center; margin-top:10px; font-weight:800; color:#ffeec2; min-height:1.5em; font-size:1rem; }
+
+  /* ---------- game cards ---------- */
+  .cards{ display:grid; grid-template-columns:1fr; gap:26px; margin-top:8px; }
+  @media (min-width:860px){ .cards{ grid-template-columns:repeat(3,1fr); align-items:stretch; } }
+  .card{
+    background:var(--paper); color:var(--ink); border-radius:var(--radius); overflow:hidden;
+    box-shadow:var(--card-shadow); display:flex; flex-direction:column; position:relative;
+    border:3px solid transparent; transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .card.spotlight{ border-color:var(--gold); transform:translateY(-6px) scale(1.02); box-shadow:0 0 0 6px rgba(255,183,3,.35), var(--card-shadow); }
+  .card .art{ padding:14px 16px 14px; text-align:center; position:relative; overflow:hidden; }
+  .art-tags{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:10px; }
+  .art-tags .badge, .art-tags .pick-tag{ position:static; }
+  .art-bus{ background:linear-gradient(160deg,#fde68a,#f59e0b); }
+  .art-relay{ background:linear-gradient(160deg,#bbf7d0,#22c55e); }
+  .art-charades{ background:linear-gradient(160deg,#fecdd3,#f43f5e); }
+  .card .art svg{ width:120px; height:92px; filter:drop-shadow(0 8px 12px rgba(0,0,0,.25)); }
+  .badge{
+    position:absolute; top:12px; left:12px; background:var(--pine); color:#fff; font-weight:900; font-size:.74rem;
+    letter-spacing:.1em; text-transform:uppercase; padding:6px 11px; border-radius:999px;
+  }
+  .pick-tag{
+    position:absolute; top:12px; right:12px; background:#fff; color:var(--holly-deep); font-weight:900; font-size:.74rem;
+    padding:6px 11px; border-radius:999px; border:2px dashed var(--holly);
+  }
+  .card .body{ padding:6px 20px 22px; display:flex; flex-direction:column; flex:1; }
+  .card h3{ font-family:"Mountains of Christmas",cursive; font-size:1.95rem; line-height:1.02; margin:8px 0 2px; color:#7f1d1d; }
+  .art-relay + .body h3, .card.relay h3{ color:#14532d; }
+  .card .tagline{ font-weight:800; font-size:1.02rem; line-height:1.45; color:#374151; margin:4px 0 12px; }
+  .meta{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+  .meta span{ background:#fef3c7; border:1.5px solid #f59e0b; color:#92400e; font-weight:900; font-size:.8rem; padding:5px 11px; border-radius:999px; }
+  .card.relay .meta span{ background:#dcfce7; border-color:#22c55e; color:#14532d; }
+  .card.charades .meta span{ background:#ffe4e6; border-color:#f43f5e; color:#881337; }
+  .feats{ list-style:none; margin:0 0 18px; padding:0; display:grid; gap:7px; font-weight:700; color:#4b5563; font-size:.95rem; }
+  .feats li{ display:flex; gap:9px; align-items:flex-start; }
+  .feats li::before{ content:"★"; color:#f59e0b; flex:none; }
+  .card .play{ margin-top:auto; }
+  .play a{
+    display:flex; align-items:center; justify-content:center; gap:10px; text-decoration:none; color:#fff;
+    font-weight:900; font-size:1.2rem; letter-spacing:.02em; padding:16px; border-radius:16px; min-height:56px;
+    box-shadow:0 10px 22px rgba(0,0,0,.25), inset 0 2px 0 rgba(255,255,255,.35); transition:transform .15s ease;
+  }
+  .play a:active{ transform:scale(.97); }
+  .play-bus a{ background:linear-gradient(180deg,#f59e0b,#b45309); }
+  .play-relay a{ background:linear-gradient(180deg,#22c55e,#15803d); }
+  .play-charades a{ background:linear-gradient(180deg,#f43f5e,#be123c); }
+  .how-link{ display:block; text-align:center; margin-top:10px; font-weight:900; color:#6b7280; text-decoration:underline; text-underline-offset:3px; padding:8px; }
+
+  /* ---------- pick for me / how it works ---------- */
+  .banner{
+    margin-top:40px; background:linear-gradient(120deg, var(--holly), #7f1d1d);
+    border-radius:var(--radius); padding:26px 22px; text-align:center; box-shadow:var(--card-shadow);
+    border:3px solid rgba(255,209,102,.6);
+  }
+  .banner h2{ font-family:"Mountains of Christmas",cursive; margin:0 0 6px; font-size:clamp(1.8rem,5vw,2.5rem); color:#fff; }
+  .banner p{ margin:0 auto 16px; max-width:520px; font-weight:700; color:#ffe4e6; }
+  .steps{ display:grid; gap:14px; margin-top:18px; }
+  @media (min-width:760px){ .steps{ grid-template-columns:repeat(3,1fr); } }
+  .step{ background:rgba(255,248,234,.08); border:2px solid rgba(255,248,234,.25); border-radius:18px; padding:18px; text-align:center; }
+  .step .num{ width:46px; height:46px; margin:0 auto 10px; border-radius:50%; background:var(--gold); color:#4a2c00; font-weight:900; font-size:1.3rem; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(0,0,0,.3); }
+  .step h3{ margin:0 0 5px; font-size:1.08rem; color:#fff; }
+  .step p{ margin:0; color:var(--mint); font-weight:600; font-size:.95rem; line-height:1.5; }
+
+  /* ---------- collaboration ---------- */
+  .collab{
+    margin-top:44px; background:var(--paper); color:var(--ink); border-radius:var(--radius);
+    padding:30px 24px; box-shadow:var(--card-shadow); border-top:10px solid var(--holly); position:relative; overflow:hidden;
+  }
+  .collab::after{ content:"✦ ✦ ✦"; position:absolute; top:12px; right:18px; color:#f59e0b; letter-spacing:.4em; font-size:.9rem; }
+  .collab h2{ font-family:"Mountains of Christmas",cursive; font-size:clamp(1.9rem,5.4vw,2.6rem); margin:0 0 10px; color:#7f1d1d; }
+  .collab p{ font-size:1.05rem; line-height:1.65; font-weight:600; color:#374151; max-width:720px; }
+  .collab p strong{ color:#14532d; }
+  .duo{ display:grid; gap:14px; margin-top:18px; }
+  @media (min-width:700px){ .duo{ grid-template-columns:1fr 1fr; } }
+  .duo .side{ border-radius:16px; padding:18px; }
+  .duo .human{ background:#fef3c7; border:2px solid #f59e0b; }
+  .duo .ai{ background:#dcfce7; border:2px solid #22c55e; }
+  .duo h3{ margin:0 0 6px; font-size:1.05rem; }
+  .duo p{ margin:0; font-size:.97rem; }
+  .signoff{ margin-top:20px; display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+  .sig{ font-family:"Mountains of Christmas",cursive; font-size:1.6rem; color:#7f1d1d; transform:rotate(-2deg); }
+  .signoff span{ font-weight:800; color:#6b7280; font-size:.95rem; }
+
+  footer{ text-align:center; margin-top:42px; color:var(--mint); }
+  footer .credit{ font-weight:900; font-size:1.02rem; color:var(--cream); }
+  footer p{ font-weight:600; opacity:.85; font-size:.92rem; }
+
+  /* ---------- intro overlay ---------- */
+  #intro{
+    position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; padding:20px;
+    background:radial-gradient(800px 420px at 50% -60px, rgba(255,183,3,.3), transparent), linear-gradient(180deg,#0e4634,#051f17);
+    transition:opacity .6s ease, visibility .6s;
+  }
+  #intro.gone{ opacity:0; visibility:hidden; }
+  .intro-card{ text-align:center; max-width:560px; width:100%; }
+  .intro-card .lights{ margin-bottom:8px; }
+  .intro-card h2{ font-family:"Mountains of Christmas",cursive; font-size:clamp(2.6rem,9vw,4.4rem); line-height:.98; margin:8px 0 6px; color:var(--cream); text-shadow:0 3px 0 var(--holly-deep), 0 12px 30px rgba(0,0,0,.5); animation:rise .7s ease both; }
+  .intro-card p{ color:var(--mint); font-weight:800; font-size:1.08rem; margin:0 auto 18px; max-width:440px; animation:rise .7s .15s ease both; }
+  .intro-games{ display:grid; gap:10px; margin:0 auto 22px; max-width:420px; }
+  .intro-games div{
+    background:rgba(255,248,234,.1); border:2px solid rgba(255,248,234,.3); border-radius:14px; padding:12px 16px;
+    font-weight:900; font-size:1.02rem; display:flex; justify-content:space-between; align-items:center; gap:10px;
+    opacity:0; animation:rise .55s ease forwards;
+  }
+  .intro-games div:nth-child(1){ animation-delay:.35s; } .intro-games div:nth-child(2){ animation-delay:.6s; } .intro-games div:nth-child(3){ animation-delay:.85s; }
+  .intro-games small{ color:var(--gold-soft); font-weight:800; }
+  @keyframes rise{ from{ opacity:0; transform:translateY(16px);} to{ opacity:1; transform:none;} }
+  .intro-actions{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; animation:rise .7s 1.05s ease both; }
+  #confetti{ position:fixed; inset:0; pointer-events:none; z-index:60; }
+
+  @media (max-width: 560px){
+    .scene{ padding:10px 12px; }
+    .scene .big{ font-size:1.5rem; }
+    .scene .small{ font-size:.85rem; margin-top:6px; }
+    .scene .emoji-row{ font-size:1.7rem; margin-bottom:2px; }
+    .scene .chain{ margin-top:7px; gap:6px; }
+    .scene .chain b{ padding:4px 10px; font-size:.78rem; }
+    .big-play .disc{ width:70px; height:70px; }
+    .big-play strong{ font-size:1.35rem; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+    html{ scroll-behavior:auto; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="snow" aria-hidden="true"></canvas>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<!-- ======== FIRST-OPEN INTRO ======== -->
+<div id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+  <div class="intro-card">
+    <div class="lights" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <h2 id="introTitle">Three Jolly Games<br/>are in the house! 🎄</h2>
+    <p>Three Christmas party games. One phone. Pass it around the room and try not to laugh eggnog out of your nose.</p>
+    <div class="intro-games">
+      <div><span>🚌 Stop the Bus: Advent Categories</span><small>Think fast!</small></div>
+      <div><span>🦌 Reindeer Relay</span><small>Draw it wrong!</small></div>
+      <div><span>🎭 Charades: Jolly Edition</span><small>Act it out!</small></div>
+    </div>
+    <div class="intro-actions">
+      <button class="btn btn-red" id="enterBtn" type="button">🎁 Open the Games</button>
+      <button class="btn btn-ghost" id="introWatchBtn" type="button">▶ Watch the Tour First</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="lights" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+  <!-- ======== HERO ======== -->
+  <header class="hero">
+    <span class="kicker">★ One Phone · Whole Room · Zero Downloads ★</span>
+    <h1>Three <span class="gold">Jolly</span> Games</h1>
+    <p class="lede">A Christmas party in your pocket — pick a game, pass the phone, and let the chaos begin.</p>
+    <p class="sub">Everybody likes to share a phone. These three were built for exactly that: no accounts, no downloads, no five people staring at five separate screens. The phone is just the deck of cards — the game is the people.</p>
+    <div class="hero-cta">
+      <a class="btn btn-red" href="#tour">▶ Watch the Tour</a>
+      <a class="btn btn-gold" href="#games">🎄 Pick a Game</a>
+      <button class="btn btn-ghost" id="musicBtn" type="button" aria-pressed="false">🔔 Music: Off</button>
+      <button class="btn btn-ghost" id="replayIntroBtn" type="button">↺ Replay Intro</button>
+    </div>
+  </header>
+
+  <!-- ======== INTRO / PITCH VIDEO ======== -->
+  <section id="tour" aria-labelledby="tourTitle">
+    <div class="section-head">
+      <h2 id="tourTitle">🎬 The Jolly Tour</h2>
+      <p>New here? Press play — sixty seconds and you'll know all three games.</p>
+    </div>
+    <div class="marquee">
+      <div class="bulbs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="screen idle" id="screen">
+        <div class="scene scene-1 on" data-scene>
+          <div class="emoji-row" aria-hidden="true">🚌 🦌 🎭</div>
+          <div class="big">Three games.<br/>One phone. Zero downloads.</div>
+          <div class="small">The whole Christmas party, right in your pocket.</div>
+        </div>
+        <div class="scene scene-2" data-scene>
+          <div class="big">Stop the Bus:<br/>Advent Categories 🚌</div>
+          <div class="small">A letter drops. Ten categories. Race the clock — and pray nobody else wrote “Silent Night” too.</div>
+          <div class="chain"><b>Letter: S</b><b>Song → Silent Night</b><b class="hot">Unique = points!</b></div>
+        </div>
+        <div class="scene scene-3" data-scene>
+          <div class="big">Reindeer Relay 🦌</div>
+          <div class="small">Draw the sentence. Guess the drawing. Draw the guess. By the end, Santa's sleigh is a submarine.</div>
+          <div class="chain"><b>✍️ Write</b><b>🎨 Draw</b><b>🤔 Guess</b><b class="hot">😂 Reveal</b></div>
+        </div>
+        <div class="scene scene-4" data-scene>
+          <div class="big">Charades: Jolly Edition 🎭</div>
+          <div class="small">One phone on your forehead, the whole room shouting. 320 cards of pure December nonsense.</div>
+          <div class="chain"><b>Team Holly 🌿</b><b>vs.</b><b class="hot">Team Jingle 🔔</b></div>
+        </div>
+        <div class="scene scene-5" data-scene>
+          <div class="big">Pick one.<br/>Pass the phone. 🎄</div>
+          <div class="small">Merry chaos guaranteed. Scroll down and choose your fighter.</div>
+        </div>
+        <button class="big-play" id="bigPlay" type="button" aria-label="Play the intro tour">
+          <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.8v16.4c0 .9 1 1.5 1.8 1L21 13a1.2 1.2 0 0 0 0-2L7.8 2.9C7 2.4 6 2.9 6 3.8z"/></svg></span>
+          <strong>Watch What These Are!</strong>
+          <small>The 60-second tour of all three games</small>
+        </button>
+      </div>
+      <div class="reel-bar" aria-hidden="true">
+        <div class="seg"><i id="segFill"></i></div>
+      </div>
+      <p class="caption" id="reelCaption" aria-live="polite">Press play for the tour 🎅</p>
+      <div class="reel-ctl" style="justify-content:center;">
+        <button type="button" id="reelToggle">▶ Play Tour</button>
+        <button type="button" id="reelRestart">↺ Restart</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== GAME CARDS ======== -->
+  <section id="games" aria-labelledby="gamesTitle">
+    <div class="section-head">
+      <h2 id="gamesTitle">🎁 Pick Your Game</h2>
+      <p>Three doors, all of them jolly. Tap PLAY and the game opens on its own page.</p>
+    </div>
+    <div class="cards">
+
+      <article class="card" id="card-bus">
+        <div class="art art-bus">
+          <div class="art-tags"><span class="badge">Game 1 · Word Race</span><span class="pick-tag">Bryan's first build</span></div>
+          <svg viewBox="0 0 120 92" role="img" aria-label="A cheerful red Christmas bus with a wreath">
+            <rect x="10" y="18" width="100" height="52" rx="12" fill="#d9232e"/>
+            <rect x="10" y="18" width="100" height="20" rx="10" fill="#f43f4e"/>
+            <rect x="18" y="24" width="16" height="13" rx="3" fill="#aee7ff"/><rect x="39" y="24" width="16" height="13" rx="3" fill="#aee7ff"/><rect x="60" y="24" width="16" height="13" rx="3" fill="#aee7ff"/><rect x="81" y="24" width="16" height="13" rx="3" fill="#aee7ff"/>
+            <circle cx="60" cy="52" r="10" fill="none" stroke="#22c55e" stroke-width="5"/>
+            <circle cx="60" cy="47" r="2.4" fill="#ffb703"/><circle cx="55" cy="55" r="2.4" fill="#ffb703"/><circle cx="65" cy="55" r="2.4" fill="#ffb703"/>
+            <circle cx="32" cy="72" r="9" fill="#1f2937"/><circle cx="32" cy="72" r="4" fill="#e5e7eb"/>
+            <circle cx="88" cy="72" r="9" fill="#1f2937"/><circle cx="88" cy="72" r="4" fill="#e5e7eb"/>
+            <rect x="46" y="6" width="28" height="9" rx="4" fill="#fff8ea"/><text x="60" y="13.5" text-anchor="middle" font-size="7.5" font-weight="900" fill="#a8121d" font-family="Nunito,sans-serif">ADVENT</text>
+          </svg>
+        </div>
+        <div class="body">
+          <h3>Stop the Bus: Advent Categories</h3>
+          <p class="tagline">A letter drops, ten categories flash up, and suddenly Uncle Ray is screaming “SNICKERDOODLES!” at the ceiling.</p>
+          <div class="meta"><span>👥 1–4 players</span><span>⏱️ ~2 min a round</span><span>📅 25 Advent lists</span></div>
+          <ul class="feats">
+            <li>Real scoring — crowd favorites pay 1, rare finds pay 2</li>
+            <li>Party mode cancels matching answers, classic style</li>
+            <li>A brand-new list every day, December 1–25</li>
+          </ul>
+          <div class="play play-bus"><a href="stop-the-bus-advent-categories.html">▶ PLAY CATEGORIES</a></div>
+        </div>
+      </article>
+
+      <article class="card relay" id="card-relay">
+        <div class="art art-relay">
+          <div class="art-tags"><span class="badge">Game 2 · Draw &amp; Guess</span><span class="pick-tag">Bryan's pick 🦌</span></div>
+          <svg viewBox="0 0 120 92" role="img" aria-label="A smiling reindeer with a red nose and antlers strung with lights">
+            <path d="M38 26 C28 14 20 14 14 8 M38 26 C34 12 40 6 38 0 M82 26 C92 14 100 14 106 8 M82 26 C86 12 80 6 82 0" stroke="#92400e" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <circle cx="24" cy="16" r="3.4" fill="#ff5964"/><circle cx="96" cy="16" r="3.4" fill="#ffd166"/><circle cx="38" cy="6" r="3.4" fill="#7dd7ff"/><circle cx="82" cy="6" r="3.4" fill="#6ee7a0"/>
+            <ellipse cx="60" cy="52" rx="30" ry="32" fill="#b45309"/>
+            <ellipse cx="60" cy="64" rx="17" ry="15" fill="#fde68a"/>
+            <circle cx="48" cy="46" r="4.5" fill="#1f2937"/><circle cx="72" cy="46" r="4.5" fill="#1f2937"/>
+            <circle cx="49.5" cy="44.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="44.5" r="1.6" fill="#fff"/>
+            <circle cx="60" cy="60" r="7" fill="#d9232e"/>
+            <path d="M50 74 Q60 81 70 74" stroke="#7c2d12" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <ellipse cx="31" cy="56" rx="7" ry="10" fill="#92400e" transform="rotate(24 31 56)"/><ellipse cx="89" cy="56" rx="7" ry="10" fill="#92400e" transform="rotate(-24 89 56)"/>
+          </svg>
+        </div>
+        <div class="body">
+          <h3>Reindeer Relay</h3>
+          <p class="tagline">Telephone, but with drawings — a sentence goes in one end and a beautiful disaster comes out the other.</p>
+          <div class="meta"><span>👥 3–8 players</span><span>⏱️ ~10 min a chain</span><span>📱 1 phone, passed</span></div>
+          <ul class="feats">
+            <li>Draw it, guess it, draw the guess — behind pass-screens</li>
+            <li>Full drawing pad: 10 colors, 3 brushes, undo</li>
+            <li>Mutation Awards for the wildest transformations</li>
+          </ul>
+          <div class="play play-relay"><a href="reindeer-relay.html">▶ PLAY REINDEER RELAY</a></div>
+        </div>
+      </article>
+
+      <article class="card charades" id="card-charades">
+        <div class="art art-charades">
+          <div class="art-tags"><span class="badge">Game 3 · Act It Out</span><span class="pick-tag">The party pick 🎭</span></div>
+          <svg viewBox="0 0 120 92" role="img" aria-label="Two theatre masks, one laughing and one surprised, wearing a Santa hat">
+            <path d="M14 30 Q30 12 52 24 L50 58 Q32 74 16 60 Q8 44 14 30Z" fill="#fff8ea" stroke="#be123c" stroke-width="3"/>
+            <circle cx="27" cy="38" r="3.4" fill="#1f2937"/><circle cx="42" cy="40" r="3.4" fill="#1f2937"/>
+            <path d="M24 50 Q34 60 46 50" stroke="#1f2937" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <path d="M68 24 Q90 12 106 30 Q112 44 104 60 Q88 74 70 58 L68 24Z" fill="#ffd166" stroke="#be123c" stroke-width="3"/>
+            <circle cx="79" cy="40" r="3.4" fill="#1f2937"/><circle cx="94" cy="38" r="3.4" fill="#1f2937"/>
+            <ellipse cx="86" cy="52" rx="5" ry="7" fill="#1f2937"/>
+            <path d="M52 8 Q72 -4 96 6 L90 16 Q70 8 56 18Z" fill="#d9232e"/>
+            <circle cx="97" cy="7" r="6" fill="#fff8ea"/>
+          </svg>
+        </div>
+        <div class="body">
+          <h3>Charades: Jolly Edition</h3>
+          <p class="tagline">Phone on your forehead, family on their feet — somebody WILL act out “reindeer stuck in a chimney.”</p>
+          <div class="meta"><span>👥 2 teams, whole room</span><span>⏱️ 30 / 60 / 90 sec rounds</span><span>🃏 320 cards · 7 decks</span></div>
+          <ul class="feats">
+            <li>Team Holly vs. Team Jingle, trophy finish</li>
+            <li>Forehead mode with giant tap zones</li>
+            <li>Christmas Chaos, Movie Magic, Kids deck &amp; more</li>
+          </ul>
+          <div class="play play-charades"><a href="charades-jolly-edition.html">▶ PLAY CHARADES</a></div>
+        </div>
+      </article>
+    </div>
+
+    <div class="banner">
+      <h2>🤔 Can't Decide? Let the Elf Decide.</h2>
+      <p>Analysis paralysis is not a Christmas tradition. Tap the button and fate picks your game.</p>
+      <button class="btn btn-gold" id="pickBtn" type="button" style="font-size:1.15rem; padding:16px 30px;">🎲 Pick For Me!</button>
+      <p id="pickResult" aria-live="polite" style="margin:16px auto 0; font-size:1.1rem; color:#fff; min-height:1.4em;"></p>
+    </div>
+
+    <div class="steps" aria-label="How the night works">
+      <div class="step"><div class="num">1</div><h3>Pick a game 🎁</h3><p>Word race, drawing telephone, or full-body charades — dealer's choice.</p></div>
+      <div class="step"><div class="num">2</div><h3>Pass the phone 📱</h3><p>One phone travels hand to hand around the room, like a deck of cards.</p></div>
+      <div class="step"><div class="num">3</div><h3>Try not to snort 😂</h3><p>No accounts. No downloads. Just your people, being ridiculous together.</p></div>
+    </div>
+  </section>
+
+  <!-- ======== ABOUT THE COLLABORATION ======== -->
+  <section class="collab" aria-labelledby="collabTitle">
+    <h2 id="collabTitle">🤝 About the Collaboration</h2>
+    <p>Let's say it plain, because it's true and we're proud of it: <strong>everything here — the games, the apps, the words on this page — is built by Bryan Lee (Afnuke) working in collaboration with AI.</strong> Not “made by a company.” Not churned out by a machine on its own. A man and an AI, building together on purpose.</p>
+    <div class="duo">
+      <div class="side human">
+        <h3>🧑 Bryan calls the shots</h3>
+        <p>Every idea starts with him. He picks the games, sets the style, makes the calls, and says what's good enough to carry his name — and what goes back in the shop. If it's here, it's because he said so.</p>
+      </div>
+      <div class="side ai">
+        <h3>🤖 The AI builds alongside him</h3>
+        <p>The AI does the heavy lifting at the workbench — writing the code, laying out the pages, checking the math — and brings the work back to Bryan for the verdict. A partner at the bench, not the boss of it.</p>
+      </div>
+    </div>
+    <p>That's the deal on every project in this repository: <strong>he directs, decides, and calls the shots; the AI builds alongside him; and the pair sign their work together.</strong> Two names on the door, because both of them did the work.</p>
+    <div class="signoff">
+      <span class="sig">Bryan Lee (Afnuke) × AI</span>
+      <span>— signed together, like everything else here.</span>
+    </div>
+  </section>
+
+  <footer>
+    <p class="credit">Built by Bryan Lee (Afnuke) · AI collaboration</p>
+    <p>Three Jolly Games — Stop the Bus: Advent Categories · Reindeer Relay · Charades: Jolly Edition 🎄</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- falling snow ---------- */
+  var snow = document.getElementById("snow"), sctx = snow.getContext("2d"), flakes = [];
+  function sizeSnow(){ snow.width = window.innerWidth; snow.height = window.innerHeight; }
+  sizeSnow(); window.addEventListener("resize", sizeSnow);
+  for (var i = 0; i < (reduced ? 0 : 70); i++){
+    flakes.push({ x: Math.random()*window.innerWidth, y: Math.random()*window.innerHeight, r: 1 + Math.random()*2.6, s: .4 + Math.random()*1.1, p: Math.random()*Math.PI*2 });
+  }
+  function drawSnow(){
+    sctx.clearRect(0,0,snow.width,snow.height);
+    sctx.fillStyle = "rgba(255,255,255,.85)";
+    for (var j = 0; j < flakes.length; j++){
+      var f = flakes[j]; f.y += f.s; f.p += .012; f.x += Math.sin(f.p)*.5;
+      if (f.y > snow.height + 6){ f.y = -6; f.x = Math.random()*snow.width; }
+      sctx.beginPath(); sctx.arc(f.x, f.y, f.r, 0, Math.PI*2); sctx.fill();
+    }
+    if (!reduced) requestAnimationFrame(drawSnow);
+  }
+  drawSnow();
+
+  /* ---------- confetti ---------- */
+  var conf = document.getElementById("confetti"), cctx = conf.getContext("2d"), pieces = [], confRunning = false;
+  function sizeConf(){ conf.width = window.innerWidth; conf.height = window.innerHeight; }
+  sizeConf(); window.addEventListener("resize", sizeConf);
+  var COLORS = ["#d9232e","#ffb703","#22c55e","#7dd7ff","#ff5964","#fff8ea"];
+  function burst(n){
+    for (var k = 0; k < n; k++){
+      pieces.push({ x: window.innerWidth/2 + (Math.random()-.5)*220, y: window.innerHeight*0.32, vx:(Math.random()-.5)*9, vy:-(5+Math.random()*8), w:6+Math.random()*6, h:8+Math.random()*7, rot:Math.random()*Math.PI, vr:(Math.random()-.5)*.3, c:COLORS[Math.floor(Math.random()*COLORS.length)] });
+    }
+    if (!confRunning){ confRunning = true; requestAnimationFrame(drawConf); }
+  }
+  function drawConf(){
+    cctx.clearRect(0,0,conf.width,conf.height);
+    pieces = pieces.filter(function(p){ return p.y < conf.height + 30; });
+    for (var m = 0; m < pieces.length; m++){
+      var p = pieces[m]; p.x += p.vx; p.y += p.vy; p.vy += .28; p.vx *= .99; p.rot += p.vr;
+      cctx.save(); cctx.translate(p.x,p.y); cctx.rotate(p.rot); cctx.fillStyle = p.c; cctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); cctx.restore();
+    }
+    if (pieces.length){ requestAnimationFrame(drawConf); } else { confRunning = false; cctx.clearRect(0,0,conf.width,conf.height); }
+  }
+
+  /* ---------- intro overlay ---------- */
+  var intro = document.getElementById("intro");
+  var introTimer = setTimeout(closeIntro, 9000);
+  function closeIntro(){ intro.classList.add("gone"); clearTimeout(introTimer); }
+  document.getElementById("enterBtn").addEventListener("click", function(){ closeIntro(); burst(90); });
+  document.getElementById("introWatchBtn").addEventListener("click", function(){
+    closeIntro();
+    document.getElementById("tour").scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+    setTimeout(startReel, 450);
+  });
+  document.getElementById("replayIntroBtn").addEventListener("click", function(){
+    intro.classList.remove("gone");
+    introTimer = setTimeout(closeIntro, 9000);
+    window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+  });
+
+  /* ---------- the tour reel ---------- */
+  var scenes = Array.prototype.slice.call(document.querySelectorAll("[data-scene]"));
+  var captions = [
+    "Three games. One phone. Zero downloads. 🎄",
+    "Stop the Bus: race the letter before somebody steals your answer! 🚌",
+    "Reindeer Relay: it starts as a sentence and ends as a masterpiece. 🦌",
+    "Charades: forehead up, whole room shouting. 🎭",
+    "Pick one below and pass the phone! 🎁"
+  ];
+  var SCENE_MS = 4200, sceneIdx = 0, playing = false, sceneStart = 0, rafId = null, elapsedBefore = 0;
+  var fill = document.getElementById("segFill"), capEl = document.getElementById("reelCaption");
+  var toggleBtn = document.getElementById("reelToggle"), bigPlay = document.getElementById("bigPlay");
+  function showScene(idx){
+    sceneIdx = idx;
+    scenes.forEach(function(s, i){ s.classList.toggle("on", i === idx); });
+    capEl.textContent = captions[idx];
+  }
+  function tick(now){
+    if (!playing) return;
+    var t = elapsedBefore + (now - sceneStart);
+    var total = SCENE_MS * scenes.length;
+    if (t >= total){ stopReel(); showScene(0); fill.style.width = "100%"; capEl.textContent = "That's the tour! Pick a game below 🎁"; document.getElementById("screen").classList.add("idle"); bigPlay.style.display = "flex"; burst(70); return; }
+    var idx = Math.floor(t / SCENE_MS);
+    if (idx !== sceneIdx) showScene(idx);
+    fill.style.width = (t / total * 100) + "%";
+    rafId = requestAnimationFrame(tick);
+  }
+  function startReel(){
+    if (playing) return;
+    document.getElementById("screen").classList.remove("idle");
+    bigPlay.style.display = "none";
+    playing = true; sceneStart = performance.now();
+    toggleBtn.textContent = "⏸ Pause Tour";
+    rafId = requestAnimationFrame(tick);
+  }
+  function stopReel(){
+    playing = false; elapsedBefore = 0;
+    if (rafId) cancelAnimationFrame(rafId);
+    toggleBtn.textContent = "▶ Play Tour";
+  }
+  toggleBtn.addEventListener("click", function(){
+    if (playing){
+      elapsedBefore += performance.now() - sceneStart; stopReel();
+      toggleBtn.textContent = "▶ Resume Tour";
+    } else { startReel(); }
+  });
+  bigPlay.addEventListener("click", startReel);
+  document.getElementById("reelRestart").addEventListener("click", function(){
+    stopReel(); showScene(0); fill.style.width = "0%"; startReel();
+  });
+  showScene(0);
+
+  /* ---------- pick for me ---------- */
+  var games = [
+    { id: "card-bus", name: "Stop the Bus: Advent Categories", line: "The elf has spoken: think fast, write faster! 🚌" },
+    { id: "card-relay", name: "Reindeer Relay", line: "The elf has spoken: grab the phone and draw it wrong on purpose! 🦌" },
+    { id: "card-charades", name: "Charades: Jolly Edition", line: "The elf has spoken: up on your feet, whole room! 🎭" }
+  ];
+  document.getElementById("pickBtn").addEventListener("click", function(){
+    var pick = games[Math.floor(Math.random()*games.length)];
+    document.querySelectorAll(".card").forEach(function(c){ c.classList.remove("spotlight"); });
+    var card = document.getElementById(pick.id);
+    card.classList.add("spotlight");
+    document.getElementById("pickResult").textContent = "🎉 " + pick.name + "! " + pick.line;
+    burst(110);
+    setTimeout(function(){ card.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" }); }, 250);
+  });
+
+  /* ---------- music-box carol (WebAudio, starts only on tap) ---------- */
+  var actx = null, musicOn = false, musicTimer = null, noteIdx = 0;
+  var NOTE = { C5:523.25, D5:587.33, E5:659.25, F5:698.46, G5:783.99, A5:880, G4:392, E4:329.63 };
+  var MELODY = ["E5","E5","E5",null,"E5","E5","E5",null,"E5","G5","C5","D5","E5",null,"F5","F5","F5","F5","F5","E5","E5","E5","E5","D5","D5","E5","D5",null,"G4",null];
+  var musicBtn = document.getElementById("musicBtn");
+  function playNote(freq, t){
+    var o = actx.createOscillator(), o2 = actx.createOscillator(), g = actx.createGain();
+    o.type = "sine"; o.frequency.value = freq;
+    o2.type = "triangle"; o2.frequency.value = freq * 2;
+    var g2 = actx.createGain(); g2.gain.value = .25;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.16, t + .015); g.gain.exponentialRampToValueAtTime(.0001, t + .85);
+    o.connect(g); o2.connect(g2); g2.connect(g); g.connect(actx.destination);
+    o.start(t); o2.start(t); o.stop(t + .9); o2.stop(t + .9);
+  }
+  function schedule(){
+    if (!musicOn) return;
+    var name = MELODY[noteIdx % MELODY.length]; noteIdx++;
+    if (name) playNote(NOTE[name], actx.currentTime + .02);
+    musicTimer = setTimeout(schedule, 330);
+  }
+  musicBtn.addEventListener("click", function(){
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === "suspended") actx.resume();
+    musicOn = !musicOn;
+    musicBtn.setAttribute("aria-pressed", musicOn ? "true" : "false");
+    musicBtn.textContent = musicOn ? "🔔 Music: On" : "🔔 Music: Off";
+    if (musicOn){ noteIdx = 0; schedule(); } else if (musicTimer){ clearTimeout(musicTimer); }
+  });
+})();
+</script>
+</body>
+</html>
