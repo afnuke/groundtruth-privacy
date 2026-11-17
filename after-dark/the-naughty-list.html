@@ -309,7 +309,7 @@
         <div class="brand-mark" aria-hidden="true">🎄</div>
         <h1>The Naughty List <small>Adults only · 18+</small></h1>
       </div>
-      <button class="sound-btn" id="soundBtn" type="button" aria-pressed="true" title="Music-box carols on or off">
+      <button class="sound-btn" id="soundBtn" type="button" aria-pressed="true" title="Smooth holiday carols on or off">
         <span class="dot" aria-hidden="true"></span><span id="soundLabel">Music: On</span>
       </button>
     </div>
@@ -320,6 +320,11 @@
         <h2 class="serif">One phone. One room.<br><em>Zero innocence.</em></h2>
         <p>Pass the phone around the room. Pick a deck, draw a card, and do your worst — Santa is absolutely watching, and he is taking notes.</p>
       </div>
+
+      <figure style="margin:20px 0 4px;border:1px solid #d4af37;border-radius:14px;overflow:hidden;background:#000">
+        <img src="shadow-window.jpg" alt="A red lace set on burgundy velvet under Christmas bows — the After Dark window" style="display:block;width:100%;height:auto">
+        <figcaption style="text-align:center;font-size:12.5px;color:#cdbf9f;padding:8px 10px">The Christmas Window — the corner, dressed for the season.</figcaption>
+      </figure>
 
       <div class="decks">
         <button class="deck-btn" type="button" data-deck="charades">
@@ -795,20 +800,24 @@
   var soundLabel = document.getElementById("soundLabel");
 
   function bell(freq, when, dur){
-    var o1 = audioCtx.createOscillator(), o2 = audioCtx.createOscillator(), g = audioCtx.createGain();
+    // Warm keys voice (holiday R&B feel): soft attack, mellow harmonic, sub-octave body
+    var o1 = audioCtx.createOscillator(), o2 = audioCtx.createOscillator(), o3 = audioCtx.createOscillator(), g = audioCtx.createGain();
     o1.type = "sine"; o1.frequency.value = freq;
-    o2.type = "sine"; o2.frequency.value = freq*3.01;
-    var g2 = audioCtx.createGain(); g2.gain.value = 0.18;
+    o2.type = "sine"; o2.frequency.value = freq*2.0;
+    o3.type = "triangle"; o3.frequency.value = freq/2;
+    var g2 = audioCtx.createGain(); g2.gain.value = 0.07;
+    var g3 = audioCtx.createGain(); g3.gain.value = 0.30;
+    var tail = dur*1.7;
     g.gain.setValueAtTime(0.0001, when);
-    g.gain.exponentialRampToValueAtTime(0.22, when+0.015);
-    g.gain.exponentialRampToValueAtTime(0.0001, when+dur);
-    o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(audioCtx.destination);
-    o1.start(when); o2.start(when); o1.stop(when+dur+0.05); o2.stop(when+dur+0.05);
+    g.gain.exponentialRampToValueAtTime(0.20, when+0.045);
+    g.gain.exponentialRampToValueAtTime(0.0001, when+tail);
+    o1.connect(g); o2.connect(g2); g2.connect(g); o3.connect(g3); g3.connect(g); g.connect(audioCtx.destination);
+    o1.start(when); o2.start(when); o3.start(when); o1.stop(when+tail+0.05); o2.stop(when+tail+0.05); o3.stop(when+tail+0.05);
   }
   function scheduleNext(){
     if (!musicOn || !audioCtx) return;
     var item = PLAYLIST[noteIdx % PLAYLIST.length]; noteIdx++;
-    var beatMs = 340;
+    var beatMs = 430;
     var durMs = item[1]*beatMs;
     if (item[0] !== "R" && NOTE[item[0]]){
       bell(NOTE[item[0]], audioCtx.currentTime + 0.03, Math.max(0.7, durMs/1000*1.4));
