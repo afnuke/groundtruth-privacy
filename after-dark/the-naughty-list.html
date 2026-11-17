@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<link rel="icon" href="data:," />
+<title>The Naughty List</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;0,900;1,600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --velvet:#3d0810;
+    --velvet-2:#57101d;
+    --velvet-3:#711a2a;
+    --wine:#8c2338;
+    --gold:#d9a441;
+    --gold-light:#f3d98b;
+    --gold-pale:#fff3c4;
+    --cream:#fff8e6;
+    --cream-dim:#f3dfb8;
+    --ink:#2a050a;
+    --card-bg:#fffaf0;
+    --card-ink:#331118;
+    --shadow:0 20px 50px rgba(0,0,0,.55);
+    --radius:20px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Nunito Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    background:
+      radial-gradient(900px 500px at 15% -5%, rgba(217,164,65,.22), transparent 60%),
+      radial-gradient(800px 600px at 95% 10%, rgba(140,35,56,.55), transparent 60%),
+      linear-gradient(165deg,#26040a 0%, var(--velvet) 42%, #1c0307 100%);
+    color:var(--cream);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit; cursor:pointer; min-height:48px}
+  a{min-height:36px; display:inline-flex; align-items:center}
+  .serif{font-family:"Playfair Display",Georgia,serif}
+
+  /* ---------- snow dots (decorative) ---------- */
+  .snow{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; opacity:.5}
+  .snow i{position:absolute; top:-10px; border-radius:50%; background:#fff; opacity:.7; animation:fall linear infinite}
+  @keyframes fall{ to{ transform:translateY(105vh) translateX(18px)} }
+  @media (prefers-reduced-motion: reduce){
+    .snow i{animation:none}
+    *{animation-duration:.01ms !important; transition-duration:.01ms !important}
+  }
+
+  /* ================= AGE GATE ================= */
+  #gate{
+    position:relative; z-index:5;
+    min-height:100vh; min-height:100dvh;
+    display:flex; align-items:center; justify-content:center;
+    padding:28px 18px 40px;
+  }
+  .gate-card{
+    width:100%; max-width:560px; text-align:center;
+    background:linear-gradient(180deg, rgba(113,26,42,.92), rgba(61,8,16,.96));
+    border:1.5px solid rgba(217,164,65,.75);
+    border-radius:26px;
+    padding:42px 30px 34px;
+    box-shadow:var(--shadow), inset 0 0 0 6px rgba(0,0,0,.12), inset 0 1px 0 rgba(243,217,139,.35);
+    position:relative;
+  }
+  .gate-card::before{
+    content:""; position:absolute; inset:10px; border:1px solid rgba(243,217,139,.28);
+    border-radius:18px; pointer-events:none;
+  }
+  .gate-orn{font-size:26px; letter-spacing:.5em; color:var(--gold-light); margin:0 0 6px; text-indent:.5em}
+  .gate-eyebrow{
+    margin:0 0 10px; font-size:12px; font-weight:800; letter-spacing:.32em; text-transform:uppercase; color:var(--gold-light);
+  }
+  .gate-title{
+    font-family:"Playfair Display",Georgia,serif; font-weight:900;
+    font-size:clamp(44px,11vw,68px); line-height:.98; margin:0 0 14px; color:var(--cream);
+    text-shadow:0 3px 0 rgba(0,0,0,.25);
+  }
+  .gate-title em{color:var(--gold-light); font-style:italic}
+  .gate-rule{width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:16px auto}
+  .gate-q{font-size:clamp(18px,4.6vw,22px); line-height:1.45; margin:0 auto 8px; max-width:42ch; font-weight:600}
+  .gate-q strong{color:var(--gold-pale)}
+  .gate-sub{font-size:14.5px; color:var(--cream-dim); margin:0 auto 26px; max-width:44ch; line-height:1.55}
+  .btn-in{
+    display:block; width:100%; border:none; border-radius:999px;
+    background:linear-gradient(180deg,#f3d98b,#d9a441 55%,#b9822a);
+    color:#33160a; font-size:18px; font-weight:800; letter-spacing:.01em;
+    padding:16px 22px; min-height:58px;
+    box-shadow:0 10px 26px rgba(0,0,0,.45), inset 0 1px 0 #fff8;
+  }
+  .btn-in:active{transform:translateY(1px)}
+  .gate-exit{
+    margin-top:18px; color:var(--cream-dim); font-size:15px; font-weight:600;
+    text-decoration:underline; text-underline-offset:4px; padding:8px 10px;
+  }
+  .gate-exit:hover{color:var(--gold-light)}
+  .gate-18{
+    display:inline-block; margin-top:22px; border:1.5px solid var(--gold); color:var(--gold-light);
+    border-radius:999px; padding:5px 14px; font-size:12px; font-weight:800; letter-spacing:.22em;
+  }
+
+  /* ================= APP ================= */
+  #app{display:none; position:relative; z-index:2}
+  #app.on{display:block}
+  .wrap{max-width:760px; margin:0 auto; padding:18px 16px 30px}
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:6px 2px 14px;
+  }
+  .brand{display:flex; align-items:center; gap:11px; min-width:0}
+  .brand-mark{
+    width:44px;height:44px; flex:0 0 auto; border-radius:50%;
+    border:1.5px solid var(--gold); display:grid; place-items:center;
+    background:radial-gradient(circle at 35% 30%, var(--velvet-3), var(--velvet));
+    font-size:21px;
+  }
+  .brand h1{
+    font-family:"Playfair Display",Georgia,serif; font-size:23px; font-weight:800; margin:0; line-height:1.05; white-space:nowrap;
+  }
+  .brand small{display:block; font-family:"Nunito Sans",sans-serif; font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--gold-light); font-weight:800; margin-top:3px}
+  .sound-btn{
+    flex:0 0 auto; display:inline-flex; align-items:center; gap:8px;
+    background:rgba(255,248,230,.08); color:var(--cream);
+    border:1px solid rgba(217,164,65,.55); border-radius:999px;
+    padding:10px 16px; font-size:14px; font-weight:800; min-height:48px;
+  }
+  .sound-btn .dot{width:9px;height:9px;border-radius:50%;background:#7d7d7d}
+  .sound-btn.playing .dot{background:#8fe388; box-shadow:0 0 8px #8fe388}
+
+  .hero{text-align:center; padding:8px 6px 20px}
+  .hero h2{
+    font-family:"Playfair Display",Georgia,serif; font-weight:800;
+    font-size:clamp(30px,7.4vw,44px); line-height:1.08; margin:0 0 10px;
+  }
+  .hero h2 em{color:var(--gold-light)}
+  .hero p{margin:0 auto; max-width:52ch; color:var(--cream-dim); font-size:16px; line-height:1.55}
+
+  /* deck chooser */
+  .decks{display:grid; gap:14px}
+  @media(min-width:640px){ .decks{grid-template-columns:1fr 1fr 1fr} }
+  .deck-btn{
+    text-align:left; border:1px solid rgba(217,164,65,.5); border-radius:var(--radius);
+    background:linear-gradient(180deg, rgba(113,26,42,.85), rgba(61,8,16,.92));
+    color:var(--cream); padding:20px 18px 18px; width:100%;
+    box-shadow:0 12px 28px rgba(0,0,0,.4);
+    display:flex; flex-direction:column; gap:8px; min-height:178px;
+  }
+  .deck-btn:active{transform:translateY(1px)}
+  .deck-btn .d-ico{font-size:30px; line-height:1}
+  .deck-btn .d-name{font-family:"Playfair Display",Georgia,serif; font-size:21px; font-weight:800; line-height:1.15}
+  .deck-btn .d-desc{font-size:14px; color:var(--cream-dim); line-height:1.5; font-weight:600}
+  .deck-btn .d-count{margin-top:auto; font-size:11.5px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:var(--gold-light)}
+
+  .howto{
+    margin-top:20px; border:1px dashed rgba(217,164,65,.45); border-radius:16px;
+    padding:16px 18px; color:var(--cream-dim); font-size:14.5px; line-height:1.6;
+    background:rgba(0,0,0,.18);
+  }
+  .howto strong{color:var(--gold-pale)}
+
+  /* play view */
+  #playView{display:none}
+  #playView.on{display:block}
+  #homeView.off{display:none}
+  .play-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px}
+  .back-btn{
+    background:transparent; border:1px solid rgba(217,164,65,.55); color:var(--cream);
+    border-radius:999px; padding:10px 16px; font-weight:800; font-size:14.5px; min-height:48px;
+  }
+  .play-deck-name{font-family:"Playfair Display",Georgia,serif; font-weight:800; font-size:19px; text-align:right; line-height:1.15}
+  .play-deck-name small{display:block; font-family:"Nunito Sans",sans-serif; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold-light); font-weight:800; margin-top:3px}
+
+  .stage{
+    background:var(--card-bg); color:var(--card-ink);
+    border-radius:24px; padding:30px 24px 26px; text-align:center;
+    box-shadow:var(--shadow); border-top:6px solid var(--gold);
+    min-height:300px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:14px;
+    position:relative; overflow:hidden;
+  }
+  .stage .kicker{font-size:11.5px; font-weight:800; letter-spacing:.26em; text-transform:uppercase; color:#a4761f}
+  .stage .big{
+    font-family:"Playfair Display",Georgia,serif; font-weight:800;
+    font-size:clamp(28px,7vw,40px); line-height:1.22; margin:0; max-width:22ch;
+  }
+  .stage .reason{font-size:clamp(17px,4.6vw,21px); line-height:1.5; margin:0; max-width:34ch; font-weight:600; color:#5a2b33}
+  .stage .fine{font-size:14.5px; line-height:1.6; color:#6d4a4f; margin:0; max-width:44ch; font-weight:600}
+  .stage .consent{
+    background:#fdf0d3; border:1px solid #e5c26b; color:#5c3d08; border-radius:12px;
+    padding:12px 16px; font-size:15px; font-weight:700; line-height:1.5; max-width:46ch; margin:0;
+  }
+  .verdict-word{
+    font-family:"Playfair Display",Georgia,serif; font-weight:900;
+    font-size:clamp(52px,15vw,84px); line-height:1; margin:2px 0 0; letter-spacing:.01em;
+  }
+  .verdict-word.naughty{color:#9c1f36}
+  .verdict-word.nice{color:#1e6b3a}
+  .card-count{font-size:13px; font-weight:800; color:#9a7a52; letter-spacing:.14em; text-transform:uppercase}
+
+  /* scanning */
+  .scan-wrap{display:flex; flex-direction:column; align-items:center; gap:16px; padding:10px 0}
+  .scan-face{
+    width:150px;height:150px;border-radius:50%; position:relative; overflow:hidden;
+    border:3px solid var(--gold); background:radial-gradient(circle,#57101d 0%, #2a050a 78%);
+  }
+  .scan-face::before,.scan-face::after{
+    content:""; position:absolute; inset:0; border-radius:50%;
+    background:repeating-radial-gradient(circle, transparent 0 24px, rgba(217,164,65,.25) 24px 25px);
+  }
+  .scan-sweep{
+    position:absolute; inset:0; border-radius:50%;
+    background:conic-gradient(from 0deg, rgba(243,217,139,.85), transparent 22%);
+    animation:sweep 1s linear infinite;
+  }
+  @keyframes sweep{to{transform:rotate(360deg)}}
+  .scan-blip{position:absolute; width:11px;height:11px;border-radius:50%; background:#f3d98b; box-shadow:0 0 12px #f3d98b; animation:blink .7s ease-in-out infinite alternate}
+  @keyframes blink{from{opacity:.25}to{opacity:1}}
+  .scan-text{font-family:"Playfair Display",Georgia,serif; font-size:22px; font-weight:800; color:var(--card-ink); margin:0}
+  .scan-sub{font-size:14px; color:#6d4a4f; font-weight:700; margin:0}
+
+  /* timer */
+  .timer-row{display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:center}
+  .timer-display{
+    font-variant-numeric:tabular-nums; font-weight:800; font-size:30px; color:var(--card-ink);
+    background:#fdf0d3; border:1.5px solid #e5c26b; border-radius:14px; padding:4px 18px; min-width:118px;
+  }
+  .timer-display.low{color:#9c1f36; border-color:#d98a97; background:#fbe7ea}
+  .timer-btn{
+    border-radius:999px; border:1.5px solid #8c2338; background:#8c2338; color:#fff;
+    font-weight:800; font-size:15px; padding:10px 20px; min-height:48px;
+  }
+  .timer-btn.ghost{background:transparent; color:#8c2338}
+
+  /* controls under card */
+  .controls{display:grid; gap:12px; margin-top:16px}
+  .btn-next{
+    width:100%; border:none; border-radius:999px; min-height:58px;
+    background:linear-gradient(180deg,#f3d98b,#d9a441 55%,#b9822a);
+    color:#33160a; font-size:18px; font-weight:800;
+    box-shadow:0 10px 24px rgba(0,0,0,.4);
+  }
+  .score-strip{
+    background:rgba(0,0,0,.28); border:1px solid rgba(217,164,65,.45); border-radius:18px;
+    padding:14px 14px 16px;
+  }
+  .score-title{font-size:11px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; color:var(--gold-light); text-align:center; margin:0 0 10px}
+  .teams{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px}
+  .team{
+    border:1.5px solid rgba(243,217,139,.35); background:rgba(255,248,230,.06); color:var(--cream);
+    border-radius:14px; padding:10px 8px; text-align:center; min-height:64px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; width:100%;
+  }
+  .team .t-name{font-size:13px; font-weight:800; letter-spacing:.06em}
+  .team .t-score{font-family:"Playfair Display",Georgia,serif; font-size:28px; font-weight:900; line-height:1; color:var(--gold-pale)}
+  .team.active{border-color:var(--gold); background:rgba(217,164,65,.18); box-shadow:0 0 0 2px rgba(217,164,65,.25)}
+  .team .t-tag{font-size:10.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-light); visibility:hidden}
+  .team.active .t-tag{visibility:visible}
+  .score-btns{display:grid; grid-template-columns:1.2fr .8fr; gap:10px}
+  .btn-nailed{
+    border:none; border-radius:999px; background:#1e6b3a; color:#fff; font-weight:800; font-size:16.5px; padding:13px 10px; min-height:52px;
+  }
+  .btn-pass{
+    border-radius:999px; background:transparent; border:1.5px solid rgba(243,217,139,.6); color:var(--cream);
+    font-weight:800; font-size:16.5px; padding:13px 10px; min-height:52px;
+  }
+  .score-note{text-align:center; font-size:12.5px; color:var(--cream-dim); margin:10px 0 0}
+  .toast{
+    text-align:center; font-weight:800; font-size:14.5px; color:var(--gold-pale);
+    min-height:22px; margin:10px 0 0;
+  }
+
+  footer{
+    text-align:center; padding:26px 16px 8px; color:var(--cream-dim);
+  }
+  footer .credit{font-size:14px; font-weight:700; color:var(--cream)}
+  footer .adult-line{font-size:12.5px; margin-top:5px}
+  footer .orn{color:var(--gold); letter-spacing:.5em; text-indent:.5em; font-size:13px; margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<div class="snow" id="snow" aria-hidden="true"></div>
+
+<!-- ================= AGE GATE ================= -->
+<section id="gate" aria-label="Age gate">
+  <div class="gate-card">
+    <p class="gate-orn" aria-hidden="true">✦ ✦ ✦</p>
+    <p class="gate-eyebrow">A Christmas Party Game · After Dark</p>
+    <h1 class="gate-title">The <em>Naughty</em> List</h1>
+    <div class="gate-rule" aria-hidden="true"></div>
+    <p class="gate-q"><strong>Adults only.</strong> Everybody playing is 18+?</p>
+    <p class="gate-sub">This one is the grown-ups' deck — cheeky charades, flirty dares, and a phone that judges. The family games are in the other room.</p>
+    <button class="btn-in" id="enterBtn" type="button">We're all 18+ — Let us in</button>
+    <a class="gate-exit" href="../games/index.html" id="exitLink">Take me back to the family games</a>
+    <div><span class="gate-18">18+</span></div>
+  </div>
+</section>
+
+<!-- ================= APP ================= -->
+<div id="app">
+  <div class="wrap">
+
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">🎄</div>
+        <h1>The Naughty List <small>Adults only · 18+</small></h1>
+      </div>
+      <button class="sound-btn" id="soundBtn" type="button" aria-pressed="true" title="Music-box carols on or off">
+        <span class="dot" aria-hidden="true"></span><span id="soundLabel">Music: On</span>
+      </button>
+    </div>
+
+    <!-- HOME / DECK CHOOSER -->
+    <div id="homeView">
+      <div class="hero">
+        <h2 class="serif">One phone. One room.<br><em>Zero innocence.</em></h2>
+        <p>Pass the phone around the room. Pick a deck, draw a card, and do your worst — Santa is absolutely watching, and he is taking notes.</p>
+      </div>
+
+      <div class="decks">
+        <button class="deck-btn" type="button" data-deck="charades">
+          <span class="d-ico" aria-hidden="true">🎭</span>
+          <span class="d-name">After-Dark Charades</span>
+          <span class="d-desc">Act it out. No talking, no pointing — just you, the prompt, and a room full of grown-ups guessing the worst.</span>
+          <span class="d-count">64 prompts</span>
+        </button>
+
+        <button class="deck-btn" type="button" data-deck="verdict">
+          <span class="d-ico" aria-hidden="true">📜</span>
+          <span class="d-name">Naughty or Nice?</span>
+          <span class="d-desc">The room nominates someone. The phone scans them, checks the list twice, and delivers the verdict. No appeals.</span>
+          <span class="d-count">64 verdicts</span>
+        </button>
+
+        <button class="deck-btn" type="button" data-deck="mistletoe">
+          <span class="d-ico" aria-hidden="true">💋</span>
+          <span class="d-name">Mistletoe Minutes</span>
+          <span class="d-desc">Sixty-second flirty challenges and dares for consenting adults. The timer is running. So is the blushing.</span>
+          <span class="d-count">44 challenges</span>
+        </button>
+      </div>
+
+      <div class="howto">
+        <strong>How it plays:</strong> tap a deck, draw cards one at a time, pass the phone to the next player when your turn's done.
+        Score only if you feel like it — tap your team below a card, then <strong>Nailed it +1</strong> or <strong>Pass</strong>. No setup, no accounts, nothing saved.
+      </div>
+    </div>
+
+    <!-- PLAY VIEW -->
+    <div id="playView">
+      <div class="play-head">
+        <button class="back-btn" id="backBtn" type="button">← All decks</button>
+        <div class="play-deck-name"><span id="playDeckName">Deck</span><small id="playDeckSub"></small></div>
+      </div>
+
+      <div class="stage" id="stage"><!-- card content injected --></div>
+
+      <div class="controls">
+        <button class="btn-next" id="nextBtn" type="button">Draw a card</button>
+
+        <div class="score-strip" aria-label="Score">
+          <p class="score-title">Score — tap your team, then score the card</p>
+          <div class="teams">
+            <button class="team active" id="teamNaughty" type="button">
+              <span class="t-name">😈 Team Naughty</span>
+              <span class="t-score" id="scoreNaughty">0</span>
+              <span class="t-tag">Scoring now</span>
+            </button>
+            <button class="team" id="teamNice" type="button">
+              <span class="t-name">😇 Team Nice</span>
+              <span class="t-score" id="scoreNice">0</span>
+              <span class="t-tag">Scoring now</span>
+            </button>
+          </div>
+          <div class="score-btns">
+            <button class="btn-nailed" id="nailedBtn" type="button">Nailed it +1</button>
+            <button class="btn-pass" id="passBtn" type="button">Pass</button>
+          </div>
+          <p class="toast" id="toast" aria-live="polite"></p>
+          <p class="score-note">Keeping score is optional. Bragging is not.</p>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="orn" aria-hidden="true">✦ ✦ ✦</div>
+      <div class="credit">Built by Bryan Lee (Afnuke) · AI collaboration</div>
+      <div class="adult-line">An adults-only novelty game. All players 18+.</div>
+    </footer>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ==================== DATA ==================== */
+  var CHARADES = [
+    "Santa's lap dance",
+    "Mrs. Claus's girls' night out",
+    "An elf on the naughty list",
+    "Kissing under the mistletoe — with the wrong person",
+    "Reindeer games after dark",
+    "Stuffing more than the turkey",
+    "Jingle bell rock-bottom",
+    "The office party photocopier",
+    "Santa stuck in the chimney — again",
+    "Unwrapping a present very, very slowly",
+    "An elf sneaking the spiked eggnog",
+    "Mrs. Claus catching Santa texting at 2 a.m.",
+    "Riding a reindeer like a mechanical bull",
+    "A snowman melting from embarrassment",
+    "Hiding a mark with a Christmas scarf",
+    "The ugly sweater contest getting way too competitive",
+    "Santa's belt coming undone mid-delivery",
+    "Dancing on the table at the office party",
+    "An elf doing the walk of shame at dawn",
+    "Kissing the wrong Santa at the mall",
+    "Returning a gift in front of the person who gave it",
+    "A reindeer who had too much eggnog",
+    "Sneaking out of Santa's workshop early",
+    "A wrapping-paper wardrobe malfunction",
+    "The mistletoe was hung way too low",
+    "Santa reading a very naughty letter out loud",
+    "An elf flirting with the Tooth Fairy",
+    "Blaming the reindeer for the noise last night",
+    "A snowball fight that turned flirty",
+    "Mrs. Claus's book club — it's not about books",
+    "Santa posing for a firefighter-style calendar",
+    "Stuffing a stocking that isn't yours",
+    "The Christmas tree wasn't the only thing lit",
+    "Caroling outside the wrong bedroom window",
+    "An elf caught dancing in Santa's hat",
+    "Secret Santa who went way too personal",
+    "Looking innocent after eating all the cookies",
+    "A gingerbread man running from Mrs. Claus",
+    "Santa's sleigh getting pulled over",
+    "Walking home still wearing last night's elf costume",
+    "The office party slow dance that lasted too long",
+    "Hiding under the table at Christmas dinner",
+    "A reindeer posing for its own calendar",
+    "Mrs. Claus spiking the punch — again",
+    "An elf who lost a bet and has to carol in a tutu",
+    "Getting tangled in the Christmas lights — on purpose",
+    "Santa forgetting a name right after the mistletoe kiss",
+    "Sneaking a kiss behind the Christmas tree",
+    "Elf karaoke: 'All I Want for Christmas' — badly",
+    "Trying to look cool eating a candy cane",
+    "The snow globe got shaken — and so did you",
+    "Santa's naughty list just leaked online",
+    "A dramatic reading of a very naughty Christmas card",
+    "Waking up in a Santa suit you don't own",
+    "The reindeer saw everything and won't stop staring",
+    "Mrs. Claus's poker night — loser wraps presents",
+    "An elf trying to return mistletoe for store credit",
+    "Slow-dancing with a nutcracker who leads badly",
+    "Santa sliding down the wrong chimney — into a hot tub party",
+    "The Christmas Eve group chat that should be deleted",
+    "An elf proposing with a ring from a Christmas cracker",
+    "Getting caught regifting — by the person who gave it",
+    "Santa's happy dance after the very last delivery",
+    "An elf winking at everyone on the nice list"
+  ];
+
+  var VERDICTS_NAUGHTY = [
+    "Caught peeking at presents. And at the neighbors.",
+    "Ate Santa's cookies and blamed the dog. You don't have a dog.",
+    "Regifted last year's fruitcake. Twice.",
+    "Put yourself at the top of your own Secret Santa list.",
+    "Drank the eggnog straight from the bowl.",
+    "Told the kids Santa was 'running late' so you could take a nap.",
+    "Hid the good chocolates and shared only the weird ones.",
+    "Sang the wrong words to every carol — on purpose.",
+    "Spent the Christmas lights money on takeout.",
+    "Peeked at the list, then edited it in pencil.",
+    "Left the tree up until March. Last year's tree.",
+    "Bought a gift, kept it, and gave a card instead.",
+    "Flirted with the mall Santa. In front of Mrs. Claus.",
+    "Called in 'reindeer emergency' to skip work.",
+    "Put coal in your own stocking to fish for sympathy gifts.",
+    "Ate every advent chocolate on December 1st.",
+    "Wrapped empty boxes just to look generous.",
+    "Swore you 'don't dance' — then owned the office party dance floor.",
+    "Took the last candy cane and left only the hook.",
+    "Named all the reindeer after your exes.",
+    "Used the mistletoe as an excuse. Three times. Same person.",
+    "Hid in the pantry to avoid the carolers.",
+    "Put tinsel on the dog and entered it in a costume contest.",
+    "Opened a present early and rewrapped it — badly.",
+    "Has blamed the elf on the shelf for everything since 2019.",
+    "Sent a group text that was meant for one person. You know the one.",
+    "Took credit for a store-bought pie.",
+    "Keeps mistletoe in a pocket 'just in case.'",
+    "Danced on the coffee table at the office party. HR has photos.",
+    "Wrote a wish list longer than Santa's entire route.",
+    "Faked a Wi-Fi outage to win the board game.",
+    "Shook every present under the tree. Twice. With a stethoscope."
+  ];
+
+  var VERDICTS_NICE = [
+    "Volunteered to wash up — and actually did it.",
+    "Gave away the last cookie without even hesitating.",
+    "Remembers everybody's favorite Christmas song.",
+    "Drove a friend home from the party, no questions asked.",
+    "Bought a gift for someone who had nobody else.",
+    "Fixed the lights twice without swearing (much).",
+    "Gave up the comfy seat by the fire.",
+    "Wrapped presents for the whole street.",
+    "Called just to say Merry Christmas — and meant it.",
+    "Saved the best seat, the best slice, and the best story for others.",
+    "Shoveled a neighbor's path before they even woke up.",
+    "Made hot chocolate for the carolers.",
+    "Gave a compliment that made someone's whole week.",
+    "Took the group photo so everyone else could be in it.",
+    "Returned a lost glove — washed, folded, with a candy cane.",
+    "Listened to the same Christmas story ten times and laughed in the right places.",
+    "Shared an umbrella in a snowstorm.",
+    "Left a thank-you note for the mail carrier.",
+    "Donated the good coat, not the worn-out one.",
+    "Taught a kid to wrap a present — patiently.",
+    "Kept a Secret Santa secret even when bribed with eggnog.",
+    "Checked on the neighbor nobody checks on.",
+    "Gave up the last parking spot at the mall — in December.",
+    "Baked extra, just in case someone dropped by.",
+    "Sang carols at the nursing home — off-key, all heart.",
+    "Let the youngest pick the movie — and watched all of it.",
+    "Forgave the burnt turkey before anyone apologized.",
+    "Wrote real cards, by hand, with real stamps.",
+    "Stayed late to clean up someone else's party.",
+    "Made room at the table for one more chair.",
+    "Told the truth about the fruitcake — kindly.",
+    "Was the designated wrapper, driver, and peacemaker — all in one night."
+  ];
+
+  var MISTLETOE = [
+    "Slow-dance with someone to a Christmas song.",
+    "Whisper a compliment that makes them blush.",
+    "Feed someone a candy cane without using your hands.",
+    "Best pickup line using only Christmas words — 30 seconds, go.",
+    "Serenade someone with the chorus of a carol — eye contact the whole time.",
+    "Teach someone your best slow-dance move in 60 seconds.",
+    "Give someone a shoulder massage for 30 seconds — if they say yes.",
+    "Write a flirty Christmas card in 60 seconds and read it aloud.",
+    "Hold eye contact and smile — first to look away loses.",
+    "Toast someone like they're the guest of honor at a ball.",
+    "Show off your most charming bow or curtsy.",
+    "Compliment three people in 30 seconds — make each one different.",
+    "Act out a romantic Christmas movie scene — solo and dramatic.",
+    "Ask someone to dance using only gestures — no words.",
+    "Balance a candy cane on your nose while flirting outrageously.",
+    "Tell someone why they'd top your nice list — in 30 seconds.",
+    "Mirror-dance: copy your partner's moves for 60 seconds.",
+    "Whisper your favorite Christmas memory to someone — close and quiet.",
+    "Give a hand massage — only if they offer their hand first.",
+    "Invent a cocktail name inspired by someone in the room.",
+    "Slowly unwrap a chocolate and share it — eye contact counts.",
+    "Recite 'Twas the Night Before Christmas in your most charming voice.",
+    "Trade scarves or hats with someone and model them together.",
+    "Make someone laugh without touching them and without telling a joke.",
+    "Describe your dream mistletoe moment — keep it sweet.",
+    "Sing a love song, but swap every 'you' for 'Christmas.'",
+    "Give someone a reindeer nickname — make it flattering.",
+    "Tinsel twirl: spin your partner once, gracefully.",
+    "Tell a 30-second story where someone in the room is the hero — and the heartthrob.",
+    "Offer someone the last bite of dessert — and mean it.",
+    "Read a gift tag aloud like it's a love letter.",
+    "Teach the room your signature wink — everybody practices.",
+    "Ask for a dance with an outstretched hand and a proper introduction.",
+    "Compliment someone's laugh — then earn another one.",
+    "Star in a 15-second perfume ad featuring someone's scarf.",
+    "Share your most embarrassing mistletoe story — or invent a better one.",
+    "Present a candy cane like it's a single red rose.",
+    "Whisper a Secret Santa hint that sounds suspiciously like a love note.",
+    "Start a slow clap into a standing ovation for one person — make them blush.",
+    "Spell someone's name with tinsel or lights — photo finish.",
+    "Give a toast in rhyme — four lines, one person, go.",
+    "Do your best 'caught under the mistletoe' surprised face — hold it 10 seconds.",
+    "Partner up: build a gingerbread couple that looks like you two.",
+    "Close the round with a paired bow — pick a partner and bow together."
+  ];
+
+  var DECKS = {
+    charades: { name:"After-Dark Charades", sub:"Act it out · No talking", items:CHARADES, kicker:"Charades — act it, don't say it" },
+    verdict:  { name:"Naughty or Nice?", sub:"The phone judges", items:null, kicker:"The verdict" },
+    mistletoe:{ name:"Mistletoe Minutes", sub:"60-second challenges", items:MISTLETOE, kicker:"You have 60 seconds" }
+  };
+
+  /* ==================== STATE ==================== */
+  var currentDeck = null;
+  var queues = {};       // shuffled draw queues per deck
+  var drawnCount = {};   // cards drawn per deck this run-through
+  var phase = "intro";   // intro | card | scanning | verdict
+  var scores = { naughty:0, nice:0 };
+  var activeTeam = "naughty";
+  var toastTimer = null;
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i=a.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t=a[i]; a[i]=a[j]; a[j]=t;
+    }
+    return a;
+  }
+  function freshQueue(key){
+    if (key==="verdict"){
+      var pool = [];
+      VERDICTS_NAUGHTY.forEach(function(r){ pool.push({word:"NAUGHTY", reason:r}); });
+      VERDICTS_NICE.forEach(function(r){ pool.push({word:"NICE", reason:r}); });
+      return shuffle(pool);
+    }
+    return shuffle(DECKS[key].items);
+  }
+  function drawFrom(key){
+    if (!queues[key] || queues[key].length===0){
+      queues[key] = freshQueue(key);
+      drawnCount[key] = 0;
+    }
+    drawnCount[key] = (drawnCount[key]||0)+1;
+    return queues[key].pop();
+  }
+  function totalOf(key){
+    if (key==="verdict") return VERDICTS_NAUGHTY.length + VERDICTS_NICE.length;
+    return DECKS[key].items.length;
+  }
+
+  /* ==================== DOM ==================== */
+  var gate = document.getElementById("gate");
+  var app = document.getElementById("app");
+  var homeView = document.getElementById("homeView");
+  var playView = document.getElementById("playView");
+  var stage = document.getElementById("stage");
+  var nextBtn = document.getElementById("nextBtn");
+  var playDeckName = document.getElementById("playDeckName");
+  var playDeckSub = document.getElementById("playDeckSub");
+  var toastEl = document.getElementById("toast");
+
+  function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+  function showToast(msg){
+    toastEl.textContent = msg;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.textContent=""; }, 2600);
+  }
+
+  /* ---------- Timer (Mistletoe Minutes) ---------- */
+  var timerId = null, timerLeft = 60;
+  var timerDisplay = null;
+  function stopTimer(){ if (timerId){ clearInterval(timerId); timerId=null; } }
+  function renderTimer(){
+    if (!timerDisplay) return;
+    var m = Math.floor(timerLeft/60), s = timerLeft%60;
+    timerDisplay.textContent = m + ":" + (s<10?"0":"") + s;
+    timerDisplay.classList.toggle("low", timerLeft<=10 && timerLeft>0);
+  }
+  function startTimer(){
+    stopTimer(); timerLeft = 60; renderTimer();
+    timerId = setInterval(function(){
+      timerLeft--;
+      if (timerLeft<=0){ timerLeft=0; renderTimer(); stopTimer(); showToast("Time! Hands where Santa can see them."); return; }
+      renderTimer();
+    },1000);
+  }
+  function wireTimer(){
+    timerDisplay = document.getElementById("timerDisplay");
+    var startB = document.getElementById("timerStart");
+    var resetB = document.getElementById("timerReset");
+    if (startB) startB.addEventListener("click", startTimer);
+    if (resetB) resetB.addEventListener("click", function(){ stopTimer(); timerLeft=60; renderTimer(); });
+    renderTimer();
+  }
+  function timerHTML(){
+    return '<div class="timer-row">' +
+      '<div class="timer-display" id="timerDisplay">1:00</div>' +
+      '<button class="timer-btn" id="timerStart" type="button">Start 60s</button>' +
+      '<button class="timer-btn ghost" id="timerReset" type="button">Reset</button>' +
+    '</div>';
+  }
+
+  /* ---------- Card rendering ---------- */
+  function renderIntro(){
+    phase = "intro"; stopTimer();
+    var d = DECKS[currentDeck];
+    var html = "";
+    if (currentDeck==="charades"){
+      html = '<p class="kicker">After-Dark Charades</p>' +
+        '<p class="big">Act it out.<br>Say nothing.</p>' +
+        '<p class="fine">One player acts, the room guesses. No talking, no spelling, no pointing at the actual thing. Cheeky prompts, grown-up room.</p>' +
+        '<p class="card-count">64 prompts · shuffled</p>';
+      nextBtn.textContent = "Draw the first prompt";
+    } else if (currentDeck==="verdict"){
+      html = '<p class="kicker">Naughty or Nice?</p>' +
+        '<p class="big">Nominate someone.</p>' +
+        '<p class="fine">Point at the accused. The phone will scan them, check the list twice, and deliver a verdict with the reason Santa wrote down. The verdict is final. The reason is worse.</p>' +
+        '<p class="card-count">64 verdicts · 32 naughty · 32 nice</p>';
+      nextBtn.textContent = "Scan the accused";
+    } else {
+      html = '<p class="kicker">Mistletoe Minutes</p>' +
+        '<p class="big">Sixty seconds.<br>Make them blush.</p>' +
+        '<p class="consent">Anybody can pass on any card, no questions asked. Passing is always allowed.</p>' +
+        '<p class="fine">Flirty challenges for consenting adults in the room. Draw a card, start the timer, and go.</p>' +
+        '<p class="card-count">44 challenges · shuffled</p>';
+      nextBtn.textContent = "Draw the first challenge";
+    }
+    stage.innerHTML = html;
+  }
+
+  function renderCard(){
+    phase = "card"; stopTimer();
+    var d = DECKS[currentDeck];
+    var item = drawFrom(currentDeck);
+    var count = '<p class="card-count">Card ' + drawnCount[currentDeck] + ' of ' + totalOf(currentDeck) + '</p>';
+    if (currentDeck==="mistletoe"){
+      stage.innerHTML = '<p class="kicker">' + d.kicker + '</p>' +
+        '<p class="big">' + esc(item) + '</p>' + timerHTML() + count;
+      wireTimer();
+      nextBtn.textContent = "Next challenge";
+    } else {
+      stage.innerHTML = '<p class="kicker">' + d.kicker + '</p>' +
+        '<p class="big">' + esc(item) + '</p>' + count;
+      nextBtn.textContent = "Next card";
+    }
+    stage.scrollIntoView({behavior:"smooth", block:"center"});
+  }
+
+  function renderScan(){
+    phase = "scanning"; stopTimer();
+    stage.innerHTML =
+      '<div class="scan-wrap">' +
+        '<div class="scan-face" aria-hidden="true"><div class="scan-sweep"></div>' +
+          '<div class="scan-blip" style="top:34%;left:58%"></div>' +
+          '<div class="scan-blip" style="top:62%;left:30%;animation-delay:.3s"></div>' +
+        '</div>' +
+        '<p class="scan-text">Scanning the accused…</p>' +
+        '<p class="scan-sub">Checking the list. Checking it twice. Cross-referencing the group chat.</p>' +
+      '</div>';
+    nextBtn.textContent = "Scanning…";
+    nextBtn.disabled = true;
+    setTimeout(function(){
+      nextBtn.disabled = false;
+      renderVerdict();
+    }, 2300);
+  }
+
+  function renderVerdict(){
+    phase = "verdict";
+    var v = drawFrom("verdict");
+    var count = '<p class="card-count">Verdict ' + drawnCount["verdict"] + ' of ' + totalOf("verdict") + '</p>';
+    stage.innerHTML = '<p class="kicker">The phone has decided</p>' +
+      '<p class="verdict-word ' + (v.word==="NAUGHTY" ? "naughty" : "nice") + '">' + v.word + '</p>' +
+      '<p class="reason">' + esc(v.reason) + '</p>' + count;
+    nextBtn.textContent = "Scan the next person";
+    stage.scrollIntoView({behavior:"smooth", block:"center"});
+  }
+
+  function openDeck(key){
+    currentDeck = key;
+    playDeckName.textContent = DECKS[key].name;
+    playDeckSub.textContent = DECKS[key].sub;
+    homeView.classList.add("off");
+    playView.classList.add("on");
+    renderIntro();
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+  function closeDeck(){
+    stopTimer();
+    currentDeck = null;
+    playView.classList.remove("on");
+    homeView.classList.remove("off");
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  /* ==================== MUSIC BOX (WebAudio) ==================== */
+  var NOTE = {C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392.00,A4:440.00,B4:493.88,
+              C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880.00,B5:987.77,C6:1046.50,
+              "G3":196.00,"A3":220.00,"B3":246.94};
+  // [note, beats] — public-domain carols
+  var JINGLE = [["E4",1],["E4",1],["E4",2],["E4",1],["E4",1],["E4",2],["E4",1],["G4",1],["C4",1.5],["D4",.5],["E4",4],
+    ["F4",1],["F4",1],["F4",1.5],["F4",.5],["F4",1],["E4",1],["E4",1],["E4",.5],["E4",.5],["E4",1],["D4",1],["D4",1],["E4",1],["D4",2],["G4",2]];
+  var DECK_HALLS = [["G4",1],["F4",.5],["E4",.5],["D4",1],["C4",1],["D4",1],["E4",1],["C4",2],
+    ["D4",1],["E4",.5],["F4",.5],["D4",1],["E4",1],["D4",.5],["C4",.5],["B3",1],["C4",2],
+    ["G4",1],["F4",.5],["E4",.5],["D4",1],["C4",1],["D4",1],["E4",1],["C4",2]];
+  var WISH = [["G4",1],["C5",1],["C5",.5],["D5",.5],["C5",.5],["B4",.5],["A4",1],["A4",1],
+    ["D5",1],["D5",.5],["E5",.5],["D5",.5],["C5",.5],["B4",1],["G4",1],["G4",1],
+    ["E5",1],["E5",.5],["F5",.5],["E5",.5],["D5",.5],["C5",1],["A4",1],["G4",.5],["A4",.5],["B4",1],["C5",2]];
+  var PLAYLIST = JINGLE.concat([["R",2]]).concat(DECK_HALLS).concat([["R",2]]).concat(WISH).concat([["R",3]]);
+
+  var audioCtx = null, musicOn = true, musicTimer = null, noteIdx = 0, started = false;
+  var soundBtn = document.getElementById("soundBtn");
+  var soundLabel = document.getElementById("soundLabel");
+
+  function bell(freq, when, dur){
+    var o1 = audioCtx.createOscillator(), o2 = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o1.type = "sine"; o1.frequency.value = freq;
+    o2.type = "sine"; o2.frequency.value = freq*3.01;
+    var g2 = audioCtx.createGain(); g2.gain.value = 0.18;
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.exponentialRampToValueAtTime(0.22, when+0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, when+dur);
+    o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(audioCtx.destination);
+    o1.start(when); o2.start(when); o1.stop(when+dur+0.05); o2.stop(when+dur+0.05);
+  }
+  function scheduleNext(){
+    if (!musicOn || !audioCtx) return;
+    var item = PLAYLIST[noteIdx % PLAYLIST.length]; noteIdx++;
+    var beatMs = 340;
+    var durMs = item[1]*beatMs;
+    if (item[0] !== "R" && NOTE[item[0]]){
+      bell(NOTE[item[0]], audioCtx.currentTime + 0.03, Math.max(0.7, durMs/1000*1.4));
+    }
+    musicTimer = setTimeout(scheduleNext, durMs);
+  }
+  function startMusic(){
+    if (!musicOn) return;
+    if (!audioCtx){
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      audioCtx = new AC();
+    }
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    if (!started){ started = true; scheduleNext(); }
+    soundBtn.classList.add("playing");
+  }
+  function stopMusic(){
+    if (musicTimer){ clearTimeout(musicTimer); musicTimer = null; }
+    started = false;
+    if (audioCtx && audioCtx.state === "running") audioCtx.suspend();
+    soundBtn.classList.remove("playing");
+  }
+  function updateSoundLabel(){ soundLabel.textContent = musicOn ? "Music: On" : "Music: Off"; soundBtn.setAttribute("aria-pressed", musicOn ? "true" : "false"); }
+
+  soundBtn.addEventListener("click", function(){
+    musicOn = !musicOn;
+    updateSoundLabel();
+    if (musicOn) startMusic(); else stopMusic();
+  });
+  document.addEventListener("visibilitychange", function(){
+    if (document.hidden){ if (musicTimer){ clearTimeout(musicTimer); musicTimer=null; } if (audioCtx && audioCtx.state==="running") audioCtx.suspend(); }
+    else if (musicOn && started){ if (audioCtx && audioCtx.state==="suspended") audioCtx.resume(); scheduleNext(); }
+  });
+  // Start on first tap anywhere
+  document.addEventListener("pointerdown", function firstTap(){ startMusic(); }, { once:true });
+
+  /* ==================== EVENTS ==================== */
+  document.getElementById("enterBtn").addEventListener("click", function(){
+    startMusic();
+    gate.style.display = "none";
+    app.classList.add("on");
+    window.scrollTo(0,0);
+  });
+  document.getElementById("exitLink").addEventListener("click", function(e){
+    e.preventDefault();
+    var q = document.querySelector(".gate-q");
+    q.innerHTML = "<strong>No hard feelings.</strong> The family games are waiting — this door stays shut until everybody's 18+.";
+  });
+
+  var deckBtns = document.querySelectorAll(".deck-btn");
+  for (var i=0;i<deckBtns.length;i++){
+    deckBtns[i].addEventListener("click", function(){ openDeck(this.getAttribute("data-deck")); });
+  }
+  document.getElementById("backBtn").addEventListener("click", closeDeck);
+
+  nextBtn.addEventListener("click", function(){
+    if (!currentDeck) return;
+    if (currentDeck==="verdict"){
+      if (phase==="intro" || phase==="verdict") renderScan();
+    } else {
+      renderCard();
+    }
+  });
+
+  /* score */
+  var teamNaughty = document.getElementById("teamNaughty");
+  var teamNice = document.getElementById("teamNice");
+  function setTeam(t){
+    activeTeam = t;
+    teamNaughty.classList.toggle("active", t==="naughty");
+    teamNice.classList.toggle("active", t==="nice");
+  }
+  teamNaughty.addEventListener("click", function(){ setTeam("naughty"); });
+  teamNice.addEventListener("click", function(){ setTeam("nice"); });
+
+  document.getElementById("nailedBtn").addEventListener("click", function(){
+    scores[activeTeam]++;
+    document.getElementById(activeTeam==="naughty" ? "scoreNaughty" : "scoreNice").textContent = scores[activeTeam];
+    showToast("+1 for Team " + (activeTeam==="naughty" ? "Naughty 😈" : "Nice 😇"));
+  });
+  document.getElementById("passBtn").addEventListener("click", function(){
+    showToast("Passed. No questions asked.");
+    if (currentDeck && phase!=="intro" && phase!=="scanning"){
+      if (currentDeck==="verdict") renderScan(); else renderCard();
+    }
+  });
+
+  /* decorative snow */
+  (function(){
+    var snow = document.getElementById("snow");
+    var frag = document.createDocumentFragment();
+    for (var k=0;k<26;k++){
+      var s = document.createElement("i");
+      var size = 2 + Math.random()*3.5;
+      s.style.width = size+"px"; s.style.height = size+"px";
+      s.style.left = (Math.random()*100)+"%";
+      s.style.animationDuration = (9 + Math.random()*10)+"s";
+      s.style.animationDelay = (-Math.random()*14)+"s";
+      frag.appendChild(s);
+    }
+    snow.appendChild(frag);
+  })();
+
+  updateSoundLabel();
+})();
+</script>
+</body>
+</html>

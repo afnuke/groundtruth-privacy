@@ -1,14 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta property="og:title" content="Three Jolly Games — Christmas Party Games">
-  <meta property="og:description" content="Three free Christmas party games for one phone passed around the room: Stop the Bus: Advent Categories, Reindeer Relay, and Charades: Jolly Edition. No downloads, no accounts.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="https://afnuke.github.io/groundtruth-privacy/games/og-cover.jpg">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Three Jolly Games — Christmas Party Games">
-  <meta name="twitter:description" content="Three free Christmas party games for one phone passed around the room: Stop the Bus: Advent Categories, Reindeer Relay, and Charades: Jolly Edition. No downloads, no accounts.">
-  <meta name="twitter:image" content="https://afnuke.github.io/groundtruth-privacy/games/og-cover.jpg">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
@@ -131,7 +123,8 @@
 
   /* ---------- game cards ---------- */
   .cards{ display:grid; grid-template-columns:1fr; gap:26px; margin-top:8px; }
-  @media (min-width:860px){ .cards{ grid-template-columns:repeat(3,1fr); align-items:stretch; } }
+  @media (min-width:860px){ .cards{ grid-template-columns:repeat(2,1fr); align-items:stretch; } }
+  @media (min-width:1280px){ .cards{ grid-template-columns:repeat(4,1fr); } }
   .card{
     background:var(--paper); color:var(--ink); border-radius:var(--radius); overflow:hidden;
     box-shadow:var(--card-shadow); display:flex; flex-direction:column; position:relative;
@@ -144,6 +137,7 @@
   .art-bus{ background:linear-gradient(160deg,#fde68a,#f59e0b); }
   .art-relay{ background:linear-gradient(160deg,#bbf7d0,#22c55e); }
   .art-charades{ background:linear-gradient(160deg,#fecdd3,#f43f5e); }
+  .art-radar{ background:linear-gradient(160deg,#bae6fd,#0284c7); }
   .card .art svg{ width:120px; height:92px; filter:drop-shadow(0 8px 12px rgba(0,0,0,.25)); }
   .badge{
     position:absolute; top:12px; left:12px; background:var(--pine); color:#fff; font-weight:900; font-size:.74rem;
@@ -174,6 +168,7 @@
   .play-bus a{ background:linear-gradient(180deg,#f59e0b,#b45309); }
   .play-relay a{ background:linear-gradient(180deg,#22c55e,#15803d); }
   .play-charades a{ background:linear-gradient(180deg,#f43f5e,#be123c); }
+  .play-radar a{ background:linear-gradient(180deg,#38bdf8,#0369a1); }
   .how-link{ display:block; text-align:center; margin-top:10px; font-weight:900; color:#6b7280; text-decoration:underline; text-underline-offset:3px; padding:8px; }
 
   /* ---------- pick for me / how it works ---------- */
@@ -362,7 +357,7 @@
   <section id="games" aria-labelledby="gamesTitle">
     <div class="section-head">
       <h2 id="gamesTitle">🎁 Pick Your Game</h2>
-      <p>Three doors, all of them jolly. Tap PLAY and the game opens on its own page.</p>
+      <p>Four doors, all of them jolly. Tap PLAY and the game opens on its own page.</p>
     </div>
     <div class="cards">
 
@@ -447,6 +442,33 @@
           <div class="play play-charades"><a href="charades-jolly-edition.html">▶ PLAY CHARADES</a></div>
         </div>
       </article>
+
+      <article class="card radar" id="card-radar">
+        <div class="art art-radar">
+          <div class="art-tags"><span class="badge">Game 4 · Radar Watch</span><span class="pick-tag">New tonight 📡</span></div>
+          <svg viewBox="0 0 120 92" role="img" aria-label="A radar scope with a gold sweep, range rings, and a red Rudolph blip">
+            <circle cx="60" cy="46" r="40" fill="#0b2239" stroke="#38bdf8" stroke-width="3"/>
+            <circle cx="60" cy="46" r="27" fill="none" stroke="#38bdf8" stroke-width="1.4" opacity=".65"/>
+            <circle cx="60" cy="46" r="14" fill="none" stroke="#38bdf8" stroke-width="1.4" opacity=".65"/>
+            <path d="M60 46 L60 6 A40 40 0 0 1 88 18 Z" fill="#ffb703" opacity=".5"/>
+            <line x1="60" y1="46" x2="60" y2="6" stroke="#ffb703" stroke-width="2.6"/>
+            <circle cx="44" cy="30" r="3.2" fill="#7dd7ff"/><circle cx="76" cy="58" r="3.2" fill="#7dd7ff"/>
+            <circle cx="82" cy="26" r="4.4" fill="#f43f4e"/><circle cx="82" cy="26" r="8" fill="none" stroke="#f43f4e" stroke-width="1.6" opacity=".7"/>
+            <circle cx="60" cy="46" r="2.6" fill="#fff8ea"/>
+          </svg>
+        </div>
+        <div class="body">
+          <h3>Sleigh Radar</h3>
+          <p class="tagline">The North Pole Early Warning System is on watch — nine reindeer on the scope, and the big man's range closing by the minute.</p>
+          <div class="meta"><span>👥 The whole room watches</span><span>⏱️ Runs itself</span><span>🎅 Live track Dec 24</span></div>
+          <ul class="feats">
+            <li>Every reindeer acquired and logged, deadpan telemetry</li>
+            <li>Rudolph's blip burns red — Santa lands at midnight, Dec 24</li>
+            <li>Training flights all season; no accounts, no permissions</li>
+          </ul>
+          <div class="play play-radar"><a href="sleigh-radar.html">▶ OPEN THE SCOPE</a></div>
+        </div>
+      </article>
     </div>
 
     <div class="banner">
@@ -457,7 +479,7 @@
     </div>
 
     <div class="steps" aria-label="How the night works">
-      <div class="step"><div class="num">1</div><h3>Pick a game 🎁</h3><p>Word race, drawing telephone, or full-body charades — dealer's choice.</p></div>
+      <div class="step"><div class="num">1</div><h3>Pick a game 🎁</h3><p>Word race, drawing telephone, full-body charades, or a radar watch for Santa — dealer's choice.</p></div>
       <div class="step"><div class="num">2</div><h3>Pass the phone 📱</h3><p>One phone travels hand to hand around the room, like a deck of cards.</p></div>
       <div class="step"><div class="num">3</div><h3>Try not to snort 😂</h3><p>No accounts. No downloads. Just your people, being ridiculous together.</p></div>
     </div>
@@ -493,7 +515,8 @@
 
   <footer>
     <p class="credit">Built by Bryan Lee (Afnuke) · AI collaboration</p>
-    <p>Three Jolly Games — Stop the Bus: Advent Categories · Reindeer Relay · Charades: Jolly Edition 🎄</p>
+    <p>Three Jolly Games — Stop the Bus: Advent Categories · Reindeer Relay · Charades: Jolly Edition · plus Sleigh Radar 🎄</p>
+    <p style="margin-top:10px;">Grown-ups, after the kids are down: <a href="../after-dark/index.html" style="color:#f0cd8a; font-weight:800;">After Dark — The Naughty List (18+) →</a></p>
   </footer>
 </div>
 
@@ -614,7 +637,8 @@
   var games = [
     { id: "card-bus", name: "Stop the Bus: Advent Categories", line: "The elf has spoken: think fast, write faster! 🚌" },
     { id: "card-relay", name: "Reindeer Relay", line: "The elf has spoken: grab the phone and draw it wrong on purpose! 🦌" },
-    { id: "card-charades", name: "Charades: Jolly Edition", line: "The elf has spoken: up on your feet, whole room! 🎭" }
+    { id: "card-charades", name: "Charades: Jolly Edition", line: "The elf has spoken: up on your feet, whole room! 🎭" },
+    { id: "card-radar", name: "Sleigh Radar", line: "The elf has spoken: eyes on the scope — something's coming! 📡" }
   ];
   document.getElementById("pickBtn").addEventListener("click", function(){
     var pick = games[Math.floor(Math.random()*games.length)];
